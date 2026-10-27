@@ -1,10 +1,106 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { RotateCcw } from 'lucide-react'
-import { addTile, canMove, emptyBoard, move, type Board } from './merge/logic'
-const colors:Record<number,string>={0:'tile-empty',2:'tile-2',4:'tile-4',8:'tile-8',16:'tile-16',32:'tile-32',64:'tile-64',128:'tile-128',256:'tile-256',512:'tile-512',1024:'tile-1024',2048:'tile-2048'}
-const fresh=()=>addTile(addTile(emptyBoard()))
-export function NeonMerge({onFinish}:{onFinish:(score:number)=>void}){const [board,setBoard]=useState<Board>(fresh);const [score,setScore]=useState(0);const [over,setOver]=useState(false)
- const act=useCallback((dir:'left'|'right'|'up'|'down')=>{if(over)return;setBoard(current=>{const result=move(current,dir);if(!result.changed)return current;const next=addTile(result.board);setScore(s=>s+result.score);if(!canMove(next)){setOver(true);onFinish(score+result.score)}return next})},[onFinish,over,score])
- useEffect(()=>{const key=(e:KeyboardEvent)=>{const dirs:Record<string,'left'|'right'|'up'|'down'>={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'};if(dirs[e.key]){e.preventDefault();act(dirs[e.key])}};addEventListener('keydown',key);return()=>removeEventListener('keydown',key)},[act])
- const restart=()=>{if(score)onFinish(score);setBoard(fresh());setScore(0);setOver(false)}
- return <div className="merge"><div className="game-toolbar"><div><small>Score</small><strong>{score}</strong></div><button onClick={restart}><RotateCcw size={16}/>New game</button></div><div className="merge-board">{board.flatMap((r,y)=>r.map((v,x)=><div className={`merge-tile ${colors[v]??'tile-2048'}`} key={`${y}-${x}`}>{v||''}</div>))}</div><div className="dpad"><button onClick={()=>act('up')}>↑</button><div><button onClick={()=>act('left')}>←</button><button onClick={()=>act('down')}>↓</button><button onClick={()=>act('right')}>→</button></div></div>{over?<div className="game-over"><h3>Signal lost</h3><p>Final score: {score}</p><button className="primary-btn" onClick={restart}>Try again</button></div>:null}</div>}
+import { createRandom } from '../lib/rng'
+import type { GameProps } from '../types'
+import { highestTile, newGame, step, type Direction, type MergeState } from './merge/state'
+
+const tileClass = (value: number) => (value === 0 ? 'tile-empty' : `tile-${Math.min(value, 2048)}`)
+
+const KEYS: Record<string, Direction> = {
+  ArrowLeft: 'left',
+  ArrowRight: 'right',
+  ArrowUp: 'up',
+  ArrowDown: 'down',
+}
+
+export function NeonMerge({ onFinish, seed }: GameProps) {
+  const random = useMemo(() => createRandom(seed), [seed])
+  const [game, setGame] = useState<MergeState>(() => newGame(random))
+  const startedAt = useRef(Date.now())
+  const reported = useRef(false)
+
+  // Reports a run at most once, from event handlers only (never from a state updater).
+  const report = useCallback(
+    (state: MergeState) => {
+      if (reported.current) return
+      reported.current = true
+      onFinish({
+        score: state.score,
+        durationMs: Date.now() - startedAt.current,
+        won: highestTile(state.board) >= 2048,
+        stats: { highestTile: highestTile(state.board) },
+      })
+    },
+    [onFinish],
+  )
+
+  const act = useCallback(
+    (dir: Direction) => {
+      const next = step(game, dir, random)
+      if (next === game) return
+      setGame(next)
+      if (next.over) report(next)
+    },
+    [game, random, report],
+  )
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const dir = KEYS[e.key]
+      if (!dir) return
+      e.preventDefault()
+      act(dir)
+    }
+    addEventListener('keydown', onKey)
+    return () => removeEventListener('keydown', onKey)
+  }, [act])
+
+  const restart = () => {
+    // An abandoned run with progress still counts once; a finished run was already reported.
+    if (game.score > 0) report(game)
+    reported.current = false
+    startedAt.current = Date.now()
+    setGame(newGame(random))
+  }
+
+  return (
+    <div className="merge">
+      <div className="game-toolbar">
+        <div>
+          <small>Score</small>
+          <strong>{game.score}</strong>
+        </div>
+        <button onClick={restart}>
+          <RotateCcw size={16} />
+          New game
+        </button>
+      </div>
+      <div className="merge-board">
+        {game.board.flatMap((row, y) =>
+          row.map((value, x) => (
+            <div className={`merge-tile ${tileClass(value)}`} key={`${y}-${x}`}>
+              {value || ''}
+            </div>
+          )),
+        )}
+      </div>
+      <div className="dpad">
+        <button onClick={() => act('up')} aria-label="Up">↑</button>
+        <div>
+          <button onClick={() => act('left')} aria-label="Left">←</button>
+          <button onClick={() => act('down')} aria-label="Down">↓</button>
+          <button onClick={() => act('right')} aria-label="Right">→</button>
+        </div>
+      </div>
+      {game.over ? (
+        <div className="game-over">
+          <h3>Signal lost</h3>
+          <p>Final score: {game.score}</p>
+          <button className="primary-btn" onClick={restart}>
+            Try again
+          </button>
+        </div>
+      ) : null}
+    </div>
+  )
+}
