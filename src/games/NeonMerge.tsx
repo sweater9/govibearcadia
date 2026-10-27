@@ -1,0 +1,10 @@
+import { useCallback, useEffect, useState } from 'react'
+import { RotateCcw } from 'lucide-react'
+import { addTile, canMove, emptyBoard, move, type Board } from './merge/logic'
+const colors:Record<number,string>={0:'tile-empty',2:'tile-2',4:'tile-4',8:'tile-8',16:'tile-16',32:'tile-32',64:'tile-64',128:'tile-128',256:'tile-256',512:'tile-512',1024:'tile-1024',2048:'tile-2048'}
+const fresh=()=>addTile(addTile(emptyBoard()))
+export function NeonMerge({onFinish}:{onFinish:(score:number)=>void}){const [board,setBoard]=useState<Board>(fresh);const [score,setScore]=useState(0);const [over,setOver]=useState(false)
+ const act=useCallback((dir:'left'|'right'|'up'|'down')=>{if(over)return;setBoard(current=>{const result=move(current,dir);if(!result.changed)return current;const next=addTile(result.board);setScore(s=>s+result.score);if(!canMove(next)){setOver(true);onFinish(score+result.score)}return next})},[onFinish,over,score])
+ useEffect(()=>{const key=(e:KeyboardEvent)=>{const dirs:Record<string,'left'|'right'|'up'|'down'>={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'};if(dirs[e.key]){e.preventDefault();act(dirs[e.key])}};addEventListener('keydown',key);return()=>removeEventListener('keydown',key)},[act])
+ const restart=()=>{if(score)onFinish(score);setBoard(fresh());setScore(0);setOver(false)}
+ return <div className="merge"><div className="game-toolbar"><div><small>Score</small><strong>{score}</strong></div><button onClick={restart}><RotateCcw size={16}/>New game</button></div><div className="merge-board">{board.flatMap((r,y)=>r.map((v,x)=><div className={`merge-tile ${colors[v]??'tile-2048'}`} key={`${y}-${x}`}>{v||''}</div>))}</div><div className="dpad"><button onClick={()=>act('up')}>↑</button><div><button onClick={()=>act('left')}>←</button><button onClick={()=>act('down')}>↓</button><button onClick={()=>act('right')}>→</button></div></div>{over?<div className="game-over"><h3>Signal lost</h3><p>Final score: {score}</p><button className="primary-btn" onClick={restart}>Try again</button></div>:null}</div>}
