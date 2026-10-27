@@ -8,18 +8,19 @@ A premium, independent, local-first browser arcade. Phase 1 ships three complete
 - **Memory Grid** — a compact matching challenge
 - **Pulse Tap** — a 30-second reaction game
 
-The collection is deliberately small and functional. New games can be registered in `src/data/games.ts` and mounted in `src/pages/Play.tsx` as the arcade grows toward 15 polished titles.
+The collection is deliberately small and functional. New games are added with a single entry in `src/games/registry.ts` (each game is lazy-loaded) as the arcade grows toward 15 polished titles. See `CLAUDE.md` for the add-a-game checklist and `docs/ROADMAP.md` for the long-term plan.
 
 ## Local development
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
 ## Quality checks
 
 ```bash
+npm run lint
 npm test
 npm run build
 ```
