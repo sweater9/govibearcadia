@@ -44,6 +44,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./PulseTap').then((m) => ({ default: m.PulseTap }))),
   },
+  {
+    meta: {
+      id: 'minesweeper',
+      title: 'Minesweeper',
+      description: 'Clear the field without touching a mine. Flag, deduce, survive.',
+      category: 'Logic',
+      accent: 'from-emerald-400 to-teal-600',
+      glyph: '✹',
+      estimated: '3–10 min',
+    },
+    Component: lazy(() => import('./Minesweeper').then((m) => ({ default: m.Minesweeper }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)

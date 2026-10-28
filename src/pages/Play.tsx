@@ -1,6 +1,6 @@
 import { ArrowLeft, Heart } from 'lucide-react'
 import { Suspense, useCallback, useEffect, useState } from 'react'
-import { Link, Navigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { GameBoundary } from '../components/GameBoundary'
 import { getGame } from '../games/registry'
 import { db, recordPlay, toggleFavorite } from '../lib/db'
@@ -8,6 +8,8 @@ import type { GameResult } from '../types'
 
 export function Play() {
   const { id } = useParams()
+  // `?seed=` makes a game deterministic: the same seed always deals the same game. Daily challenges will use it.
+  const seed = useSearchParams()[0].get('seed') ?? undefined
   const entry = getGame(id)
   const gameId = entry?.meta.id
   const [favorite, setFavorite] = useState(false)
@@ -52,7 +54,7 @@ export function Play() {
       <section className="game-shell">
         <GameBoundary key={meta.id}>
           <Suspense fallback={<p className="game-help">Loading {meta.title}…</p>}>
-            <Game onFinish={finish} />
+            <Game key={seed ?? ''} onFinish={finish} seed={seed} />
           </Suspense>
         </GameBoundary>
       </section>
