@@ -188,6 +188,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./Twofold').then((m) => ({ default: m.Twofold }))),
   },
+  {
+    meta: {
+      id: 'carve',
+      title: 'Carve',
+      description: 'Cut the grid into rectangles, each one as large as the number inside it.',
+      category: 'Logic',
+      accent: 'from-emerald-400 to-sky-600',
+      glyph: '▦',
+      estimated: '3–8 min',
+    },
+    Component: lazy(() => import('./Carve').then((m) => ({ default: m.Carve }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)
