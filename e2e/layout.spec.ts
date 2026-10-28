@@ -17,6 +17,7 @@ const PLAY_AREA = {
   'space-defender': '.sd-field',
   'gravity-flip': '.gf',
   vibeline: '.vl',
+  twofold: '.tf',
 } as const
 
 type Box = { top: number; bottom: number }
