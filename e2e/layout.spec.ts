@@ -11,6 +11,7 @@ const PLAY_AREA = {
   'color-sort': '.csort-tubes',
   'connect-four': '.c4-board',
   'daily-word': '.wordle',
+  'brick-breaker': '.brk-field',
 } as const
 
 type Box = { top: number; bottom: number }
