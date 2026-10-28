@@ -24,6 +24,8 @@ Independent, free-to-play, local-first browser arcade. The long-term plan is in 
 - Read IndexedDB with `readTable`/`expectRows` in `e2e/helpers.ts` to check what was actually saved.
 - A favorite/progress write is committed only once the UI reflects it. Wait for that (for example the button label flipping) before reloading, or the test races the write.
 - Use `page.clock.install()` and `clock.runFor()` for timed games instead of waiting in real time.
+- `clock.install()` fakes timers but time keeps flowing; add `clock.setFixedTime()` when a test needs an exact time-based score.
+- To test a seeded game exactly, import its pure rules into the spec and compute the layout the page will deal (see `e2e/minesweeper.spec.ts`), then play it through the real UI. Pure-rules files the e2e imports must be listed in `tsconfig.node.json`.
 - Pulse Tap's target animates forever, so Playwright never sees it as stable; use `hitTarget`.
 - Every game's play area must be fully on screen without scrolling at laptop heights (650 to 800px) and on a 375x667 phone. A timed game with targets below the fold, or under the sticky header, is unplayable. Add each new game to `PLAY_AREA` in `e2e/layout.spec.ts`; the CSS fits boards to the viewport at the end of `src/styles.css`.
 
@@ -34,6 +36,7 @@ Independent, free-to-play, local-first browser arcade. The long-term plan is in 
 - **Report once.** Call `onFinish` once per finished run, from an event handler or a dedicated effect. Never call it, or any other side effect, inside a state updater function: React StrictMode runs updaters twice and the run would be recorded twice.
 - **Seeded randomness.** Use `createRandom(seed)` from `src/lib/rng.ts` for all game randomness, never `Math.random()` directly. With a seed the game must behave identically every time (daily challenges rely on this; `dailySeed()` gives the UTC date key).
 - **Pure rules.** Keep game rules in plain TypeScript modules next to the component (see `merge/` and `memory/`), with no React or browser APIs, so a server can reuse them to validate moves in Phase 3.
+- **`?seed=`:** `/play/<id>?seed=abc` passes the seed to the game, so the same seed always deals the same game. Daily challenges will use `dailySeed()` this way, and e2e tests use it for determinism.
 - **Storage:** Dexie in `src/lib/db.ts`. Any schema change needs a new `this.version(n)` and a migration test in the style of `db.migration.test.ts`. Never edit a shipped version.
 
 ## Adding a game
