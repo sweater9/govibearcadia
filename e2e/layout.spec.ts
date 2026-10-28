@@ -15,6 +15,7 @@ const PLAY_AREA = {
   'neon-pong': '.pong-field',
   'sudoku-master': '.sdk',
   'space-defender': '.sd-field',
+  'gravity-flip': '.gf',
 } as const
 
 type Box = { top: number; bottom: number }

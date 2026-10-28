@@ -13,6 +13,7 @@ export const GAMES = [
   { id: 'neon-pong', title: 'Neon Pong', category: 'Arcade', chunk: 'NeonPong' },
   { id: 'sudoku-master', title: 'Sudoku Master', category: 'Logic', chunk: 'SudokuMaster' },
   { id: 'space-defender', title: 'Space Defender', category: 'Arcade', chunk: 'SpaceDefender' },
+  { id: 'gravity-flip', title: 'Gravity Flip', category: 'Platform Puzzle', chunk: 'GravityFlip' },
 ] as const
 
 type Row = Record<string, unknown>
