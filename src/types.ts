@@ -9,6 +9,8 @@ export type GameMeta = {
   accent: string
   glyph: string
   estimated: string
+  /** Eligible for the daily challenge: seeded, solvable, and reports `won`. */
+  daily?: boolean
 }
 
 /**
@@ -40,4 +42,6 @@ export type PlayRecord = {
   durationMs?: number
   won?: boolean
   playedAt: string
+  /** UTC day key (e.g. 2026-10-28) when the run was that day's daily challenge. */
+  daily?: string
 }

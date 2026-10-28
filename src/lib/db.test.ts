@@ -32,3 +32,13 @@ describe('toggleFavorite', () => {
     expect(await db.favorites.get('pulse-tap')).toBeUndefined()
   })
 })
+
+describe('daily runs', () => {
+  it('stores the daily day key on the history row only when given', async () => {
+    await recordPlay('twofold', { score: 900, won: true }, '2026-10-28')
+    await recordPlay('twofold', { score: 800, won: true })
+    const rows = await db.history.orderBy('id').toArray()
+    expect(rows[0].daily).toBe('2026-10-28')
+    expect('daily' in rows[1]).toBe(false)
+  })
+})

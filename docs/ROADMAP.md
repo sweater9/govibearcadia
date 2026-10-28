@@ -106,5 +106,7 @@ Completion: reliable cross-device access, sustainable costs, and monetization th
 | Unit and component tests, lint | Done |
 | Playwright browser tests | Done for Chromium (desktop and Pixel 7 emulation; the exact count is printed by `npm run test:e2e`) covering all games, persistence, offline, layout. Firefox and WebKit not covered. |
 | Remaining launch games (none; all 15 slots are filled: Neon Merge, Memory Grid, Minesweeper, Neon Snake, Color Sort, Connect Four, Daily Word, Brick Breaker, Neon Pong, Sudoku Master, Space Defender, Gravity Flip, VibeLine, Twofold and Carve fill all 15. Twofold and Carve are my own designs, not ports of the GoVibeTool games) | Done (all 15 slots filled) |
+| Phase 2 slice 1: Passport (level, XP, stats, personal records), 10 achievements, daily challenge and daily-win streaks | Done, verified in Chromium. The daily game is picked from 8 seeded, winnable games by UTC date; XP is 10 per run, +15 for a win, +50 for winning the daily. Everything is computed locally from run history (no schema change). |
+| Phase 2 still to do | Weekly challenges, shareable results, recommendations, themes and avatars, progress export/import. Daily rolls over at 00:00 UTC (04:00 in Dubai). |
 | Domain purchase and configuration | Not confirmed |
-| Production deployment | Not authorized |
+| Production deployment | Authorized by the owner on 2026-10-28; Cloudflare Workers builds from `feature/phase-1-arcade-foundation` |

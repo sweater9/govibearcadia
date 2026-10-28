@@ -5,7 +5,7 @@ test('home page lists every game and the arcade branding', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveTitle(/GoVibeArcadia/)
   await expect(page.locator('article.game-card')).toHaveCount(GAMES.length)
-  for (const game of GAMES) await expect(page.getByRole('heading', { name: game.title })).toBeVisible()
+  for (const game of GAMES) await expect(page.locator('article.game-card').getByRole('heading', { name: game.title })).toBeVisible()
 })
 
 test('search narrows the collection and explains an empty result', async ({ page }) => {

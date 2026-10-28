@@ -3,13 +3,19 @@ import { Suspense, useCallback, useEffect, useState } from 'react'
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { GameBoundary } from '../components/GameBoundary'
 import { getGame } from '../games/registry'
+import { games } from '../data/games'
 import { db, recordPlay, toggleFavorite } from '../lib/db'
+import { dailyChallenge, today } from '../lib/passport'
 import type { GameResult } from '../types'
 
 export function Play() {
   const { id } = useParams()
   // `?seed=` makes a game deterministic: the same seed always deals the same game. Daily challenges will use it.
-  const seed = useSearchParams()[0].get('seed') ?? undefined
+  const params = useSearchParams()[0]
+  const seed = params.get('seed') ?? undefined
+  // `?daily=<day>` counts only when it is today's challenge for this game, with the challenge's seed.
+  const challenge = dailyChallenge(today(), games.filter((g) => g.daily).map((g) => g.id))
+  const daily = params.get('daily') === challenge.day && id === challenge.gameId && seed === challenge.seed ? challenge.day : undefined
   const entry = getGame(id)
   const gameId = entry?.meta.id
   const [favorite, setFavorite] = useState(false)
@@ -20,9 +26,9 @@ export function Play() {
 
   const finish = useCallback(
     (result: GameResult) => {
-      if (gameId) void recordPlay(gameId, result)
+      if (gameId) void recordPlay(gameId, result, daily)
     },
-    [gameId],
+    [gameId, daily],
   )
 
   if (!entry) return <Navigate to="/" replace />
@@ -47,7 +53,7 @@ export function Play() {
         </button>
       </div>
       <div className="play-title">
-        <p className="eyebrow">{meta.category}</p>
+        <p className="eyebrow">{daily ? `Daily challenge · ${meta.category}` : meta.category}</p>
         <h1>{meta.title}</h1>
         <p>{meta.description}</p>
       </div>

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { GameCard } from '../components/GameCard'
 import { categories, games } from '../data/games'
 import { db, toggleFavorite } from '../lib/db'
+import { dailyChallenge, today } from '../lib/passport'
 import type { GameId, GameProgress } from '../types'
 
 export function Home() {
@@ -29,6 +30,8 @@ export function Home() {
     )
   }, [filter, query])
 
+  const challenge = dailyChallenge(today(), games.filter((g) => g.daily).map((g) => g.id))
+  const challengeGame = games.find((g) => g.id === challenge.gameId)!
   const recent = progress[0] && games.find((g) => g.id === progress[0].gameId)
 
   return (
@@ -76,6 +79,16 @@ export function Home() {
             <small>ENTER ARCADIA</small>
           </div>
         </div>
+      </section>
+      <section className="home-daily daily-card" aria-label="Daily challenge">
+        <div>
+          <p className="eyebrow">Daily challenge · {challenge.day}</p>
+          <h2>{challengeGame.title}</h2>
+          <p>Same puzzle for everyone today. Win it for +50 XP and to keep your streak.</p>
+        </div>
+        <Link className="primary-btn" to={`/play/${challenge.gameId}?seed=${challenge.seed}&daily=${challenge.day}`}>
+          Play today's challenge <ArrowRight size={18} />
+        </Link>
       </section>
       {recent ? (
         <section className="continue">

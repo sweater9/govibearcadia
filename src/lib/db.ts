@@ -18,7 +18,8 @@ class ArcadeDB extends Dexie {
 
 export const db = new ArcadeDB()
 
-export async function recordPlay(gameId: GameId, result: GameResult): Promise<void> {
+/** `daily` is the UTC day key when this run was that day's daily challenge. */
+export async function recordPlay(gameId: GameId, result: GameResult, daily?: string): Promise<void> {
   const playedAt = new Date().toISOString()
   await db.transaction('rw', db.progress, db.history, async () => {
     const current = await db.progress.get(gameId)
@@ -34,6 +35,7 @@ export async function recordPlay(gameId: GameId, result: GameResult): Promise<vo
       durationMs: result.durationMs,
       won: result.won,
       playedAt,
+      ...(daily ? { daily } : {}),
     })
   })
 }
