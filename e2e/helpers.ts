@@ -14,6 +14,7 @@ export const GAMES = [
   { id: 'sudoku-master', title: 'Sudoku Master', category: 'Logic', chunk: 'SudokuMaster' },
   { id: 'space-defender', title: 'Space Defender', category: 'Arcade', chunk: 'SpaceDefender' },
   { id: 'gravity-flip', title: 'Gravity Flip', category: 'Platform Puzzle', chunk: 'GravityFlip' },
+  { id: 'vibeline', title: 'VibeLine', category: 'Original Puzzle', chunk: 'VibeLine' },
 ] as const
 
 type Row = Record<string, unknown>

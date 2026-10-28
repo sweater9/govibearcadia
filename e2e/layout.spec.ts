@@ -16,6 +16,7 @@ const PLAY_AREA = {
   'sudoku-master': '.sdk',
   'space-defender': '.sd-field',
   'gravity-flip': '.gf',
+  vibeline: '.vl',
 } as const
 
 type Box = { top: number; bottom: number }
