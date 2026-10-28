@@ -105,6 +105,6 @@ Completion: reliable cross-device access, sustainable costs, and monetization th
 | Offline PWA with PNG icons | Done. Verified in headless Chromium: service worker precaches every game chunk, the app reloads and plays offline, manifest and icons are valid. Not yet verified on real devices (install prompt, iOS Safari). |
 | Unit and component tests, lint | Done |
 | Playwright browser tests | Done for Chromium (desktop and Pixel 7 emulation): 80 checks (73 run, 6 are device-specific skips) covering all games, persistence, offline, layout. Firefox and WebKit not covered. |
-| Remaining launch games (10 of 15 slots, counting Neon Merge, Memory Grid, Minesweeper and Neon Snake as built) | Not started |
+| Remaining launch games (11 of 15 slots remain; Neon Merge, Memory Grid, Minesweeper and Neon Snake fill 4) | Not started |
 | Domain purchase and configuration | Not confirmed |
 | Production deployment | Not authorized |
