@@ -10,6 +10,7 @@ const PLAY_AREA = {
   'neon-snake': '.snake-board',
   'color-sort': '.csort-tubes',
   'connect-four': '.c4-board',
+  'daily-word': '.wordle',
 } as const
 
 type Box = { top: number; bottom: number }
