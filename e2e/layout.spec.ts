@@ -7,6 +7,7 @@ const PLAY_AREA = {
   'memory-grid': '.memory-grid',
   'pulse-tap': '.pulse-field',
   minesweeper: '.mines-grid',
+  'neon-snake': '.snake-board',
 } as const
 
 type Box = { top: number; bottom: number }
@@ -15,6 +16,18 @@ const boxOf = (page: Page, selector: string): Promise<Box> =>
   page.locator(selector).first().evaluate((el) => {
     const r = el.getBoundingClientRect()
     return { top: r.top, bottom: r.bottom }
+  })
+
+/** Names of elements that stick out past the left or right edge of the game card. */
+const overflowingShell = (page: Page): Promise<string[]> =>
+  page.evaluate(() => {
+    const shell = document.querySelector('.game-shell')!.getBoundingClientRect()
+    return Array.from(document.querySelectorAll('.game-shell *'))
+      .filter((el) => {
+        const r = el.getBoundingClientRect()
+        return r.width > 0 && (r.right > shell.right + 0.5 || r.left < shell.left - 0.5)
+      })
+      .map((el) => `${el.tagName.toLowerCase()}.${el.className}`)
   })
 
 const navBottom = async (page: Page) => (await boxOf(page, '.nav')).bottom
@@ -51,10 +64,13 @@ test.describe('play area fits on screen', () => {
         await page.goto(`/play/${id}`)
         await expect(page.locator(selector)).toBeVisible()
         expect((await boxOf(page, selector)).bottom, `${id} fits`).toBeLessThanOrEqual(667)
+        expect(await overflowingShell(page), `${id}: nothing sticks out of the game card`).toEqual([])
       }
-      await page.goto('/play/neon-merge')
-      const pad = await boxOf(page, '.dpad')
-      expect(pad.bottom, 'on-screen pad is reachable without scrolling').toBeLessThanOrEqual(667)
+      for (const id of ['neon-merge', 'neon-snake']) {
+        await page.goto(`/play/${id}`)
+        const pad = await boxOf(page, '.dpad')
+        expect(pad.bottom, `${id}: on-screen pad is reachable without scrolling`).toBeLessThanOrEqual(667)
+      }
     })
   })
 })

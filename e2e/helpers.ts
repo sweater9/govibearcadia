@@ -5,6 +5,7 @@ export const GAMES = [
   { id: 'memory-grid', title: 'Memory Grid', category: 'Focus', chunk: 'MemoryGrid' },
   { id: 'pulse-tap', title: 'Pulse Tap', category: 'Arcade', chunk: 'PulseTap' },
   { id: 'minesweeper', title: 'Minesweeper', category: 'Logic', chunk: 'Minesweeper' },
+  { id: 'neon-snake', title: 'Neon Snake', category: 'Retro', chunk: 'NeonSnake' },
 ] as const
 
 type Row = Record<string, unknown>
