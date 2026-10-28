@@ -8,6 +8,7 @@ const PLAY_AREA = {
   'pulse-tap': '.pulse-field',
   minesweeper: '.mines-grid',
   'neon-snake': '.snake-board',
+  'color-sort': '.csort-tubes',
 } as const
 
 type Box = { top: number; bottom: number }
