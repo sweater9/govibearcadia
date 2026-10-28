@@ -5,17 +5,20 @@ import { GameCard } from '../components/GameCard'
 import { categories, games } from '../data/games'
 import { db, toggleFavorite } from '../lib/db'
 import { dailyChallenge, today } from '../lib/passport'
-import type { GameId, GameProgress } from '../types'
+import { recommend } from '../lib/recommend'
+import type { GameId, GameProgress, PlayRecord } from '../types'
 
 export function Home() {
   const [favorites, setFavorites] = useState<GameId[]>([])
   const [progress, setProgress] = useState<GameProgress[]>([])
+  const [history, setHistory] = useState<PlayRecord[] | null>(null)
   const [filter, setFilter] = useState('All')
   const [query, setQuery] = useState('')
 
   const load = useCallback(async () => {
     setFavorites((await db.favorites.toArray()).map((x) => x.gameId))
     setProgress(await db.progress.orderBy('lastPlayed').reverse().toArray())
+    setHistory(await db.history.toArray())
   }, [])
   useEffect(() => {
     void load()
@@ -30,6 +33,7 @@ export function Home() {
     )
   }, [filter, query])
 
+  const picks = useMemo(() => (history ? recommend(games, history, favorites, new Date()) : []), [history, favorites])
   const challenge = dailyChallenge(today(), games.filter((g) => g.daily).map((g) => g.id))
   const challengeGame = games.find((g) => g.id === challenge.gameId)!
   const recent = progress[0] && games.find((g) => g.id === progress[0].gameId)
@@ -102,6 +106,21 @@ export function Home() {
           <Link className="primary-btn" to={`/play/${recent.id}`}>
             Jump back in <ArrowRight size={18} />
           </Link>
+        </section>
+      ) : null}
+      {picks.length ? (
+        <section className="recs" aria-label="Recommended for you">
+          <p className="eyebrow">{history?.length ? 'Recommended for you' : 'Start here'}</p>
+          <ul>
+            {picks.map((p) => (
+              <li key={p.gameId}>
+                <Link to={`/play/${p.gameId}`}>
+                  <strong>{games.find((g) => g.id === p.gameId)?.title}</strong>
+                  <small>{p.reason}</small>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </section>
       ) : null}
       <section id="library" className="library">
