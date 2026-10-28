@@ -18,6 +18,7 @@ const PLAY_AREA = {
   'gravity-flip': '.gf',
   vibeline: '.vl',
   twofold: '.tf',
+  carve: '.cv',
 } as const
 
 type Box = { top: number; bottom: number }
