@@ -116,6 +116,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./BrickBreaker').then((m) => ({ default: m.BrickBreaker }))),
   },
+  {
+    meta: {
+      id: 'neon-pong',
+      title: 'Neon Pong',
+      description: 'Rally against the machine. First to seven wins.',
+      category: 'Arcade',
+      accent: 'from-cyan-400 to-violet-600',
+      glyph: '◐',
+      estimated: '2–5 min',
+    },
+    Component: lazy(() => import('./NeonPong').then((m) => ({ default: m.NeonPong }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)
