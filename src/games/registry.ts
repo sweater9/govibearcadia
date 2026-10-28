@@ -68,6 +68,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./NeonSnake').then((m) => ({ default: m.NeonSnake }))),
   },
+  {
+    meta: {
+      id: 'color-sort',
+      title: 'Color Sort',
+      description: 'Pour the glowing balls until every tube holds a single color.',
+      category: 'Puzzle',
+      accent: 'from-pink-500 to-amber-400',
+      glyph: '▥',
+      estimated: '3–8 min',
+    },
+    Component: lazy(() => import('./ColorSort').then((m) => ({ default: m.ColorSort }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)
