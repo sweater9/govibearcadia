@@ -176,6 +176,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./VibeLine').then((m) => ({ default: m.VibeLine }))),
   },
+  {
+    meta: {
+      id: 'twofold',
+      title: 'Twofold',
+      description: 'Fill the grid with suns and moons: no three alike in a row, and every line balanced.',
+      category: 'Logic',
+      accent: 'from-amber-400 to-indigo-600',
+      glyph: '☀',
+      estimated: '3–8 min',
+    },
+    Component: lazy(() => import('./Twofold').then((m) => ({ default: m.Twofold }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)
