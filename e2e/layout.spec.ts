@@ -13,6 +13,7 @@ const PLAY_AREA = {
   'daily-word': '.wordle',
   'brick-breaker': '.brk-field',
   'neon-pong': '.pong-field',
+  'sudoku-master': '.sdk',
 } as const
 
 type Box = { top: number; bottom: number }

@@ -11,6 +11,7 @@ export const GAMES = [
   { id: 'daily-word', title: 'Daily Word', category: 'Word', chunk: 'DailyWord' },
   { id: 'brick-breaker', title: 'Brick Breaker', category: 'Arcade', chunk: 'BrickBreaker' },
   { id: 'neon-pong', title: 'Neon Pong', category: 'Arcade', chunk: 'NeonPong' },
+  { id: 'sudoku-master', title: 'Sudoku Master', category: 'Logic', chunk: 'SudokuMaster' },
 ] as const
 
 type Row = Record<string, unknown>
