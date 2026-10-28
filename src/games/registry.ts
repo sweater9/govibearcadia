@@ -140,6 +140,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./SudokuMaster').then((m) => ({ default: m.SudokuMaster }))),
   },
+  {
+    meta: {
+      id: 'space-defender',
+      title: 'Space Defender',
+      description: 'Hold the line against five waves of descending invaders.',
+      category: 'Arcade',
+      accent: 'from-fuchsia-500 to-indigo-600',
+      glyph: '▲',
+      estimated: '4–8 min',
+    },
+    Component: lazy(() => import('./SpaceDefender').then((m) => ({ default: m.SpaceDefender }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)
