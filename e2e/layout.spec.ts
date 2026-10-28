@@ -14,6 +14,7 @@ const PLAY_AREA = {
   'brick-breaker': '.brk-field',
   'neon-pong': '.pong-field',
   'sudoku-master': '.sdk',
+  'space-defender': '.sd-field',
 } as const
 
 type Box = { top: number; bottom: number }
