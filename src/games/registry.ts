@@ -164,6 +164,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./GravityFlip').then((m) => ({ default: m.GravityFlip }))),
   },
+  {
+    meta: {
+      id: 'vibeline',
+      title: 'VibeLine',
+      description: 'Draw one line through 1, 2, 3… in order and fill every square.',
+      category: 'Original Puzzle',
+      accent: 'from-violet-500 to-cyan-400',
+      glyph: '〰',
+      estimated: '2–5 min',
+    },
+    Component: lazy(() => import('./VibeLine').then((m) => ({ default: m.VibeLine }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)
