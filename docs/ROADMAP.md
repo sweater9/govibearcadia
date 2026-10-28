@@ -43,7 +43,7 @@ These are development targets, not shipped. Only the games listed under "Status"
 | 14 | Connect Four | Strategy |
 | 15 | Gravity Flip | Platform Puzzle |
 
-Neon Merge (the 2048-style game), Memory Grid (the matching game), Minesweeper, Neon Snake, Color Sort, Connect Four, Daily Word, Brick Breaker and Neon Pong currently fill the "2048 Challenge", "Memory Match", "Minesweeper", "Neon Snake", "Color Sort", "Connect Four", "Daily Word", "Brick Breaker" and "Neon Pong" slots. Pulse Tap is an extra reaction game.
+Neon Merge (the 2048-style game), Memory Grid (the matching game), Minesweeper, Neon Snake, Color Sort, Connect Four, Daily Word, Brick Breaker, Neon Pong and Sudoku Master currently fill the "2048 Challenge", "Memory Match", "Minesweeper", "Neon Snake", "Color Sort", "Connect Four", "Daily Word", "Brick Breaker", "Neon Pong" and "Sudoku Master" slots. Pulse Tap is an extra reaction game.
 
 ## Homepage and navigation (target)
 
@@ -99,12 +99,12 @@ Completion: reliable cross-device access, sustainable costs, and monetization th
 | Item | Status |
 |------|--------|
 | Repository, stack, architecture | Done |
-| Games implemented | 10: Neon Merge, Memory Grid, Pulse Tap, Minesweeper, Neon Snake, Color Sort, Connect Four, Daily Word, Brick Breaker, Neon Pong |
+| Games implemented | 11: Neon Merge, Memory Grid, Pulse Tap, Minesweeper, Neon Snake, Color Sort, Connect Four, Daily Word, Brick Breaker, Neon Pong, Sudoku Master |
 | Search, categories, favorites, recent play, high scores | Done |
 | Lazy-loaded games, seeded randomness, game result contract | Done |
 | Offline PWA with PNG icons | Done. Verified in headless Chromium: service worker precaches every game chunk, the app reloads and plays offline, manifest and icons are valid. Not yet verified on real devices (install prompt, iOS Safari). |
 | Unit and component tests, lint | Done |
 | Playwright browser tests | Done for Chromium (desktop and Pixel 7 emulation): 80 checks (73 run, 6 are device-specific skips) covering all games, persistence, offline, layout. Firefox and WebKit not covered. |
-| Remaining launch games (6 of 15 slots remain; Neon Merge, Memory Grid, Minesweeper, Neon Snake, Color Sort, Connect Four, Daily Word, Brick Breaker and Neon Pong fill 9) | Not started |
+| Remaining launch games (5 of 15 slots remain; Neon Merge, Memory Grid, Minesweeper, Neon Snake, Color Sort, Connect Four, Daily Word, Brick Breaker, Neon Pong and Sudoku Master fill 10) | Not started |
 | Domain purchase and configuration | Not confirmed |
 | Production deployment | Not authorized |
