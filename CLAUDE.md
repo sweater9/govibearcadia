@@ -9,13 +9,23 @@ Independent, free-to-play, local-first browser arcade. The long-term plan is in 
 - Never deploy without explicit approval.
 - No mandatory paid services. Core gameplay must not depend on cloud APIs.
 - No third-party network requests from the app (no CDN fonts, analytics or trackers). Everything needed to play must be bundled and cacheable offline.
-- Verify before calling anything done: `npm run lint`, `npm test`, `npm run build` must all pass.
+- Verify before calling anything done: `npm run lint`, `npm test`, `npm run build` and `npm run test:e2e` must all pass.
 - Only claim what was verified. Do not describe unbuilt games or features as complete.
 
 ## Commands
 
 - Install with `npm ci`, not `npm install`. `npm install` rewrites `package-lock.json` (it drops platform `libc` metadata) and creates noisy diffs. When a dependency really is added, restore the `libc` fields so the diff contains only the new package.
 - `npm run dev`, `npm run lint`, `npm test`, `npm run build`.
+- `npm run test:e2e`: Playwright against a fresh production build (it builds and serves it itself; it never reuses a running server, because that would test a stale build). Runs a desktop and a phone (Pixel 7) project. On a new machine run `npx playwright install chromium` first.
+
+## End-to-end tests (`e2e/`)
+
+- jsdom cannot see layout, the service worker, or real IndexedDB, so anything about those is tested here. Unit tests (Vitest) never run `e2e/`.
+- Read IndexedDB with `readTable`/`expectRows` in `e2e/helpers.ts` to check what was actually saved.
+- A favorite/progress write is committed only once the UI reflects it. Wait for that (for example the button label flipping) before reloading, or the test races the write.
+- Use `page.clock.install()` and `clock.runFor()` for timed games instead of waiting in real time.
+- Pulse Tap's target animates forever, so Playwright never sees it as stable; use `hitTarget`.
+- Every game's play area must be fully on screen without scrolling at laptop heights (650 to 800px) and on a 375x667 phone. A timed game with targets below the fold, or under the sticky header, is unplayable. Add each new game to `PLAY_AREA` in `e2e/layout.spec.ts`; the CSS fits boards to the viewport at the end of `src/styles.css`.
 
 ## Architecture
 
@@ -32,7 +42,8 @@ Independent, free-to-play, local-first browser arcade. The long-term plan is in 
 2. Add one entry to `src/games/registry.ts` (metadata plus a `lazy()` import).
 3. Add tests: pure rules, plus a StrictMode component test that checks `onFinish` is called exactly once per run.
 4. Keyboard and touch controls must both work; check it at phone width.
-5. Run lint, tests and build; open a draft PR.
+5. Add the game to `PLAY_AREA` in `e2e/layout.spec.ts`, and write an e2e test that plays it with real input and checks the saved result.
+6. Run lint, unit tests, build and e2e; open a draft PR.
 
 ## Git
 

@@ -102,9 +102,9 @@ Completion: reliable cross-device access, sustainable costs, and monetization th
 | Games implemented | 3: Neon Merge, Memory Grid, Pulse Tap |
 | Search, categories, favorites, recent play, high scores | Done |
 | Lazy-loaded games, seeded randomness, game result contract | Done |
-| Offline PWA with PNG icons | Done (manual install and offline checks still to do on real devices) |
+| Offline PWA with PNG icons | Done. Verified in headless Chromium: service worker precaches every game chunk, the app reloads and plays offline, manifest and icons are valid. Not yet verified on real devices (install prompt, iOS Safari). |
 | Unit and component tests, lint | Done |
-| Playwright browser tests | Not started |
+| Playwright browser tests | Done for Chromium (desktop and Pixel 7 emulation): 45 checks covering all games, persistence, offline, layout. Firefox and WebKit not covered. |
 | Remaining 12 launch games | Not started |
 | Domain purchase and configuration | Not confirmed |
 | Production deployment | Not authorized |

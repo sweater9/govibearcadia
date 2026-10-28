@@ -21,8 +21,9 @@ npm run dev
 
 ```bash
 npm run lint
-npm test
+npm test          # unit and component tests (Vitest)
 npm run build
+npm run test:e2e  # real-browser tests (Playwright); first run: npx playwright install chromium
 ```
 
 Progress, personal bests, recent plays, and favorites are stored only in the browser via IndexedDB. The service worker precaches the app for offline return visits.
