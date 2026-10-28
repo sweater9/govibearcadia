@@ -80,6 +80,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./ColorSort').then((m) => ({ default: m.ColorSort }))),
   },
+  {
+    meta: {
+      id: 'connect-four',
+      title: 'Connect Four',
+      description: 'Drop discs and line up four before the computer does.',
+      category: 'Strategy',
+      accent: 'from-red-500 to-yellow-400',
+      glyph: '◍',
+      estimated: '3–8 min',
+    },
+    Component: lazy(() => import('./ConnectFour').then((m) => ({ default: m.ConnectFour }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)
