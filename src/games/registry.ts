@@ -56,6 +56,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./Minesweeper').then((m) => ({ default: m.Minesweeper }))),
   },
+  {
+    meta: {
+      id: 'neon-snake',
+      title: 'Neon Snake',
+      description: 'Eat the signals, grow the trail, never touch yourself.',
+      category: 'Retro',
+      accent: 'from-lime-400 to-green-600',
+      glyph: '∿',
+      estimated: '2–6 min',
+    },
+    Component: lazy(() => import('./NeonSnake').then((m) => ({ default: m.NeonSnake }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)
