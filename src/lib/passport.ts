@@ -64,6 +64,46 @@ export function streaks(days: Iterable<string>, now: string): { current: number;
   return { current, best }
 }
 
+// ---- Weekly goals -------------------------------------------------------------------------------
+
+export const WEEKLY_BONUS_XP = 100
+
+/** The Monday (UTC) of the week containing `day`. Weeks run Monday to Sunday. */
+export function weekStart(day: string): string {
+  const d = new Date(`${day}T00:00:00Z`)
+  return shiftDay(day, -((d.getUTCDay() + 6) % 7))
+}
+
+export type WeeklyGoal = { id: string; title: string; progress: number; target: number; done: boolean }
+export type WeeklyGoals = { week: string; goals: WeeklyGoal[]; complete: boolean }
+
+const WEEKLY_TARGETS = { daily: 3, games: 3, xp: 300 } as const
+
+/** This week's three goals. Progress counts only runs inside the week; the weekly bonus itself never counts toward the XP goal. */
+export function weeklyGoals(history: readonly PlayRecord[], day: string): WeeklyGoals {
+  const week = weekStart(day)
+  const end = shiftDay(week, 7)
+  const runs = history.filter((r) => r.playedAt.slice(0, 10) >= week && r.playedAt.slice(0, 10) < end)
+  const dailyDays = new Set(runs.filter((r) => r.won && r.daily && r.daily >= week && r.daily < end).map((r) => r.daily))
+  const games = new Set(runs.map((r) => r.gameId))
+  const xp = runs.reduce((n, r) => n + xpFor(r), 0)
+  const goal = (id: string, title: string, progress: number, target: number): WeeklyGoal => ({ id, title, progress: Math.min(progress, target), target, done: progress >= target })
+  const goals = [
+    goal('daily', `Win the daily challenge on ${WEEKLY_TARGETS.daily} days`, dailyDays.size, WEEKLY_TARGETS.daily),
+    goal('games', `Play ${WEEKLY_TARGETS.games} different games`, games.size, WEEKLY_TARGETS.games),
+    goal('xp', `Earn ${WEEKLY_TARGETS.xp} XP from runs`, xp, WEEKLY_TARGETS.xp),
+  ]
+  return { week, goals, complete: goals.every((g) => g.done) }
+}
+
+/** How many weeks had every goal completed. Each earns a one-off bonus, so XP can always be rebuilt from history. */
+export function completedWeeks(history: readonly PlayRecord[]): number {
+  const weeks = new Set(history.map((r) => weekStart(r.playedAt.slice(0, 10))))
+  let n = 0
+  for (const w of weeks) if (weeklyGoals(history, w).complete) n++
+  return n
+}
+
 // ---- Summary, records and achievements ------------------------------------------------------------
 
 export type Summary = {
@@ -73,18 +113,21 @@ export type Summary = {
   dailyWins: number
   xp: number
   level: number
+  weeksCompleted: number
   streak: { current: number; best: number }
 }
 
 export function summarise(history: readonly PlayRecord[], now: string): Summary {
   const dailyDays = new Set(history.filter((r) => r.won && r.daily).map((r) => r.daily as string))
-  const xp = history.reduce((n, r) => n + xpFor(r), 0)
+  const weeksCompleted = completedWeeks(history)
+  const xp = history.reduce((n, r) => n + xpFor(r), 0) + weeksCompleted * WEEKLY_BONUS_XP
   return {
     plays: history.length,
     wins: history.filter((r) => r.won).length,
     gamesPlayed: new Set(history.map((r) => r.gameId)).size,
     dailyWins: dailyDays.size,
     xp,
+    weeksCompleted,
     level: levelFor(xp).level,
     streak: streaks(dailyDays, now),
   }
@@ -102,6 +145,8 @@ export const ACHIEVEMENTS: readonly Achievement[] = [
   { id: 'daily-first', title: 'Daily Driver', description: 'Win a daily challenge.', earned: (s) => s.dailyWins >= 1 },
   { id: 'streak-3', title: 'On a Roll', description: 'Win the daily challenge 3 days in a row.', earned: (s) => s.streak.best >= 3 },
   { id: 'streak-7', title: 'Week Warrior', description: 'Win the daily challenge 7 days in a row.', earned: (s) => s.streak.best >= 7 },
+  { id: 'weekly-1', title: 'Weekly Winner', description: 'Finish all three weekly goals.', earned: (s) => s.weeksCompleted >= 1 },
+  { id: 'weekly-3', title: 'Season Ticket', description: 'Finish the weekly goals in 3 different weeks.', earned: (s) => s.weeksCompleted >= 3 },
   { id: 'level-5', title: 'Level 5', description: 'Reach level 5.', earned: (s) => s.level >= 5 },
 ]
 

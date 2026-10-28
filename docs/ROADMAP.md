@@ -108,6 +108,7 @@ Completion: reliable cross-device access, sustainable costs, and monetization th
 | Remaining launch games (none; all 15 slots are filled: Neon Merge, Memory Grid, Minesweeper, Neon Snake, Color Sort, Connect Four, Daily Word, Brick Breaker, Neon Pong, Sudoku Master, Space Defender, Gravity Flip, VibeLine, Twofold and Carve fill all 15. Twofold and Carve are my own designs, not ports of the GoVibeTool games) | Done (all 15 slots filled) |
 | Phase 2 slice 1: Passport (level, XP, stats, personal records), 10 achievements, daily challenge and daily-win streaks | Done, verified in Chromium. The daily game is picked from 8 seeded, winnable games by UTC date; XP is 10 per run, +15 for a win, +50 for winning the daily. Everything is computed locally from run history (no schema change). |
 | Phase 2 slice 2: progress export/import (JSON file, strictly validated, merges and never overwrites or double counts) and text-only shareable results (daily win, passport) | Done, verified in Chromium. |
-| Phase 2 still to do | Weekly challenges, recommendations, themes and avatars. Daily rolls over at 00:00 UTC (04:00 in Dubai). |
+| Phase 2 slice 3: weekly goals (3 goals per Monday-to-Sunday UTC week: win the daily on 3 days, play 3 different games, earn 300 XP; +100 XP bonus per completed week; 2 more achievements) | Done, verified in Chromium. A full weekly puzzle is deferred to Phase 3, when leaderboards exist. |
+| Phase 2 still to do | Game recommendations, themes and avatars. Daily rolls over at 00:00 UTC (04:00 in Dubai). |
 | Domain purchase and configuration | Not confirmed |
 | Production deployment | Authorized by the owner on 2026-10-28; Cloudflare Workers builds from `feature/phase-1-arcade-foundation` |

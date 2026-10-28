@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { PlayRecord } from '../types'
-import { ACHIEVEMENTS, sharePassport, shareDaily, dailyChallenge, earnedAchievements, levelFor, recordsByGame, streaks, summarise, xpFor, xpToReach } from './passport'
+import { ACHIEVEMENTS, completedWeeks, weekStart, weeklyGoals, WEEKLY_BONUS_XP, sharePassport, shareDaily, dailyChallenge, earnedAchievements, levelFor, recordsByGame, streaks, summarise, xpFor, xpToReach } from './passport'
 
 const run = (gameId: string, extra: Partial<PlayRecord> = {}): PlayRecord => ({ gameId, score: 100, playedAt: '2026-10-28T10:00:00.000Z', ...extra })
 
@@ -100,7 +100,86 @@ describe('sharing', () => {
   })
   it('passport text shows level, XP, streak and achievements', () => {
     const s = summarise([run('a', { won: true, daily: '2026-10-28' })], '2026-10-28')
-    expect(sharePassport(s)).toBe('GoVibeArcadia passport: level 1 · 75 XP · 1-day streak · 3/10 achievements')
-    expect(sharePassport(summarise([], '2026-10-28'))).toBe('GoVibeArcadia passport: level 1 · 0 XP · 0/10 achievements')
+    expect(sharePassport(s)).toBe('GoVibeArcadia passport: level 1 · 75 XP · 1-day streak · 3/12 achievements')
+    expect(sharePassport(summarise([], '2026-10-28'))).toBe('GoVibeArcadia passport: level 1 · 0 XP · 0/12 achievements')
   })
 })
+
+describe('weekly goals', () => {
+  // 2026-10-26 is a Monday.
+  const at = (day: string, gameId: string, extra: Partial<PlayRecord> = {}): PlayRecord => ({ gameId, score: 1, playedAt: `${day}T09:00:00.000Z`, ...extra })
+
+  it('weeks run Monday to Sunday', () => {
+    expect(['2026-10-26', '2026-10-28', '2026-11-01'].map(weekStart)).toEqual(['2026-10-26', '2026-10-26', '2026-10-26'])
+    expect(weekStart('2026-11-02')).toBe('2026-11-02')
+    expect(weekStart('2027-01-01')).toBe('2026-12-28') // across a year boundary
+  })
+
+  it('starts empty and counts only runs inside the week', () => {
+    const w = weeklyGoals([at('2026-10-25', 'a', { won: true, daily: '2026-10-25' })], '2026-10-28') // Sunday before
+    expect(w.goals.map((g) => g.progress)).toEqual([0, 0, 0])
+    expect(w.complete).toBe(false)
+  })
+
+  it('tracks daily wins on distinct days, distinct games and run XP', () => {
+    const history = [
+      at('2026-10-26', 'a', { won: true, daily: '2026-10-26' }),
+      at('2026-10-26', 'a', { won: true, daily: '2026-10-26' }), // same daily day counts once
+      at('2026-10-27', 'b'),
+    ]
+    const w = weeklyGoals(history, '2026-10-30')
+    expect(w.goals.map((g) => [g.id, g.progress, g.done])).toEqual([['daily', 1, false], ['games', 2, false], ['xp', 160, false]])
+  })
+
+  it('three daily wins on three games are not enough without the XP goal', () => {
+    const week1 = [
+      at('2026-10-26', 'a', { won: true, daily: '2026-10-26' }),
+      at('2026-10-27', 'b', { won: true, daily: '2026-10-27' }),
+      at('2026-10-28', 'c', { won: true, daily: '2026-10-28' }),
+    ]
+    const w = weeklyGoals(week1, '2026-10-28')
+    expect(w.goals.map((g) => g.done)).toEqual([true, true, false])
+    expect(w.goals[2].progress).toBe(225)
+    expect(w.complete).toBe(false)
+    expect(completedWeeks(week1)).toBe(0)
+  })
+
+  it('needs the XP goal too, then adds the bonus to total XP and unlocks achievements', () => {
+    const week = [
+      at('2026-10-26', 'a', { won: true, daily: '2026-10-26' }),
+      at('2026-10-27', 'b', { won: true, daily: '2026-10-27' }),
+      at('2026-10-28', 'c', { won: true, daily: '2026-10-28' }),
+      at('2026-10-29', 'c'),
+      at('2026-10-29', 'c'),
+      at('2026-10-29', 'c'),
+      at('2026-10-29', 'c'),
+      at('2026-10-29', 'c'),
+      at('2026-10-29', 'c'),
+      at('2026-10-29', 'c'),
+    ]
+    const runXp = week.reduce((n, r) => n + xpFor(r), 0)
+    expect(runXp).toBe(295)
+    expect(weeklyGoals(week, '2026-10-29').complete).toBe(false)
+    const done = [...week, at('2026-10-30', 'c')]
+    expect(weeklyGoals(done, '2026-10-30').complete).toBe(true)
+    expect(completedWeeks(done)).toBe(1)
+    const s = summarise(done, '2026-10-30')
+    expect(s.xp).toBe(305 + WEEKLY_BONUS_XP)
+    expect(earnedAchievements(s).map((a) => a.id)).toContain('weekly-1')
+    expect(earnedAchievements(s).map((a) => a.id)).not.toContain('weekly-3')
+  })
+
+  it('three completed weeks unlock Season Ticket', () => {
+    const week = (monday: string) =>
+      [0, 1, 2].map((i) => at(shiftDays(monday, i), `g${i}`, { won: true, daily: shiftDays(monday, i) })).concat(Array.from({ length: 8 }, () => at(shiftDays(monday, 3), 'g0')))
+    const history = [...week('2026-10-05'), ...week('2026-10-12'), ...week('2026-10-19')]
+    expect(completedWeeks(history)).toBe(3)
+    expect(earnedAchievements(summarise(history, '2026-10-25')).map((a) => a.id)).toContain('weekly-3')
+  })
+})
+
+const shiftDays = (day: string, by: number): string => {
+  const d = new Date(`${day}T00:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + by)
+  return d.toISOString().slice(0, 10)
+}

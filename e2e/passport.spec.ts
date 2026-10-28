@@ -125,5 +125,38 @@ test('sharing a daily win and the passport copies plain text with no personal da
 
   await page.goto('/passport')
   await page.getByRole('button', { name: 'Share my passport' }).click()
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('GoVibeArcadia passport: level 1 · 75 XP · 1-day streak · 3/10 achievements')
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('GoVibeArcadia passport: level 1 · 75 XP · 1-day streak · 3/12 achievements')
+})
+
+
+test('weekly goals fill in from your runs; finishing all three adds the bonus and unlocks Weekly Winner', async ({ page }) => {
+  // 2026-11-04 is a Wednesday; its week started on Monday 2 November.
+  await page.clock.install({ time: new Date('2026-11-04T12:00:00Z') })
+  await page.goto('/passport')
+  await expect(page.locator('.pp-weekly li')).toHaveCount(3)
+  await expect(page.locator('.pp-weekly li[data-id="xp"]')).toContainText('0 / 300')
+
+  let n = 0 // every real run has its own timestamp
+  const run = (day: string, gameId: string, extra: object = {}) => ({ gameId, score: 100, playedAt: `${day}T09:${String(n++).padStart(2, '0')}:00.000Z`, ...extra })
+  const history = [
+    run('2026-11-02', 'twofold', { won: true, daily: '2026-11-02' }),
+    run('2026-11-03', 'carve', { won: true, daily: '2026-11-03' }),
+    run('2026-11-04', 'vibeline', { won: true, daily: '2026-11-04' }),
+    ...Array.from({ length: 8 }, () => run('2026-11-04', 'twofold')),
+    run('2026-10-30', 'twofold', { won: true }), // last week: must not count
+  ]
+  const backup = { app: 'govibearcadia', version: 1, exportedAt: '2026-11-04T10:00:00.000Z', progress: [], favorites: [], history }
+  await page.getByLabel('Import file').setInputFiles({ name: 'week.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup)) })
+  await expect(page.getByText('Imported 12 new runs')).toBeVisible()
+
+  await expect(page.locator('.pp-weekly li[data-id="daily"]')).toContainText('3 / 3')
+  await expect(page.locator('.pp-weekly li[data-id="games"]')).toContainText('3 / 3')
+  await expect(page.locator('.pp-weekly li[data-id="xp"]')).toContainText('300 / 300')
+  await expect(page.getByText('All goals done. +100 XP earned this week.')).toBeVisible()
+  await expect(page.locator('.pp-ach li[data-id="weekly-1"]')).toHaveClass(/got/)
+  await expect(page.locator('.pp-ach li[data-id="weekly-3"]')).not.toHaveClass(/got/)
+  // 3 daily wins (225) + 8 plain runs (80) + last week's win (25) + 100 bonus = 430 XP: level 3.
+  await expect(page.getByRole('heading', { name: 'Level 3' })).toBeVisible()
+  await expect(page.getByText('430 XP total')).toBeVisible()
+  expect(await overflowsHorizontally(page)).toBe(false)
 })

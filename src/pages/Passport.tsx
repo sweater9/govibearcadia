@@ -5,7 +5,7 @@ import { games } from '../data/games'
 import { ShareButton } from '../components/ShareButton'
 import { parseBackup } from '../lib/backup'
 import { db, exportAll, importBackup } from '../lib/db'
-import { ACHIEVEMENTS, dailyChallenge, levelFor, recordsByGame, sharePassport, summarise, today } from '../lib/passport'
+import { ACHIEVEMENTS, dailyChallenge, levelFor, recordsByGame, sharePassport, summarise, today, weeklyGoals, WEEKLY_BONUS_XP } from '../lib/passport'
 import type { PlayRecord } from '../types'
 
 const title = (id: string) => games.find((g) => g.id === id)?.title ?? id
@@ -46,6 +46,7 @@ export function Passport() {
   const lvl = levelFor(s.xp)
   const records = recordsByGame(history)
   const challenge = dailyChallenge(day, games.filter((g) => g.daily).map((g) => g.id))
+  const weekly = weeklyGoals(history, day)
   const doneToday = history.some((r) => r.won && r.daily === day)
 
   return (
@@ -77,6 +78,28 @@ export function Passport() {
             Play
           </Link>
         )}
+      </section>
+
+      <section className="pp-weekly" aria-label="Weekly goals">
+        <h2>This week</h2>
+        <p className="text-white/55">
+          {weekly.complete ? `All goals done. +${WEEKLY_BONUS_XP} XP earned this week.` : `Finish all three for +${WEEKLY_BONUS_XP} XP. Weeks run Monday to Sunday (UTC).`}
+        </p>
+        <ul>
+          {weekly.goals.map((g) => (
+            <li key={g.id} data-id={g.id} className={g.done ? 'done' : ''}>
+              <span>
+                {g.title}
+                <small>
+                  {g.progress} / {g.target}
+                </small>
+              </span>
+              <div className="xp-bar" role="progressbar" aria-label={g.title} aria-valuemin={0} aria-valuemax={g.target} aria-valuenow={g.progress}>
+                <span style={{ width: `${(g.progress / g.target) * 100}%` }} />
+              </div>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <h2>Achievements</h2>
