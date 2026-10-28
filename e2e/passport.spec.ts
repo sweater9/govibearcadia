@@ -76,3 +76,54 @@ test('the passport works offline once loaded', async ({ page, context }) => {
   await page.reload()
   await expect(page.getByRole('heading', { name: 'Level 1' })).toBeVisible()
 })
+
+test('export then import into a fresh browser restores progress once; a bad file changes nothing', async ({ page, browser, baseURL }) => {
+  await page.goto(`/play/twofold?seed=${day}`)
+  await solveTwofold(page, day)
+  await expectRows(page, 'history', 1)
+  await page.goto('/passport')
+  const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Export progress' }).click()])
+  expect(download.suggestedFilename()).toMatch(/^govibearcadia-backup-\d{4}-\d{2}-\d{2}\.json$/)
+  const file = await download.createReadStream().then(async (stream) => {
+    const chunks: Buffer[] = []
+    for await (const chunk of stream) chunks.push(chunk as Buffer)
+    return Buffer.concat(chunks)
+  })
+  const parsed = JSON.parse(file.toString())
+  expect(parsed).toMatchObject({ app: 'govibearcadia', version: 1 })
+  expect(parsed.history).toHaveLength(1)
+
+  const fresh = await browser.newContext({ baseURL })
+  const other = await fresh.newPage()
+  await other.goto('/passport')
+  await expect(other.getByText('Play a game and your records')).toBeVisible()
+
+  await other.getByLabel('Import file').setInputFiles({ name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from('{"nope":true}') })
+  await expect(other.getByRole('status').filter({ hasText: 'Import failed' })).toBeVisible()
+  await expectRows(other, 'history', 0)
+
+  await other.getByLabel('Import file').setInputFiles({ name: 'backup.json', mimeType: 'application/json', buffer: file })
+  await expect(other.getByText('Imported 1 new run')).toBeVisible()
+  await expect(other.locator('.pp-records tbody tr')).toHaveCount(1)
+  await expect(other.getByText('25 / 100 XP to level 2 · 25 XP total')).toBeVisible()
+
+  await other.getByLabel('Import file').setInputFiles({ name: 'backup.json', mimeType: 'application/json', buffer: file })
+  await expect(other.getByText('Nothing new to import')).toBeVisible()
+  await expectRows(other, 'history', 1)
+  await fresh.close()
+})
+
+test('sharing a daily win and the passport copies plain text with no personal data', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+  await page.clock.install({ time: new Date(`${day}T12:00:00Z`) })
+  await page.goto(`/play/twofold?seed=${day}&daily=${day}`)
+  await solveTwofold(page, day)
+  await page.getByRole('button', { name: 'Share result' }).click()
+  await expect(page.getByRole('button', { name: 'Copied' })).toBeVisible()
+  const text = await page.evaluate(() => navigator.clipboard.readText())
+  expect(text).toMatch(new RegExp(`^GoVibeArcadia daily ${day}: Twofold, [\\d,]+ points`))
+
+  await page.goto('/passport')
+  await page.getByRole('button', { name: 'Share my passport' }).click()
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('GoVibeArcadia passport: level 1 · 75 XP · 1-day streak · 3/10 achievements')
+})

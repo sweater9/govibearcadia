@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { PlayRecord } from '../types'
-import { ACHIEVEMENTS, dailyChallenge, earnedAchievements, levelFor, recordsByGame, streaks, summarise, xpFor, xpToReach } from './passport'
+import { ACHIEVEMENTS, sharePassport, shareDaily, dailyChallenge, earnedAchievements, levelFor, recordsByGame, streaks, summarise, xpFor, xpToReach } from './passport'
 
 const run = (gameId: string, extra: Partial<PlayRecord> = {}): PlayRecord => ({ gameId, score: 100, playedAt: '2026-10-28T10:00:00.000Z', ...extra })
 
@@ -90,5 +90,17 @@ describe('personal records', () => {
       { gameId: 'x', plays: 3, wins: 2, bestScore: 999, bestTimeMs: 7000 },
       { gameId: 'y', plays: 1, wins: 0, bestScore: 5 },
     ])
+  })
+})
+
+describe('sharing', () => {
+  it('daily text has only the game, day, score and time', () => {
+    expect(shareDaily('Twofold', '2026-10-28', 1234, 41_400)).toBe('GoVibeArcadia daily 2026-10-28: Twofold, 1,234 points in 41s')
+    expect(shareDaily('Carve', '2026-10-28', 90)).toBe('GoVibeArcadia daily 2026-10-28: Carve, 90 points')
+  })
+  it('passport text shows level, XP, streak and achievements', () => {
+    const s = summarise([run('a', { won: true, daily: '2026-10-28' })], '2026-10-28')
+    expect(sharePassport(s)).toBe('GoVibeArcadia passport: level 1 · 75 XP · 1-day streak · 3/10 achievements')
+    expect(sharePassport(summarise([], '2026-10-28'))).toBe('GoVibeArcadia passport: level 1 · 0 XP · 0/10 achievements')
   })
 })

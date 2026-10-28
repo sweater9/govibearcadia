@@ -1,5 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie'
 import type { GameId, GameProgress, GameResult, PlayRecord } from '../types'
+import { makeBackup, mergeBackup, type Backup } from './backup'
 
 type Favorite = { gameId: GameId; addedAt: string }
 
@@ -44,4 +45,22 @@ export async function toggleFavorite(gameId: GameId): Promise<void> {
   const found = await db.favorites.get(gameId)
   if (found) await db.favorites.delete(gameId)
   else await db.favorites.put({ gameId, addedAt: new Date().toISOString() })
+}
+
+/** Everything stored on this device, ready to be written to a backup file. */
+export async function exportAll(): Promise<Backup> {
+  const [progress, favorites, history] = await Promise.all([db.progress.toArray(), db.favorites.toArray(), db.history.toArray()])
+  return makeBackup({ progress, favorites, history })
+}
+
+/** Merges a validated backup into the database in one transaction. Returns how many new runs were added. */
+export async function importBackup(backup: Backup): Promise<number> {
+  return db.transaction('rw', db.progress, db.favorites, db.history, async () => {
+    const [progress, favorites, history] = await Promise.all([db.progress.toArray(), db.favorites.toArray(), db.history.toArray()])
+    const merged = mergeBackup({ progress, favorites, history }, backup)
+    await db.progress.bulkPut(merged.progress)
+    await db.favorites.bulkPut(merged.favorites)
+    await db.history.bulkAdd(merged.newHistory)
+    return merged.newHistory.length
+  })
 }

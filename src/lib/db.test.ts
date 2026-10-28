@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { db, recordPlay, toggleFavorite } from './db'
+import { db, exportAll, importBackup, recordPlay, toggleFavorite } from './db'
 
 beforeEach(async () => {
   await Promise.all([db.progress.clear(), db.favorites.clear(), db.history.clear()])
@@ -40,5 +40,21 @@ describe('daily runs', () => {
     const rows = await db.history.orderBy('id').toArray()
     expect(rows[0].daily).toBe('2026-10-28')
     expect('daily' in rows[1]).toBe(false)
+  })
+})
+
+describe('export and import', () => {
+  it('exports everything, and importing into an empty database restores it exactly once', async () => {
+    await recordPlay('twofold', { score: 900, won: true, durationMs: 1000 }, '2026-10-28')
+    await toggleFavorite('carve')
+    const backup = await exportAll()
+    expect(backup.history).toHaveLength(1)
+    await Promise.all([db.progress.clear(), db.favorites.clear(), db.history.clear()])
+    expect(await importBackup(backup)).toBe(1)
+    expect(await importBackup(backup)).toBe(0) // the same file twice adds nothing
+    expect(await db.history.count()).toBe(1)
+    expect(await db.history.toCollection().first()).toMatchObject({ gameId: 'twofold', daily: '2026-10-28', won: true })
+    expect(await db.favorites.get('carve')).toBeDefined()
+    expect(await db.progress.get('twofold')).toMatchObject({ highScore: 900, plays: 1 })
   })
 })

@@ -5,7 +5,8 @@ import { GameBoundary } from '../components/GameBoundary'
 import { getGame } from '../games/registry'
 import { games } from '../data/games'
 import { db, recordPlay, toggleFavorite } from '../lib/db'
-import { dailyChallenge, today } from '../lib/passport'
+import { ShareButton } from '../components/ShareButton'
+import { dailyChallenge, shareDaily, today } from '../lib/passport'
 import type { GameResult } from '../types'
 
 export function Play() {
@@ -19,6 +20,7 @@ export function Play() {
   const entry = getGame(id)
   const gameId = entry?.meta.id
   const [favorite, setFavorite] = useState(false)
+  const [dailyWin, setDailyWin] = useState<GameResult | null>(null)
 
   useEffect(() => {
     if (gameId) void db.favorites.get(gameId).then(Boolean).then(setFavorite)
@@ -27,6 +29,7 @@ export function Play() {
   const finish = useCallback(
     (result: GameResult) => {
       if (gameId) void recordPlay(gameId, result, daily)
+      if (daily && result.won) setDailyWin(result)
     },
     [gameId, daily],
   )
@@ -64,6 +67,7 @@ export function Play() {
           </Suspense>
         </GameBoundary>
       </section>
+      {daily && dailyWin ? <ShareButton text={shareDaily(meta.title, daily, dailyWin.score, dailyWin.durationMs)} /> : null}
       <p className="game-help">Keyboard and touch controls supported · Progress is saved on this device</p>
     </main>
   )

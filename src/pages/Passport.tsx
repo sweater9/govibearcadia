@@ -1,9 +1,11 @@
 import { Flame, Lock, Trophy } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { games } from '../data/games'
-import { db } from '../lib/db'
-import { ACHIEVEMENTS, dailyChallenge, levelFor, recordsByGame, summarise, today } from '../lib/passport'
+import { ShareButton } from '../components/ShareButton'
+import { parseBackup } from '../lib/backup'
+import { db, exportAll, importBackup } from '../lib/db'
+import { ACHIEVEMENTS, dailyChallenge, levelFor, recordsByGame, sharePassport, summarise, today } from '../lib/passport'
 import type { PlayRecord } from '../types'
 
 const title = (id: string) => games.find((g) => g.id === id)?.title ?? id
@@ -11,9 +13,31 @@ const seconds = (ms: number) => `${(ms / 1000).toFixed(ms < 10_000 ? 1 : 0)}s`
 
 export function Passport() {
   const [history, setHistory] = useState<PlayRecord[] | null>(null)
+  const [message, setMessage] = useState('')
+  const fileInput = useRef<HTMLInputElement>(null)
+  const load = () => db.history.toArray().then(setHistory)
   useEffect(() => {
-    void db.history.toArray().then(setHistory)
+    void load()
   }, [])
+
+  const download = async () => {
+    const blob = new Blob([JSON.stringify(await exportAll(), null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `govibearcadia-backup-${today()}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    setMessage('Backup saved. Keep it somewhere safe; it contains your scores and history only.')
+  }
+  const upload = async (file: File | undefined) => {
+    if (!file) return
+    const parsed = parseBackup(await file.text())
+    if (!parsed.ok) return setMessage(`Import failed: ${parsed.error} Nothing was changed.`)
+    const added = await importBackup(parsed.backup)
+    await load()
+    setMessage(added ? `Imported ${added} new ${added === 1 ? 'run' : 'runs'}. Your existing progress was kept.` : 'Nothing new to import: everything in that file is already here.')
+  }
 
   if (!history) return <main className="passport"><p className="game-help">Loading your passport…</p></main>
 
@@ -72,6 +96,8 @@ export function Passport() {
         })}
       </ul>
 
+      <ShareButton text={sharePassport(s)} label="Share my passport" />
+
       <h2>Personal records</h2>
       {records.length ? (
         <table className="pp-records">
@@ -93,6 +119,19 @@ export function Passport() {
       ) : (
         <p className="text-white/55">Play a game and your records will show up here. Everything stays on this device.</p>
       )}
+    
+      <h2>Back up your progress</h2>
+      <p className="text-white/55">Everything lives on this device. Save a backup file to keep it safe or move it to another device. Importing merges; it never overwrites.</p>
+      <div className="pp-backup">
+        <button className="secondary-btn" onClick={() => void download()}>
+          Export progress
+        </button>
+        <button className="secondary-btn" onClick={() => fileInput.current?.click()}>
+          Import progress
+        </button>
+        <input ref={fileInput} type="file" accept="application/json,.json" aria-label="Import file" hidden onChange={(e) => { void upload(e.target.files?.[0]); e.target.value = '' }} />
+      </div>
+      <p role="status" className="pp-msg">{message}</p>
     </main>
   )
 }
