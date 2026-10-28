@@ -7,6 +7,7 @@ export const GAMES = [
   { id: 'minesweeper', title: 'Minesweeper', category: 'Logic', chunk: 'Minesweeper' },
   { id: 'neon-snake', title: 'Neon Snake', category: 'Retro', chunk: 'NeonSnake' },
   { id: 'color-sort', title: 'Color Sort', category: 'Puzzle', chunk: 'ColorSort' },
+  { id: 'connect-four', title: 'Connect Four', category: 'Strategy', chunk: 'ConnectFour' },
 ] as const
 
 type Row = Record<string, unknown>

@@ -9,6 +9,7 @@ const PLAY_AREA = {
   minesweeper: '.mines-grid',
   'neon-snake': '.snake-board',
   'color-sort': '.csort-tubes',
+  'connect-four': '.c4-board',
 } as const
 
 type Box = { top: number; bottom: number }
