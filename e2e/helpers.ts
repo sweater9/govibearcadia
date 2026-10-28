@@ -1,9 +1,10 @@
 import { expect, type Page } from '@playwright/test'
 
 export const GAMES = [
-  { id: 'neon-merge', title: 'Neon Merge' },
-  { id: 'memory-grid', title: 'Memory Grid' },
-  { id: 'pulse-tap', title: 'Pulse Tap' },
+  { id: 'neon-merge', title: 'Neon Merge', category: 'Puzzle', chunk: 'NeonMerge' },
+  { id: 'memory-grid', title: 'Memory Grid', category: 'Focus', chunk: 'MemoryGrid' },
+  { id: 'pulse-tap', title: 'Pulse Tap', category: 'Arcade', chunk: 'PulseTap' },
+  { id: 'minesweeper', title: 'Minesweeper', category: 'Logic', chunk: 'Minesweeper' },
 ] as const
 
 type Row = Record<string, unknown>

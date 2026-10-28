@@ -28,7 +28,7 @@ test('category filters come from the registry and combine with search', async ({
   await page.goto('/')
   const filters = page.locator('.filters button')
   await expect(filters.first()).toHaveText('All')
-  await expect(filters).toHaveText(['All', 'Puzzle', 'Focus', 'Arcade'])
+  await expect(filters).toHaveText(['All', ...new Set(GAMES.map((game) => game.category))])
 
   await filters.filter({ hasText: 'Focus' }).click()
   await expect(page.locator('article.game-card')).toHaveCount(1)

@@ -6,6 +6,7 @@ const PLAY_AREA = {
   'neon-merge': '.merge-board',
   'memory-grid': '.memory-grid',
   'pulse-tap': '.pulse-field',
+  minesweeper: '.mines-grid',
 } as const
 
 type Box = { top: number; bottom: number }

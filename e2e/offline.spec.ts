@@ -20,7 +20,7 @@ test('the service worker precaches the app shell and every game chunk', async ({
   })
 
   expect(cached).toContain('/index.html')
-  for (const chunk of ['NeonMerge', 'MemoryGrid', 'PulseTap']) {
+  for (const { chunk } of GAMES) {
     expect(cached.some((path) => path.startsWith(`/assets/${chunk}-`)), `${chunk} chunk is precached`).toBe(true)
   }
   for (const icon of ['icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'favicon.svg']) {
