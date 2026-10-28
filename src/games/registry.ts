@@ -92,6 +92,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./ConnectFour').then((m) => ({ default: m.ConnectFour }))),
   },
+  {
+    meta: {
+      id: 'daily-word',
+      title: 'Daily Word',
+      description: 'Six guesses to find the word of the day. Same word for everyone.',
+      category: 'Word',
+      accent: 'from-emerald-400 to-lime-500',
+      glyph: 'Ⓦ',
+      estimated: '2–5 min',
+    },
+    Component: lazy(() => import('./DailyWord').then((m) => ({ default: m.DailyWord }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)
