@@ -43,7 +43,7 @@ These are development targets, not shipped. Only the games listed under "Status"
 | 14 | Connect Four | Strategy |
 | 15 | Gravity Flip | Platform Puzzle |
 
-Neon Merge (the 2048-style game), Memory Grid (the matching game), Minesweeper, Neon Snake and Color Sort currently fill the "2048 Challenge", "Memory Match", "Minesweeper", "Neon Snake" and "Color Sort" slots. Pulse Tap is an extra reaction game.
+Neon Merge (the 2048-style game), Memory Grid (the matching game), Minesweeper, Neon Snake, Color Sort and Connect Four currently fill the "2048 Challenge", "Memory Match", "Minesweeper", "Neon Snake", "Color Sort" and "Connect Four" slots. Pulse Tap is an extra reaction game.
 
 ## Homepage and navigation (target)
 
@@ -99,12 +99,12 @@ Completion: reliable cross-device access, sustainable costs, and monetization th
 | Item | Status |
 |------|--------|
 | Repository, stack, architecture | Done |
-| Games implemented | 6: Neon Merge, Memory Grid, Pulse Tap, Minesweeper, Neon Snake, Color Sort |
+| Games implemented | 7: Neon Merge, Memory Grid, Pulse Tap, Minesweeper, Neon Snake, Color Sort, Connect Four |
 | Search, categories, favorites, recent play, high scores | Done |
 | Lazy-loaded games, seeded randomness, game result contract | Done |
 | Offline PWA with PNG icons | Done. Verified in headless Chromium: service worker precaches every game chunk, the app reloads and plays offline, manifest and icons are valid. Not yet verified on real devices (install prompt, iOS Safari). |
 | Unit and component tests, lint | Done |
 | Playwright browser tests | Done for Chromium (desktop and Pixel 7 emulation): 80 checks (73 run, 6 are device-specific skips) covering all games, persistence, offline, layout. Firefox and WebKit not covered. |
-| Remaining launch games (10 of 15 slots remain; Neon Merge, Memory Grid, Minesweeper, Neon Snake and Color Sort fill 5) | Not started |
+| Remaining launch games (9 of 15 slots remain; Neon Merge, Memory Grid, Minesweeper, Neon Snake, Color Sort and Connect Four fill 6) | Not started |
 | Domain purchase and configuration | Not confirmed |
 | Production deployment | Not authorized |
