@@ -27,3 +27,15 @@ npm run test:e2e  # real-browser tests (Playwright); first run: npx playwright i
 ```
 
 Progress, personal bests, recent plays, and favorites are stored only in the browser via IndexedDB. The service worker precaches the app for offline return visits.
+
+## Cloudflare Workers build settings
+
+This repository builds a static React application. `wrangler.jsonc` tells Workers to serve `dist` and return the app for game navigation URLs such as `/play/neon-merge`.
+
+- Build command: `npm run build`
+- Deploy command: `npx wrangler deploy`
+- Root directory: repository root
+
+The deploy command publishes the site; run it only when deployment is intended. For a local configuration check without publishing, run `npm run build` followed by `npx wrangler deploy --dry-run`.
+
+A successful local build does not confirm that a Cloudflare dashboard build succeeded. Dashboard logs and the connected production branch must be checked separately.
