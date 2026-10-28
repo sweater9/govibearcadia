@@ -128,6 +128,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./NeonPong').then((m) => ({ default: m.NeonPong }))),
   },
+  {
+    meta: {
+      id: 'sudoku-master',
+      title: 'Sudoku Master',
+      description: 'Fill the grid so every row, column and box holds 1 to 9.',
+      category: 'Logic',
+      accent: 'from-indigo-500 to-cyan-400',
+      glyph: '▦',
+      estimated: '5–20 min',
+    },
+    Component: lazy(() => import('./SudokuMaster').then((m) => ({ default: m.SudokuMaster }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)
