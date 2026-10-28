@@ -152,6 +152,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./SpaceDefender').then((m) => ({ default: m.SpaceDefender }))),
   },
+  {
+    meta: {
+      id: 'gravity-flip',
+      title: 'Gravity Flip',
+      description: 'Flip gravity to reach the exit in as few moves as you can. Ten handmade levels.',
+      category: 'Platform Puzzle',
+      accent: 'from-cyan-400 to-violet-600',
+      glyph: '⇅',
+      estimated: '5–10 min',
+    },
+    Component: lazy(() => import('./GravityFlip').then((m) => ({ default: m.GravityFlip }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)
