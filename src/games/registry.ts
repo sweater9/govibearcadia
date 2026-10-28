@@ -104,6 +104,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./DailyWord').then((m) => ({ default: m.DailyWord }))),
   },
+  {
+    meta: {
+      id: 'brick-breaker',
+      title: 'Brick Breaker',
+      description: 'Steer the ball, smash the wall, keep it in play.',
+      category: 'Arcade',
+      accent: 'from-orange-500 to-pink-500',
+      glyph: '▤',
+      estimated: '3–6 min',
+    },
+    Component: lazy(() => import('./BrickBreaker').then((m) => ({ default: m.BrickBreaker }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)
