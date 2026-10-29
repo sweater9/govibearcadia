@@ -7,3 +7,6 @@ vite.config.js
 vite.config.d.ts
 test-results
 playwright-report
+
+# Local Workers runtime state (wrangler dev)
+.wrangler/

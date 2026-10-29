@@ -16,7 +16,7 @@ Independent, free-to-play, local-first browser arcade. The long-term plan is in 
 
 - Install with `npm ci`, not `npm install`. `npm install` rewrites `package-lock.json` (it drops platform `libc` metadata) and creates noisy diffs. When a dependency really is added, restore the `libc` fields so the diff contains only the new package.
 - `npm run dev`, `npm run lint`, `npm test`, `npm run build`.
-- `npm run test:e2e`: Playwright against a fresh production build (it builds and serves it itself; it never reuses a running server, because that would test a stale build). Runs a desktop and a phone (Pixel 7) project. On a new machine run `npx playwright install chromium` first.
+- `npm run test:e2e`: Playwright against a fresh production build served by `wrangler dev` (the real Workers runtime: static assets plus the `/api` Worker and Durable Objects). It builds and serves it itself; it never reuses a running server, because that would test a stale build. Runs a desktop and a phone (Pixel 7) project. On a new machine run `npx playwright install chromium` first.
 
 ## End-to-end tests (`e2e/`)
 
@@ -38,6 +38,13 @@ Independent, free-to-play, local-first browser arcade. The long-term plan is in 
 - **Pure rules.** Keep game rules in plain TypeScript modules next to the component (see `merge/` and `memory/`), with no React or browser APIs, so a server can reuse them to validate moves in Phase 3.
 - **`?seed=`:** `/play/<id>?seed=abc` passes the seed to the game, so the same seed always deals the same game. Daily challenges will use `dailySeed()` this way, and e2e tests use it for determinism.
 - **Storage:** Dexie in `src/lib/db.ts`. Any schema change needs a new `this.version(n)` and a migration test in the style of `db.migration.test.ts`. Never edit a shipped version.
+
+## Multiplayer (Phase 3, `worker/`)
+
+- Plan and decisions: `docs/PHASE3_PLAN.md`. Only `/api/*` runs the Worker (`run_worker_first` in `wrangler.jsonc`); every other request is served from static assets, so a Worker bug cannot take the arcade pages down.
+- `worker/room.ts` is the `Room` Durable Object (hibernatable WebSockets, SQLite-backed). The server is authoritative: it validates every move with the same pure `rules.ts` the client uses. Single-player must keep working without it.
+- Never commit `.wrangler/` (local runtime state). Never send hidden information (e.g. an opponent's ships) to a client.
+- A Durable Object migration cannot be casually undone; ship and check each migration on its own.
 
 ## Adding a game
 

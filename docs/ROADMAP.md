@@ -112,5 +112,7 @@ Completion: reliable cross-device access, sustainable costs, and monetization th
 | Phase 2 slice 4: game recommendations on the home page (three picks with a reason, from local history and favorites; starters for new players) | Done, verified in Chromium. |
 | Phase 2 slice 5: colour themes (Neon, Ocean, Forest, Ember; unlocked at levels 1, 2, 3 and 5; chosen on the Passport page, remembered on the device) | Done, verified in Chromium. Themes are a hue shift of the whole page, so every game follows them. |
 | Phase 2 still to do | Avatars (P2, cosmetic), deliberately not built. Everything else in Phase 2 is done, so Phase 2 is complete apart from avatars. | Daily rolls over at 00:00 UTC (04:00 in Dubai). |
+| Phase 3 plan | Approved by the owner 2026-10-29 (`docs/PHASE3_PLAN.md`): free Cloudflare plan, no chat in v1, leaderboards later with opt-in word-list nicknames. |
+| Phase 3 slice 3.0: foundations | Worker in front of the static site (only `/api/*` runs the Worker), room codes, `Room` Durable Object with hibernating WebSockets (2 seats, 2 KB message cap), e2e now runs on `wrangler dev`. No game logic online yet. |
 | Domain purchase and configuration | Not confirmed |
 | Production deployment | Authorized by the owner on 2026-10-28; Cloudflare Workers builds from `feature/phase-1-arcade-foundation` |
