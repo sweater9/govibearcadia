@@ -114,5 +114,6 @@ Completion: reliable cross-device access, sustainable costs, and monetization th
 | Phase 2 still to do | Avatars (P2, cosmetic), deliberately not built. Everything else in Phase 2 is done, so Phase 2 is complete apart from avatars. | Daily rolls over at 00:00 UTC (04:00 in Dubai). |
 | Phase 3 plan | Approved by the owner 2026-10-29 (`docs/PHASE3_PLAN.md`): free Cloudflare plan, no chat in v1, leaderboards later with opt-in word-list nicknames. |
 | Phase 3 slice 3.0: foundations | Worker in front of the static site (only `/api/*` runs the Worker), room codes, `Room` Durable Object with hibernating WebSockets (2 seats, 2 KB message cap), e2e now runs on `wrangler dev`. No game logic online yet. |
+| Phase 3 slice 3.1: online Connect Four | Private rooms with shareable 6-character codes, guest play, server-validated moves, rematch, seat reclaim on reconnect, auto-reconnect with backoff. Verified with unit, API and two-browser e2e tests on desktop and phone. Not yet tried on two real devices over the internet. |
 | Domain purchase and configuration | Not confirmed |
 | Production deployment | Authorized by the owner on 2026-10-28; Cloudflare Workers builds from `feature/phase-1-arcade-foundation` |

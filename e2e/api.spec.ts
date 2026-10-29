@@ -9,24 +9,27 @@ const api = (page: Page, path: string, init?: { method?: string }) =>
     return { status: r.status, type: r.headers.get('content-type'), body: await r.text() }
   }, [path, init ?? {}] as const)
 
-/** Opens a socket in the page, collects every message, and exposes send/close via window. */
-const connect = (page: Page, name: string, code: string) =>
+/** Opens a socket in the page for a player token, collects every message, and exposes it on window. */
+const connect = (page: Page, name: string, code: string, token = name.padEnd(20, 'x'), game = 'connect-four') =>
   page.evaluate(
-    ([n, c]) =>
+    ([n, c, t, g]) =>
       new Promise<{ ok: boolean }>((resolve) => {
-        const w = window as unknown as Record<string, { ws: WebSocket; log: unknown[] }>
-        const ws = new WebSocket(`${location.origin.replace('http', 'ws')}/api/rooms/${c}/ws`)
-        const log: unknown[] = []
+        const w = window as unknown as Record<string, { ws: WebSocket; log: Record<string, unknown>[] }>
+        const ws = new WebSocket(`${location.origin.replace('http', 'ws')}/api/rooms/${c}/ws?g=${g}&t=${t}`)
+        const log: Record<string, unknown>[] = []
         w[n] = { ws, log }
         ws.onmessage = (e) => log.push(JSON.parse(e.data))
         ws.onclose = (e) => log.push({ closed: e.code })
         ws.onopen = () => resolve({ ok: true })
         ws.onerror = () => resolve({ ok: false })
       }),
-    [name, code] as const,
+    [name, code, token, game] as const,
   )
-const log = (page: Page, name: string) => page.evaluate((n) => (window as unknown as Record<string, { log: unknown[] }>)[n].log, name)
-const send = (page: Page, name: string, data: string) => page.evaluate(([n, d]) => (window as unknown as Record<string, { ws: WebSocket }>)[n].ws.send(d), [name, data] as const)
+const log = (page: Page, name: string) => page.evaluate((n) => (window as unknown as Record<string, { log: Record<string, unknown>[] }>)[n].log, name)
+const states = async (page: Page, name: string) => (await log(page, name)).filter((m) => m.type === 'state')
+const last = async (page: Page, name: string) => (await states(page, name)).at(-1) as Record<string, any> | undefined // eslint-disable-line @typescript-eslint/no-explicit-any
+const send = (page: Page, name: string, data: unknown) => page.evaluate(([n, d]) => (window as unknown as Record<string, { ws: WebSocket }>)[n].ws.send(typeof d === 'string' ? d : JSON.stringify(d)), [name, data] as const)
+const newRoom = async (page: Page) => JSON.parse((await api(page, '/api/rooms', { method: 'POST' })).body).code as string
 
 test('health check answers without cache', async ({ page }) => {
   await page.goto('/')
@@ -54,43 +57,94 @@ test('unknown API paths and bad room codes are rejected as JSON, and the site it
   await expect(page.locator('.cv-board')).toBeVisible()
 })
 
-test('two players get seats, hear about each other, can echo, and a third is turned away', async ({ page }) => {
+test('two players get seats and see each other; a third is turned away', async ({ page }) => {
   await page.goto('/')
-  const code = JSON.parse((await api(page, '/api/rooms', { method: 'POST' })).body).code
+  const code = await newRoom(page)
   expect(await connect(page, 'p1', code)).toEqual({ ok: true })
-  await expect.poll(() => log(page, 'p1')).toEqual([{ type: 'hello', v: 1, seat: 0, players: 1 }])
-
+  await expect.poll(() => last(page, 'p1')).toMatchObject({ type: 'state', you: 0, yourColour: 1, turn: 0, connected: [true, false], round: 1, wins: [0, 0] })
   expect(await connect(page, 'p2', code)).toEqual({ ok: true })
-  await expect.poll(() => log(page, 'p2')).toEqual([{ type: 'hello', v: 1, seat: 1, players: 2 }])
-  await expect.poll(() => log(page, 'p1')).toContainEqual({ type: 'joined', seat: 1 })
-
-  await send(page, 'p1', JSON.stringify({ hi: 'there' }))
-  await expect.poll(() => log(page, 'p1')).toContainEqual({ type: 'echo', data: { hi: 'there' } })
-  expect(await log(page, 'p2')).not.toContainEqual(expect.objectContaining({ type: 'echo' })) // not broadcast
-
+  await expect.poll(() => last(page, 'p2')).toMatchObject({ you: 1, yourColour: 2, turn: 0, connected: [true, true] })
+  await expect.poll(() => last(page, 'p1')).toMatchObject({ connected: [true, true] })
   expect(await connect(page, 'p3', code)).toEqual({ ok: false }) // room is full (409)
 })
 
-test('a seat is freed when a player leaves, and the other player is told', async ({ page }) => {
+test('the server decides: out-of-turn, illegal and unknown messages are refused and change nothing', async ({ page }) => {
   await page.goto('/')
-  const code = JSON.parse((await api(page, '/api/rooms', { method: 'POST' })).body).code
+  const code = await newRoom(page)
   await connect(page, 'p1', code)
   await connect(page, 'p2', code)
-  await page.evaluate(() => (window as unknown as Record<string, { ws: WebSocket }>).p1.ws.close(1000))
-  await expect.poll(() => log(page, 'p2')).toContainEqual({ type: 'left', seat: 0 })
-  expect(await connect(page, 'p3', code)).toEqual({ ok: true })
-  await expect.poll(() => log(page, 'p3')).toEqual([{ type: 'hello', v: 1, seat: 0, players: 2 }])
+  await expect.poll(() => last(page, 'p2')).toMatchObject({ connected: [true, true] })
+
+  await send(page, 'p2', { type: 'move', col: 3 }) // not seat 1's turn
+  await expect.poll(async () => (await log(page, 'p2')).filter((m) => m.type === 'error')).toEqual([{ type: 'error', code: 'not-your-turn' }])
+  await send(page, 'p1', { type: 'move', col: 99 })
+  await send(page, 'p1', { type: 'move', col: '3' })
+  await send(page, 'p1', { type: 'cheat' })
+  await send(page, 'p1', { type: 'rematch' }) // game not over
+  await expect.poll(async () => (await log(page, 'p1')).filter((m) => m.type === 'error').map((m) => m.code)).toEqual(['illegal-move', 'illegal-move', 'unknown-message', 'game-not-over'])
+  expect((await last(page, 'p1'))?.moves).toBe(0)
+
+  await send(page, 'p1', { type: 'move', col: 3 })
+  await expect.poll(() => last(page, 'p2')).toMatchObject({ moves: 1, turn: 1 })
+  expect((await last(page, 'p2'))?.cells[38]).toBe(1) // bottom row, column 3
 })
 
-test('oversized and malformed messages close the socket', async ({ page }) => {
+test('a full game: red wins, the tally updates, and the other seat starts the rematch', async ({ page }) => {
   await page.goto('/')
-  const code = JSON.parse((await api(page, '/api/rooms', { method: 'POST' })).body).code
+  const code = await newRoom(page)
+  await connect(page, 'p1', code)
+  await connect(page, 'p2', code)
+  for (const [who, col] of [['p1', 0], ['p2', 1], ['p1', 0], ['p2', 1], ['p1', 0], ['p2', 1], ['p1', 0]] as const) {
+    await send(page, who, { type: 'move', col })
+    await expect.poll(async () => (await last(page, who))?.moves).toBeGreaterThan(0)
+  }
+  await expect.poll(() => last(page, 'p2')).toMatchObject({ winner: 0, turn: null, wins: [1, 0] })
+  await send(page, 'p2', { type: 'move', col: 2 })
+  await expect.poll(async () => (await log(page, 'p2')).filter((m) => m.type === 'error').at(-1)).toEqual({ type: 'error', code: 'game-over' })
+
+  await send(page, 'p1', { type: 'rematch' })
+  await expect.poll(() => last(page, 'p2')).toMatchObject({ rematch: [true, false] })
+  await send(page, 'p2', { type: 'rematch' })
+  await expect.poll(() => last(page, 'p2')).toMatchObject({ round: 2, turn: 1, yourColour: 1, wins: [1, 0], moves: 0 })
+})
+
+test('reconnecting with the same token gets the same seat and the live game; a stranger cannot take it', async ({ page }) => {
+  await page.goto('/')
+  const code = await newRoom(page)
+  await connect(page, 'p1', code, 'token-for-player-one')
+  await connect(page, 'p2', code, 'token-for-player-two')
+  await send(page, 'p1', { type: 'move', col: 3 })
+  await expect.poll(() => last(page, 'p2')).toMatchObject({ moves: 1 })
+
+  await page.evaluate(() => (window as unknown as Record<string, { ws: WebSocket }>).p1.ws.close(1000))
+  await expect.poll(() => last(page, 'p2')).toMatchObject({ connected: [false, true] })
+  expect(await connect(page, 'stranger', code, 'a-different-token-123')).toEqual({ ok: false }) // seat 0 is held for its owner
+
+  expect(await connect(page, 'p1b', code, 'token-for-player-one')).toEqual({ ok: true })
+  await expect.poll(() => last(page, 'p1b')).toMatchObject({ you: 0, moves: 1, turn: 1, connected: [true, true] })
+
+  // A second tab with the same token replaces the first.
+  expect(await connect(page, 'p1c', code, 'token-for-player-one')).toEqual({ ok: true })
+  await expect.poll(() => log(page, 'p1b')).toContainEqual({ closed: 4000 })
+  await expect.poll(() => last(page, 'p1c')).toMatchObject({ you: 0 })
+})
+
+test('bad tokens, games and message sizes are refused', async ({ page }) => {
+  await page.goto('/')
+  const code = await newRoom(page)
+  expect(await connect(page, 'short', code, 'short')).toEqual({ ok: false })
+  expect(await connect(page, 'odd', code, 'x'.repeat(20), 'chess')).toEqual({ ok: false })
+
   await connect(page, 'big', code)
   await send(page, 'big', JSON.stringify({ pad: 'x'.repeat(3000) }))
   await expect.poll(() => log(page, 'big')).toContainEqual({ closed: 1009 })
 
-  const code2 = JSON.parse((await api(page, '/api/rooms', { method: 'POST' })).body).code
+  const code2 = await newRoom(page)
   await connect(page, 'bad', code2)
   await send(page, 'bad', 'not json')
   await expect.poll(() => log(page, 'bad')).toContainEqual({ closed: 1003 })
+  const code3 = await newRoom(page)
+  await connect(page, 'arr', code3)
+  await send(page, 'arr', '[1,2,3]')
+  await expect.poll(() => log(page, 'arr')).toContainEqual({ closed: 1003 })
 })

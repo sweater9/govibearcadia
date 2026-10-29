@@ -94,6 +94,16 @@ export function Home() {
           Play today's challenge <ArrowRight size={18} />
         </Link>
       </section>
+      <section className="home-daily" aria-label="Play online">
+        <div>
+          <p className="eyebrow">New · Play with a friend</p>
+          <h2>Online Connect Four</h2>
+          <p>Make a private room and send the code. No account, nothing to install.</p>
+        </div>
+        <Link className="secondary-btn" to="/online">
+          Play online <ArrowRight size={18} />
+        </Link>
+      </section>
       {recent ? (
         <section className="continue">
           <div>
