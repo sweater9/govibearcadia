@@ -5,6 +5,7 @@ import { games } from '../data/games'
 import { ShareButton } from '../components/ShareButton'
 import { parseBackup } from '../lib/backup'
 import { db, exportAll, importBackup } from '../lib/db'
+import { THEMES, applyTheme, isUnlocked, resolveTheme, storedTheme, type ThemeId } from '../lib/themes'
 import { ACHIEVEMENTS, dailyChallenge, levelFor, recordsByGame, sharePassport, summarise, today, weeklyGoals, WEEKLY_BONUS_XP } from '../lib/passport'
 import type { PlayRecord } from '../types'
 
@@ -14,6 +15,7 @@ const seconds = (ms: number) => `${(ms / 1000).toFixed(ms < 10_000 ? 1 : 0)}s`
 export function Passport() {
   const [history, setHistory] = useState<PlayRecord[] | null>(null)
   const [message, setMessage] = useState('')
+  const [theme, setTheme] = useState<ThemeId>(() => storedTheme() ?? 'neon')
   const fileInput = useRef<HTMLInputElement>(null)
   const load = () => db.history.toArray().then(setHistory)
   useEffect(() => {
@@ -120,6 +122,31 @@ export function Passport() {
       </ul>
 
       <ShareButton text={sharePassport(s)} label="Share my passport" />
+
+      <h2>Themes</h2>
+      <div className="pp-themes" role="radiogroup" aria-label="Theme">
+        {THEMES.map((t) => {
+          const open = isUnlocked(t.id, lvl.level)
+          const active = resolveTheme(theme, lvl.level) === t.id
+          return (
+            <button
+              key={t.id}
+              role="radio"
+              aria-checked={active}
+              disabled={!open}
+              data-theme-option={t.id}
+              className={active ? 'on' : ''}
+              onClick={() => {
+                applyTheme(t.id)
+                setTheme(t.id)
+              }}
+            >
+              <strong>{t.name}</strong>
+              <small>{open ? t.blurb : `Unlocks at level ${t.level}`}</small>
+            </button>
+          )
+        })}
+      </div>
 
       <h2>Personal records</h2>
       {records.length ? (

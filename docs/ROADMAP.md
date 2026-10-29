@@ -110,6 +110,7 @@ Completion: reliable cross-device access, sustainable costs, and monetization th
 | Phase 2 slice 2: progress export/import (JSON file, strictly validated, merges and never overwrites or double counts) and text-only shareable results (daily win, passport) | Done, verified in Chromium. |
 | Phase 2 slice 3: weekly goals (3 goals per Monday-to-Sunday UTC week: win the daily on 3 days, play 3 different games, earn 300 XP; +100 XP bonus per completed week; 2 more achievements) | Done, verified in Chromium. A full weekly puzzle is deferred to Phase 3, when leaderboards exist. |
 | Phase 2 slice 4: game recommendations on the home page (three picks with a reason, from local history and favorites; starters for new players) | Done, verified in Chromium. |
-| Phase 2 still to do | Themes and avatars (P2, cosmetic). Daily rolls over at 00:00 UTC (04:00 in Dubai). |
+| Phase 2 slice 5: colour themes (Neon, Ocean, Forest, Ember; unlocked at levels 1, 2, 3 and 5; chosen on the Passport page, remembered on the device) | Done, verified in Chromium. Themes are a hue shift of the whole page, so every game follows them. |
+| Phase 2 still to do | Avatars (P2, cosmetic), deliberately not built. Everything else in Phase 2 is done, so Phase 2 is complete apart from avatars. | Daily rolls over at 00:00 UTC (04:00 in Dubai). |
 | Domain purchase and configuration | Not confirmed |
 | Production deployment | Authorized by the owner on 2026-10-28; Cloudflare Workers builds from `feature/phase-1-arcade-foundation` |
