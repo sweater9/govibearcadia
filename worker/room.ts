@@ -1,4 +1,5 @@
 import { DurableObject } from 'cloudflare:workers'
+import { createLimiter } from '../src/lib/ratelimit'
 import { applyMove, newRoom, parseRoom, requestRematch, viewFor, type Room as RoomState, type Seat } from '../src/games/connect4/online'
 
 /** Largest message a client may send. Anything bigger closes the socket (protocol error). */
@@ -6,6 +7,8 @@ export const MAX_MESSAGE_BYTES = 2048
 /** A room is deleted after this long without any activity. */
 const IDLE_MS = 2 * 60 * 60 * 1000
 const GAMES = ['connect-four'] as const
+/** Messages a socket may send: 20 in 5 seconds. Real play sends one every second or two. */
+const messageLimit = createLimiter(20, 5000)
 const TOKEN = /^[A-Za-z0-9_-]{16,64}$/
 
 type Attachment = { seat: Seat }
@@ -66,6 +69,7 @@ export class Room extends DurableObject {
     }
     const seat = (ws.deserializeAttachment() as Attachment | null)?.seat
     if (seat === undefined) return ws.close(1008, 'no seat')
+    if (!messageLimit.hit(`${this.ctx.id.toString()}:${seat}`, Date.now())) return void ws.send(JSON.stringify({ type: 'error', code: 'slow-down' }))
     const room = parseRoom(await this.ctx.storage.get('room'))
     if (!room) return ws.close(1011, 'room state lost')
 

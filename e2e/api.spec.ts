@@ -148,3 +148,22 @@ test('bad tokens, games and message sizes are refused', async ({ page }) => {
   await send(page, 'arr', '[1,2,3]')
   await expect.poll(() => log(page, 'arr')).toContainEqual({ closed: 1003 })
 })
+
+test('a visitor who creates rooms too fast is slowed down, and someone else is not', async ({ request }) => {
+  const make = (ip: string) => request.post('/api/rooms', { headers: { 'cf-connecting-ip': ip } })
+  const results: number[] = []
+  for (let i = 0; i < 12; i++) results.push((await make('203.0.113.7')).status())
+  expect(results.slice(0, 10).every((s) => s === 201)).toBe(true)
+  expect(results.slice(10)).toEqual([429, 429])
+  expect((await request.post('/api/rooms', { headers: { 'cf-connecting-ip': '203.0.113.8' } })).status()).toBe(201)
+})
+
+test('a socket that floods messages gets told to slow down, and the game is unharmed', async ({ page }) => {
+  await page.goto('/')
+  const code = await newRoom(page)
+  await connect(page, 'a', code)
+  await connect(page, 'b', code)
+  for (let i = 0; i < 30; i++) await send(page, 'a', { type: 'move', col: 99 })
+  await expect.poll(async () => (await log(page, 'a')).filter((m) => m.code === 'slow-down').length).toBeGreaterThan(0)
+  expect((await log(page, 'a')).some((m) => m.closed)).toBe(false)
+})
