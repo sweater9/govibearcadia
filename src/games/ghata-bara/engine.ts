@@ -55,14 +55,14 @@ function evaluate(s:State,ids:number[],indices:number[]):Move|null{
  if(first.step<0){if(paired||indices.length!==1||![6,12].includes(points))return null;}
  const distance=first.step<0?0:paired?points/2:points;
  const destinationStep=first.step<0?0:first.step+distance;
- if(destinationStep>24)return null;
+ if(destinationStep>24&&(first.credit||first.step>=16))return null;
  
- const destination=route(s.player)[destinationStep];
- const path=first.step<0?[]:Array.from({length:distance},(_,i)=>route(s.player)[first.step+i+1>=16&&!first.credit?(first.step+i+1)%16:first.step+i+1]);
+ const destination=route(s.player)[first.step>=0&&first.step<16&&!first.credit?destinationStep%16:destinationStep];
+ const path=first.step<0?[]:Array.from({length:distance},(_,i)=>route(s.player)[first.step<16&&!first.credit?(first.step+i+1)%16:first.step+i+1]);
  if(path.some(c=>!c))return null;
  // A pawn with no capture credit may circulate the outer ring.
  let finalStep=destinationStep;let dest=destination;
- if(first.step>=0&&first.step<16&&destinationStep>=16&&!first.credit){finalStep=destinationStep%16;dest=route(s.player)[finalStep];}
+ if(first.step>=0&&first.step<16&&!first.credit){finalStep=destinationStep%16;dest=route(s.player)[finalStep];}
  const enemies=s.pawns.filter(p=>p.owner!==s.player&&p.step>=0&&p.step<24);
  const blockers=enemies.filter(p=>p.juga!==null);
  if(!paired&&path.some(c=>!isSafe(c)&&blockers.some(p=>same(at(s,p),c))))return null;
@@ -97,7 +97,7 @@ export function move(s:State,ids:number[],chunkIndices:number[]):State{
  const m=legalMoves(s).find(x=>x.ids.join(',')===selected.join(',')&&x.chunkIndices.join(',')===indices.join(','));
  if(!m)throw Error('Illegal allocation');
  const next=clone(s),moving=selected.map(id=>next.pawns[id]),from=moving[0].step;
- const paired=moving.length===2,rawStep=from<0?0:from+m.points/(paired?2:1),step=from>=0&&from<16&&rawStep>=16&&!moving[0].credit?rawStep%16:rawStep;
+ const paired=moving.length===2,rawStep=from<0?0:from+m.points/(paired?2:1),step=from>=0&&from<16&&!moving[0].credit?rawStep%16:rawStep;
  for(const p of moving){p.step=step;p.pinnedBy=null;}
  for(const id of m.captures){const p=next.pawns[id];p.step=-1;p.credit=false;p.juga=null;p.pinnedBy=null;}
  // Rescue releases the pinned pawn, without repinning it.
