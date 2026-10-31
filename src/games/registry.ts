@@ -257,6 +257,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./Carve').then((m) => ({ default: m.Carve }))),
   },
+  {
+    meta: {
+      id: 'ghata-bara',
+      title: 'Ghata Bara',
+      description: 'Traditional four-player strategy with long dice, captures, Jugas and a 5×5 board.',
+      category: 'Strategy',
+      accent: 'from-amber-400 to-rose-600',
+      glyph: '✥',
+      estimated: '20–60 min',
+    },
+    Component: lazy(() => import('./GhataBara').then((m) => ({ default: m.GhataBara }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)
