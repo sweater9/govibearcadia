@@ -1,0 +1,22 @@
+name: Ghata Bara rules and build
+on:
+  push:
+    branches:
+      - feature/ghata-bara-rules-engine
+  pull_request:
+    paths:
+      - 'src/games/ghata-bara/**'
+      - 'src/games/GhataBara.tsx'
+      - 'src/games/registry.ts'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test -- src/games/ghata-bara/engine.test.ts
+      - run: npm run build
