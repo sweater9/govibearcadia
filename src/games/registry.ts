@@ -10,6 +10,19 @@ export type GameEntry = { meta: GameMeta; Component: ComponentType<GameProps> }
 export const registry: GameEntry[] = [
   {
     meta: {
+      id: 'ghata-bara',
+      title: 'Ghata Bara',
+      description: 'Traditional four-player strategy with long dice, capture credits, and Jugas.',
+      category: 'Strategy',
+      accent: 'from-amber-500 to-rose-600',
+      glyph: '✥',
+      estimated: '20–45 min',
+    },
+    Component: lazy(() => import('./GhataBara').then((m) => ({ default: m.GhataBara }))),
+  },
+
+  {
+    meta: {
       id: 'neon-merge',
       title: 'Neon Merge',
       description: 'Slide luminous tiles and chase the 2048 core.',
@@ -243,6 +256,18 @@ export const registry: GameEntry[] = [
       daily: true,
     },
     Component: lazy(() => import('./Carve').then((m) => ({ default: m.Carve }))),
+  },
+  {
+    meta: {
+      id: 'ghata-bara',
+      title: 'Ghata Bara',
+      description: 'Traditional four-player strategy with long dice, captures, Jugas and a 5×5 board.',
+      category: 'Strategy',
+      accent: 'from-amber-400 to-rose-600',
+      glyph: '✥',
+      estimated: '20–60 min',
+    },
+    Component: lazy(() => import('./GhataBara').then((m) => ({ default: m.GhataBara }))),
   },
 ]
 
