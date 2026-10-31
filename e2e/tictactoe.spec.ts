@@ -38,6 +38,7 @@ test('plays a whole game against the computer with real clicks and saves the res
 test('number keys play, and the board is locked while the computer thinks', async ({ page }) => {
   await page.clock.install({ time: new Date('2026-10-28T10:00:00Z') })
   await page.goto(`/play/tic-tac-toe?seed=${SEED}`)
+  await expect(page.locator('.ttt-board')).toBeVisible() // the game loads lazily; keys only work once it is mounted
   await page.clock.pauseAt(new Date('2026-10-28T10:00:30Z'))
   await page.keyboard.press('5')
   await expect(status(page)).toHaveText('Computer is thinking…')
