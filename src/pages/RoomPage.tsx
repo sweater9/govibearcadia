@@ -10,7 +10,7 @@ import { isRoomCode } from '../lib/roomcode'
 
 type Connected = [boolean, boolean]
 type StateMessage = View & { type: 'state'; connected: Connected }
-type Status = 'connecting' | 'open' | 'reconnecting' | 'failed' | 'replaced'
+type Status = 'connecting' | 'open' | 'reconnecting' | 'failed' | 'replaced' | 'expired'
 
 const RECONNECT_MS = [500, 1000, 2000, 4000]
 
@@ -60,11 +60,12 @@ export function RoomPage() {
           return
         }
         if (msg.type === 'state') setState(msg as unknown as StateMessage)
-        else if (msg.type === 'error') setNotice(msg.code === 'not-your-turn' ? 'Wait for your turn.' : msg.code === 'illegal-move' ? 'That column is full.' : '')
+        else if (msg.type === 'error') setNotice(msg.code === 'not-your-turn' ? 'Wait for your turn.' : msg.code === 'illegal-move' ? 'That column is full.' : msg.code === 'slow-down' ? 'Slow down a little.' : '')
       }
       ws.onclose = (event) => {
         if (closed) return
         if (event.code === 4000) return setStatus('replaced')
+        if (event.code === 1000 && event.reason === 'room expired') return setStatus('expired')
         if (!everOpen.current) return setStatus('failed') // never got in: full, expired or offline
         setStatus('reconnecting')
         timer = setTimeout(connect, RECONNECT_MS[Math.min(attempt++, RECONNECT_MS.length - 1)])
@@ -96,11 +97,19 @@ export function RoomPage() {
     if (socket.current?.readyState === WebSocket.OPEN) socket.current.send(JSON.stringify(message))
   }, [])
 
-  if (!valid) return <Navigate to="/online" replace />
-
   const you = state?.you
   const opp = you === undefined ? undefined : ((1 - you) as 0 | 1)
   const oppHere = state && opp !== undefined ? state.connected[opp] : false
+  const [away, setAway] = useState(false)
+  useEffect(() => {
+    setAway(false)
+    if (!state || oppHere) return
+    const t = setTimeout(() => setAway(true), 30_000)
+    return () => clearTimeout(t)
+  }, [!!state, oppHere]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!valid) return <Navigate to="/online" replace />
+
   const over = !!state && state.turn === null
   const myTurn = !!state && state.turn === state.you
   const link = `${location.origin}/room/${code}`
@@ -108,7 +117,9 @@ export function RoomPage() {
   const headline =
     status === 'failed'
       ? 'Could not join this room'
-      : status === 'replaced'
+      : status === 'expired'
+        ? 'This room expired'
+        : status === 'replaced'
         ? 'This room was opened in another tab'
         : !state
           ? 'Connecting…'
@@ -138,10 +149,10 @@ export function RoomPage() {
         <ShareButton text={link} label="Copy invite link" />
       </div>
       <section className="game-shell" aria-label="Online Connect Four">
-        {status === 'failed' ? (
+        {status === 'failed' || status === 'expired' ? (
           <div className="game-over">
             <h3>{headline}</h3>
-            <p>The room may be full, may have expired, or online play may be unavailable.</p>
+            <p>{status === 'expired' ? 'Rooms close after two hours without a move. Make a new one to keep playing.' : 'The room may be full, may have expired, or online play may be unavailable.'}</p>
             <Link className="primary-btn" to="/online">
               Back to rooms
             </Link>
@@ -177,7 +188,7 @@ export function RoomPage() {
               </div>
             </div>
             <p className="game-help" role="status">
-              {notice || (state ? `You are ${state.yourColour === 1 ? 'red' : 'yellow'}.${oppHere ? '' : ' Share the code or link so your friend can join.'}` : '')}
+              {notice || (state ? `You are ${state.yourColour === 1 ? 'red' : 'yellow'}.${oppHere ? '' : away ? ' Your friend has been gone a while. You can keep waiting, share the link again, or leave the room.' : ' Share the code or link so your friend can join.'}` : '')}
             </p>
             {over ? (
               <div className="game-over">
