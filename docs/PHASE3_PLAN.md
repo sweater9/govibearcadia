@@ -62,7 +62,7 @@ Conclusion: the free plan is enough for launch and early growth. If a game takes
 | 3.1 Rooms and Connect Four online | Create room, share code or link, join as guest, play with server-validated moves, rematch | Two real browser contexts finish a match; illegal and out-of-turn moves rejected |
 | 3.2 Reconnection and hardening | Reload or drop and rejoin the same seat, opponent-left handling, rate limits, expiry, size limits | Test drops one side mid-match and resumes |
 | 3.3 Tic-Tac-Toe and Checkers | New games with pure rules, single-player (computer opponent) and online | Same bar as slice 3.1 for each |
-| 3.4 Neon Pong online | Server-side simulation, input messages, client prediction kept simple | Two clients complete a point; behaviour under latency documented |
+| 3.4 Neon Pong online (SKIPPED 2026-10-31: too heavy for the free plan, about 180 matches a day against about 1,000 for turn-based games, and it needs lag handling; revisit only if the arcade outgrows the free tier) | Server-side simulation, input messages, client prediction kept simple | Two clients complete a point; behaviour under latency documented |
 | 3.5 Battleship | Hidden-information game, so the server must never send the opponent's ships | Test confirms the opponent's board is never in any message |
 | 3.6 (P1) Friend challenges, leaderboards, quick match | Shareable challenge links, opt-in word-list nicknames, queue object | Decided after 3.1 to 3.5 |
 | Later (P2) | Tournaments, spectators | Not planned yet |
