@@ -8,9 +8,12 @@ interface Env {
 
 // Best effort: counters live in one Worker isolate's memory, so they slow abuse down rather than stop it outright.
 const createLimit = createLimiter(10, 60_000) // new rooms per visitor per minute
-const connectLimit = createLimiter(40, 60_000) // WebSocket connection attempts per visitor per minute
-// Cloudflare always sets this header; without it (local dev) there is nobody to count, so nothing is limited.
-const who = (request: Request) => request.headers.get('cf-connecting-ip')
+const connectLimit = createLimiter(120, 60_000) // WebSocket connection attempts per visitor per minute (generous: reconnects and shared networks count)
+// Cloudflare always sets this header; without it (local dev) there is nobody to count, so nothing is limited (the same goes for loopback).
+const who = (request: Request) => {
+  const ip = request.headers.get('cf-connecting-ip')
+  return ip === '127.0.0.1' || ip === '::1' ? null : ip // local development and tests share one address
+}
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } })
 
