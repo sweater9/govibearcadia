@@ -117,15 +117,18 @@ test('a player who loses their connection is shown as gone, and the game resumes
   await expect(a.locator('.c4-cell[data-p="2"]')).toHaveCount(1)
 })
 
-test('the room page fits the screen', async ({ page, isMobile }) => {
-  await page.goto('/online')
-  await page.getByRole('button', { name: 'Create a room' }).click()
-  await expect(page.locator('.c4-board')).toBeVisible()
-  const sizes = isMobile ? [{ width: 375, height: 667 }] : [{ width: 1366, height: 650 }, { width: 1280, height: 720 }]
-  for (const viewport of sizes) {
-    await page.setViewportSize(viewport)
-    const box = await page.locator('.c4-board').boundingBox()
-    expect(box!.y + box!.height, `${viewport.width}x${viewport.height}`).toBeLessThanOrEqual(viewport.height)
-    expect(await overflowsHorizontally(page)).toBe(false)
-  }
-})
+for (const [game, board] of [['connect-four', '.c4-board'], ['tic-tac-toe', '.ttt-board'], ['checkers', '.ck-board']] as const) {
+  test(`the ${game} room page fits the screen`, async ({ page, isMobile }) => {
+    await page.goto('/online')
+    await page.getByLabel('Game').selectOption(game)
+    await page.getByRole('button', { name: 'Create a room' }).click()
+    await expect(page.locator(board)).toBeVisible()
+    const sizes = isMobile ? [{ width: 375, height: 667 }] : [{ width: 1366, height: 650 }, { width: 1280, height: 720 }]
+    for (const viewport of sizes) {
+      await page.setViewportSize(viewport)
+      const box = await page.locator(board).boundingBox()
+      expect(box!.y + box!.height, `${viewport.width}x${viewport.height}`).toBeLessThanOrEqual(viewport.height)
+      expect(await overflowsHorizontally(page)).toBe(false)
+    }
+  })
+}

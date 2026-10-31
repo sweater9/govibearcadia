@@ -1,21 +1,37 @@
 import { ArrowLeft } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link, Navigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { ShareButton } from '../components/ShareButton'
 import { COLS } from '../games/connect4/rules'
 import type { View } from '../games/connect4/online'
+import { CheckersBoard } from '../games/checkers/Board'
+import { interact, legalSteps as legalStepsFor, newGame as newCheckers, type CState } from '../games/checkers/rules'
+import { TicTacToeBoard } from '../games/tictactoe/Board'
+import type { TState } from '../games/tictactoe/rules'
 import { recordPlay } from '../lib/db'
-import { roomSocketUrl } from '../lib/online'
+import { ONLINE_GAME_LIST, gameFromParam, roomSocketUrl, type OnlineGameId } from '../lib/online'
 import { isRoomCode } from '../lib/roomcode'
 
 type Connected = [boolean, boolean]
-type StateMessage = View & { type: 'state'; connected: Connected }
+/** Connect Four sends its board flat (cells, line, moves); the other games nest it under `board`. */
+type Common = Pick<View, 'you' | 'yourColour' | 'turn' | 'winner' | 'draw' | 'round' | 'wins' | 'rematch'>
+type StateMessage = Common & Partial<Pick<View, 'cells' | 'line' | 'moves'>> & { type: 'state'; connected: Connected; board?: unknown }
 type Status = 'connecting' | 'open' | 'reconnecting' | 'failed' | 'replaced' | 'expired'
 
 const RECONNECT_MS = [500, 1000, 2000, 4000]
 
-/** Wins pay more the sooner they come; a draw is worth something; a loss nothing. Same shape as the single-player score. */
-const scoreOf = (v: View) => (v.winner === v.you ? Math.max(100, 1000 - 30 * Math.ceil(v.moves / 2)) : v.draw ? 300 : 0)
+const movesOf = (v: StateMessage) => v.moves ?? (v.board as { moves?: number } | undefined)?.moves ?? 0
+
+/** Wins pay more the sooner they come; a draw is worth something; a loss nothing. Same shape as each single-player score. */
+function scoreOf(game: OnlineGameId, v: StateMessage): number {
+  const moves = movesOf(v)
+  const won = v.winner === v.you
+  if (game === 'tic-tac-toe') return won ? 500 + 100 * (5 - Math.ceil(moves / 2)) : v.draw ? 200 : 0
+  if (game === 'checkers') return won ? Math.max(400, 1000 - 4 * moves) : v.draw ? 300 : 0
+  return won ? Math.max(100, 1000 - 30 * Math.ceil(moves / 2)) : v.draw ? 300 : 0
+}
+
+const COLOURS: Record<OnlineGameId, [string, string]> = { 'connect-four': ['red', 'yellow'], 'tic-tac-toe': ['X', 'O'], checkers: ['red', 'white'] }
 
 function alreadyRecorded(key: string): boolean {
   try {
@@ -30,6 +46,9 @@ function alreadyRecorded(key: string): boolean {
 
 export function RoomPage() {
   const { code = '' } = useParams()
+  const [params] = useSearchParams()
+  const game = gameFromParam(params.get('g'))
+  const [picked, setPicked] = useState<number | null>(null)
   const valid = isRoomCode(code)
   const [status, setStatus] = useState<Status>('connecting')
   const [state, setState] = useState<StateMessage | null>(null)
@@ -45,7 +64,7 @@ export function RoomPage() {
     let timer: ReturnType<typeof setTimeout> | undefined
 
     const connect = () => {
-      const ws = new WebSocket(roomSocketUrl(code, 'connect-four'))
+      const ws = new WebSocket(roomSocketUrl(code, game))
       socket.current = ws
       ws.onopen = () => {
         everOpen.current = true
@@ -77,21 +96,21 @@ export function RoomPage() {
       clearTimeout(timer)
       socket.current?.close(1000)
     }
-  }, [code, valid])
+  }, [code, valid, game])
 
   // Record each finished round once on this device.
   useEffect(() => {
     if (!state || state.turn !== null) return
     if (state.winner === null && !state.draw) return
     if (alreadyRecorded(`${code}:${state.round}`)) return
-    void recordPlay('connect-four', {
-      score: scoreOf(state),
+    void recordPlay(game, {
+      score: scoreOf(game, state),
       durationMs: Date.now() - startedAt.current,
       won: state.winner === state.you,
-      stats: { online: 1, moves: state.moves, outcome: state.winner === null ? 0 : state.winner === state.you ? 1 : -1 },
+      stats: { online: 1, moves: movesOf(state), outcome: state.winner === null ? 0 : state.winner === state.you ? 1 : -1 },
     })
     startedAt.current = Date.now()
-  }, [state, code])
+  }, [state, code, game])
 
   const send = useCallback((message: object) => {
     if (socket.current?.readyState === WebSocket.OPEN) socket.current.send(JSON.stringify(message))
@@ -108,11 +127,19 @@ export function RoomPage() {
     return () => clearTimeout(t)
   }, [!!state, oppHere]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const checkers = (game === 'checkers' && state?.board ? (state.board as CState) : newCheckers()) as CState
+  const targets = new Set<number>()
+  if (game === 'checkers' && state && state.turn === state.you) {
+    const from = checkers.chain ?? picked
+    if (from !== null) for (const m of legalStepsFor(checkers)) if (m.from === from) targets.add(m.to)
+  }
+
   if (!valid) return <Navigate to="/online" replace />
 
   const over = !!state && state.turn === null
   const myTurn = !!state && state.turn === state.you
-  const link = `${location.origin}/room/${code}`
+  const link = `${location.origin}/room/${code}?g=${game}`
+  const title = ONLINE_GAME_LIST.find((g) => g.id === game)!.title
 
   const headline =
     status === 'failed'
@@ -148,17 +175,17 @@ export function RoomPage() {
         <h1 aria-label={`Room ${code}`}>{code}</h1>
         <ShareButton text={link} label="Copy invite link" />
       </div>
-      <section className="game-shell" aria-label="Online Connect Four">
+      <section className="game-shell" aria-label={`Online ${title}`}>
         {status === 'failed' || status === 'expired' ? (
           <div className="game-over">
             <h3>{headline}</h3>
-            <p>{status === 'expired' ? 'Rooms close after two hours without a move. Make a new one to keep playing.' : 'The room may be full, may have expired, or online play may be unavailable.'}</p>
+            <p>{status === 'expired' ? 'Rooms close after two hours without a move. Make a new one to keep playing.' : 'The room may be full, may have expired, may be a different game (check you picked the same one as your friend), or online play may be unavailable.'}</p>
             <Link className="primary-btn" to="/online">
               Back to rooms
             </Link>
           </div>
         ) : (
-          <div className="c4">
+          <div className={game === 'connect-four' ? 'c4' : game === 'tic-tac-toe' ? 'ttt' : 'ck'}>
             <div className="game-toolbar c4-bar">
               <div>
                 <small>Status</small>
@@ -175,20 +202,42 @@ export function RoomPage() {
                 </div>
               ) : null}
             </div>
-            <div className="c4-board" data-over={over} data-thinking={!!state && !over && !myTurn}>
-              <div className="c4-grid" aria-hidden="true">
-                {(state?.cells ?? Array(42).fill(0)).map((p, i) => (
-                  <div key={i} className="c4-cell" data-r={Math.floor(i / COLS)} data-c={i % COLS} data-p={state ? (p === 0 ? 0 : p) : 0} data-win={state?.line?.includes(i) ? 'true' : undefined} />
-                ))}
+            {game === 'connect-four' ? (
+              <div className="c4-board" data-over={over} data-thinking={!!state && !over && !myTurn}>
+                <div className="c4-grid" aria-hidden="true">
+                  {(state?.cells ?? Array(42).fill(0)).map((p, i) => (
+                    <div key={i} className="c4-cell" data-r={Math.floor(i / COLS)} data-c={i % COLS} data-p={state ? (p === 0 ? 0 : p) : 0} data-win={state?.line?.includes(i) ? 'true' : undefined} />
+                  ))}
+                </div>
+                <div className="c4-cols">
+                  {Array.from({ length: COLS }, (_, c) => (
+                    <button key={c} data-col={c} aria-label={`Drop in column ${c + 1}`} disabled={!myTurn || over || !oppHere} onClick={() => send({ type: 'move', col: c })} />
+                  ))}
+                </div>
               </div>
-              <div className="c4-cols">
-                {Array.from({ length: COLS }, (_, c) => (
-                  <button key={c} data-col={c} aria-label={`Drop in column ${c + 1}`} disabled={!myTurn || over || !oppHere} onClick={() => send({ type: 'move', col: c })} />
-                ))}
-              </div>
-            </div>
+            ) : game === 'tic-tac-toe' ? (
+              <TicTacToeBoard
+                cells={(state?.board as TState | undefined)?.cells ?? Array(9).fill(0)}
+                line={(state?.board as TState | undefined)?.line ?? null}
+                disabled={!myTurn || over || !oppHere}
+                onCell={(cell) => send({ type: 'move', cell })}
+              />
+            ) : (
+              <CheckersBoard
+                cells={checkers.cells}
+                selected={myTurn ? (checkers.chain ?? picked) : null}
+                targets={targets}
+                flip={state?.yourColour === 2}
+                disabled={!myTurn || over || !oppHere}
+                onSquare={(i) => {
+                  const r = interact(checkers, state?.yourColour ?? 1, myTurn ? (checkers.chain ?? picked) : null, i)
+                  setPicked(r.select)
+                  if (r.move) send({ type: 'move', from: r.move.from, to: r.move.to })
+                }}
+              />
+            )}
             <p className="game-help" role="status">
-              {notice || (state ? `You are ${state.yourColour === 1 ? 'red' : 'yellow'}.${oppHere ? '' : away ? ' Your friend has been gone a while. You can keep waiting, share the link again, or leave the room.' : ' Share the code or link so your friend can join.'}` : '')}
+              {notice || (state ? `You are ${COLOURS[game][state.yourColour - 1]}.${oppHere ? '' : away ? ' Your friend has been gone a while. You can keep waiting, share the link again, or leave the room.' : ' Share the code or link so your friend can join.'}` : '')}
             </p>
             {over ? (
               <div className="game-over">

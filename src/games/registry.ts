@@ -97,6 +97,30 @@ export const registry: GameEntry[] = [
   },
   {
     meta: {
+      id: 'tic-tac-toe',
+      title: 'Tic-Tac-Toe',
+      description: 'Three in a row. Outsmart the computer, or play a friend online.',
+      category: 'Strategy',
+      accent: 'from-cyan-400 to-violet-500',
+      glyph: '✕',
+      estimated: '1–2 min',
+    },
+    Component: lazy(() => import('./TicTacToe').then((m) => ({ default: m.TicTacToe }))),
+  },
+  {
+    meta: {
+      id: 'checkers',
+      title: 'Checkers',
+      description: 'Jump, capture and crown kings against the computer, or a friend online.',
+      category: 'Strategy',
+      accent: 'from-red-500 to-violet-600',
+      glyph: '⛀',
+      estimated: '8–20 min',
+    },
+    Component: lazy(() => import('./Checkers').then((m) => ({ default: m.Checkers }))),
+  },
+  {
+    meta: {
       id: 'daily-word',
       title: 'Daily Word',
       description: 'Six guesses to find the word of the day. Same word for everyone.',

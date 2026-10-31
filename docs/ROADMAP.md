@@ -54,7 +54,7 @@ Navigation: Home | Discover | Daily Arcade | Multiplayer | Achievements | Leader
 
 ### Phase 1: Foundation (in progress)
 
-Playable arcade, premium responsive homepage, reusable game architecture, local progress, favorites and recently played, search and category filtering, offline PWA, automated tests. Target: 15 polished games, prioritising working and tested games over placeholders.
+Playable arcade, premium responsive homepage, reusable game architecture, local progress, favorites and recently played, search and category filtering, offline PWA, automated tests. Target: 15 polished games (17 now, after Tic-Tac-Toe and Checkers), prioritising working and tested games over placeholders.
 
 ### Phase 2: Player engagement and retention
 
@@ -116,5 +116,6 @@ Completion: reliable cross-device access, sustainable costs, and monetization th
 | Phase 3 slice 3.0: foundations | Worker in front of the static site (only `/api/*` runs the Worker), room codes, `Room` Durable Object with hibernating WebSockets (2 seats, 2 KB message cap), e2e now runs on `wrangler dev`. No game logic online yet. |
 | Phase 3 slice 3.1: online Connect Four | Private rooms with shareable 6-character codes, guest play, server-validated moves, rematch, seat reclaim on reconnect, auto-reconnect with backoff. Verified with unit, API and two-browser e2e tests on desktop and phone. Not yet tried on two real devices over the internet. |
 | Phase 3 slice 3.2: hardening | Best-effort rate limits (10 new rooms and 40 connections per visitor per minute, 20 messages per socket per 5 seconds), a clear screen when a room expires, and a hint when the friend has been gone 30 seconds. Verified by unit and API tests and the full e2e suite. Room expiry itself (2 hours idle) is not covered by an automated test. |
+| Phase 3 slice 3.3: Tic-Tac-Toe and Checkers | Two new games (17 in the arcade), each with pure rules, a computer opponent (Tic-Tac-Toe is perfect play with a 20% chance of a slip so it can be beaten; Checkers is 4-move lookahead with mandatory, chained captures and kings), keyboard and touch play, and online rooms. The online lobby has a game picker, invite links carry the game, and the Worker runs any game behind one interface. Verified by unit, component (StrictMode), API and two-browser e2e tests. Not yet tried on two real devices. |
 | Domain purchase and configuration | Not confirmed |
 | Production deployment | Authorized by the owner on 2026-10-28; Cloudflare Workers builds from `feature/phase-1-arcade-foundation` |

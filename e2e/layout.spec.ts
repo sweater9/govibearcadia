@@ -10,6 +10,8 @@ const PLAY_AREA = {
   'neon-snake': '.snake-board',
   'color-sort': '.csort-tubes',
   'connect-four': '.c4-board',
+  'tic-tac-toe': '.ttt-board',
+  checkers: '.ck-board',
   'daily-word': '.wordle',
   'brick-breaker': '.brk-field',
   'neon-pong': '.pong-field',

@@ -8,6 +8,8 @@ export const GAMES = [
   { id: 'neon-snake', title: 'Neon Snake', category: 'Retro', chunk: 'NeonSnake' },
   { id: 'color-sort', title: 'Color Sort', category: 'Puzzle', chunk: 'ColorSort' },
   { id: 'connect-four', title: 'Connect Four', category: 'Strategy', chunk: 'ConnectFour' },
+  { id: 'tic-tac-toe', title: 'Tic-Tac-Toe', category: 'Strategy', chunk: 'TicTacToe' },
+  { id: 'checkers', title: 'Checkers', category: 'Strategy', chunk: 'Checkers' },
   { id: 'daily-word', title: 'Daily Word', category: 'Word', chunk: 'DailyWord' },
   { id: 'brick-breaker', title: 'Brick Breaker', category: 'Arcade', chunk: 'BrickBreaker' },
   { id: 'neon-pong', title: 'Neon Pong', category: 'Arcade', chunk: 'NeonPong' },

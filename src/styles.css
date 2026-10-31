@@ -27,3 +27,25 @@ html[data-theme=ocean]{filter:hue-rotate(-50deg)}html[data-theme=forest]{filter:
 @media(max-height:800px){.gf-hint{display:none}.gf-board{width:min(100%,calc((100dvh - 380px)*var(--gw)/var(--gh)),560px)}}
 @media(max-height:700px){.gf-name{display:none}.gf-board{width:min(100%,calc((100dvh - 395px)*var(--gw)/var(--gh)),560px)}}
 @media(max-height:900px){.room-title{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap}.room-title .eyebrow{display:none}.room-title .share{margin:0}.room-title h1{margin:0;font-size:28px}.room-title .secondary-btn{padding:8px 12px}}
+
+.ttt{max-width:clamp(240px,calc(100svh - 360px),420px);margin:auto}
+.ttt-board{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;aspect-ratio:1;margin-top:8px}
+.ttt-cell{border:0;border-radius:14px;background:#1b0f3a;box-shadow:inset 0 0 0 2px #7c3aed55;font-size:clamp(28px,9vw,64px);font-weight:900;cursor:pointer;color:#67e8f9;line-height:1}
+.ttt-cell[data-p="2"]{color:#f472b6}
+.ttt-cell:hover:not(:disabled),.ttt-cell:focus-visible{background:#2a1659;outline:none}
+.ttt-cell:disabled{cursor:default}
+.ttt-cell[data-win=true]{box-shadow:inset 0 0 0 3px #fff}
+.ck{max-width:clamp(260px,calc(100svh - 350px),560px);margin:auto}
+.ck-board{display:grid;grid-template-columns:repeat(8,1fr);aspect-ratio:1;border-radius:12px;overflow:hidden;box-shadow:0 0 0 3px #3b2a6b;margin-top:8px}
+.ck-sq{position:relative;background:#e9e1ff30;border:0;padding:0}
+.ck-sq[data-dark]{background:#2a1659;cursor:pointer}
+.ck-sq[data-dark]:hover:not(:disabled),.ck-sq[data-dark]:focus-visible{background:#3a2080;outline:none}
+.ck-sq:disabled{cursor:default}
+.ck-piece{position:absolute;inset:11%;border-radius:50%;background:#ef4444;box-shadow:inset 0 -4px 6px #0006,0 2px 4px #000a}
+.ck-piece[data-p="2"]{background:#f1ecff}
+.ck-piece[data-king]::after{content:"♛";position:absolute;inset:0;display:grid;place-items:center;font-size:clamp(10px,3.6vw,26px);color:#facc15;text-shadow:0 1px 2px #000}
+.ck-piece[data-p="2"][data-king]::after{color:#7c3aed}
+.ck-sq[data-sel]{outline:3px solid #22d3ee;outline-offset:-3px}
+.ck-sq[data-target]::after{content:"";position:absolute;inset:36%;border-radius:50%;background:#22d3eeaa}
+.online-game{display:flex;align-items:center;gap:10px;margin:14px 0 4px;font-size:14px;color:#ffffffb0}
+.online-game select{background:#1b0f3a;color:#fff;border:1px solid #7c3aed66;border-radius:10px;padding:9px 12px;font:inherit}
