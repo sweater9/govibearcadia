@@ -117,7 +117,7 @@ test('a player who loses their connection is shown as gone, and the game resumes
   await expect(a.locator('.c4-cell[data-p="2"]')).toHaveCount(1)
 })
 
-for (const [game, board] of [['connect-four', '.c4-board'], ['tic-tac-toe', '.ttt-board'], ['checkers', '.ck-board']] as const) {
+for (const [game, board] of [['connect-four', '.c4-board'], ['tic-tac-toe', '.ttt-board'], ['checkers', '.ck-board'], ['battleship', '.bs-board']] as const) {
   test(`the ${game} room page fits the screen`, async ({ page, isMobile }) => {
     await page.goto('/online')
     await page.getByLabel('Game').selectOption(game)

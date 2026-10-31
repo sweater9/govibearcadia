@@ -121,6 +121,18 @@ export const registry: GameEntry[] = [
   },
   {
     meta: {
+      id: 'battleship',
+      title: 'Battleship',
+      description: 'Hunt the hidden fleet. Beat the computer, or a friend online.',
+      category: 'Strategy',
+      accent: 'from-sky-500 to-indigo-600',
+      glyph: '⚓',
+      estimated: '5–12 min',
+    },
+    Component: lazy(() => import('./Battleship').then((m) => ({ default: m.Battleship }))),
+  },
+  {
+    meta: {
       id: 'daily-word',
       title: 'Daily Word',
       description: 'Six guesses to find the word of the day. Same word for everyone.',

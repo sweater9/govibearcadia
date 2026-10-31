@@ -10,6 +10,7 @@ export const GAMES = [
   { id: 'connect-four', title: 'Connect Four', category: 'Strategy', chunk: 'ConnectFour' },
   { id: 'tic-tac-toe', title: 'Tic-Tac-Toe', category: 'Strategy', chunk: 'TicTacToe' },
   { id: 'checkers', title: 'Checkers', category: 'Strategy', chunk: 'Checkers' },
+  { id: 'battleship', title: 'Battleship', category: 'Strategy', chunk: 'Battleship' },
   { id: 'daily-word', title: 'Daily Word', category: 'Word', chunk: 'DailyWord' },
   { id: 'brick-breaker', title: 'Brick Breaker', category: 'Arcade', chunk: 'BrickBreaker' },
   { id: 'neon-pong', title: 'Neon Pong', category: 'Arcade', chunk: 'NeonPong' },

@@ -78,6 +78,7 @@ export class Room extends DurableObject {
     let outcome
     if (data.type === 'move') outcome = game.impl.move(room, seat, data)
     else if (data.type === 'rematch') outcome = game.impl.rematch(room, seat)
+    else if (typeof data.type === 'string' && game.impl.extra?.includes(data.type) && game.impl.act) outcome = game.impl.act(room, seat, data)
     else return void ws.send(JSON.stringify({ type: 'error', code: 'unknown-message' }))
 
     if (!outcome.ok) return void ws.send(JSON.stringify({ type: 'error', code: outcome.error }))

@@ -46,3 +46,21 @@ describe('online checkers play', () => {
     if (r.ok) expect(g.view(r.room, 1)).toMatchObject({ turn: 1, board: { turn: 2 } })
   })
 })
+
+describe('online battleship through the Worker interface', () => {
+  const g = ONLINE_GAMES.battleship
+  it('takes shuffle and ready as extra messages, then plays and never leaks the other fleet', () => {
+    expect(g.extra).toEqual(['shuffle', 'ready'])
+    let room = g.newRoom()
+    for (const seat of [0, 1] as const) {
+      const r = g.act!(room, seat, { type: 'ready' })
+      if (!r.ok) throw new Error(r.error)
+      room = r.room
+    }
+    const mine = (g.view(room, 0) as { board: { fleet: number[][]; reveal: unknown } }).board
+    const theirs = (g.view(room, 1) as { board: { fleet: number[][] } }).board
+    expect(JSON.stringify(g.view(room, 0))).not.toContain(JSON.stringify(theirs.fleet))
+    expect(JSON.stringify(g.view(room, 1))).not.toContain(JSON.stringify(mine.fleet))
+    expect(mine.reveal).toBeNull()
+  })
+})

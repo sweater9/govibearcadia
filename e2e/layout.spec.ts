@@ -12,6 +12,7 @@ const PLAY_AREA = {
   'connect-four': '.c4-board',
   'tic-tac-toe': '.ttt-board',
   checkers: '.ck-board',
+  battleship: '.bs-board',
   'daily-word': '.wordle',
   'brick-breaker': '.brk-field',
   'neon-pong': '.pong-field',

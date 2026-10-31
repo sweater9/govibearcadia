@@ -6,6 +6,8 @@ import { COLS } from '../games/connect4/rules'
 import type { View } from '../games/connect4/online'
 import { CheckersBoard } from '../games/checkers/Board'
 import { interact, legalSteps as legalStepsFor, newGame as newCheckers, type CState } from '../games/checkers/rules'
+import { BattleshipBoard } from '../games/battleship/Board'
+import type { View as BattleshipView } from '../games/battleship/rules'
 import { TicTacToeBoard } from '../games/tictactoe/Board'
 import type { TState } from '../games/tictactoe/rules'
 import { recordPlay } from '../lib/db'
@@ -27,11 +29,17 @@ function scoreOf(game: OnlineGameId, v: StateMessage): number {
   const moves = movesOf(v)
   const won = v.winner === v.you
   if (game === 'tic-tac-toe') return won ? 500 + 100 * (5 - Math.ceil(moves / 2)) : v.draw ? 200 : 0
+  if (game === 'battleship') return won ? Math.max(300, 1000 - 6 * moves) : 0
   if (game === 'checkers') return won ? Math.max(400, 1000 - 4 * moves) : v.draw ? 300 : 0
   return won ? Math.max(100, 1000 - 30 * Math.ceil(moves / 2)) : v.draw ? 300 : 0
 }
 
-const COLOURS: Record<OnlineGameId, [string, string]> = { 'connect-four': ['red', 'yellow'], 'tic-tac-toe': ['X', 'O'], checkers: ['red', 'white'] }
+const emptyBattleship = {
+  you: 0, yourColour: 1, turn: 0, winner: null, draw: false, round: 1, wins: [0, 0], rematch: [false, false],
+  board: { phase: 'placing', fleet: [], incoming: [], shots: [], sunk: [], ready: { you: false, opp: false }, left: { you: 5, opp: 5 }, moves: 0, reveal: null },
+}
+
+const COLOURS: Record<OnlineGameId, [string, string]> = { 'connect-four': ['red', 'yellow'], 'tic-tac-toe': ['X', 'O'], checkers: ['red', 'white'], battleship: ['first to shoot', 'second to shoot'] }
 
 function alreadyRecorded(key: string): boolean {
   try {
@@ -79,7 +87,7 @@ export function RoomPage() {
           return
         }
         if (msg.type === 'state') setState(msg as unknown as StateMessage)
-        else if (msg.type === 'error') setNotice(msg.code === 'not-your-turn' ? 'Wait for your turn.' : msg.code === 'illegal-move' ? 'That column is full.' : msg.code === 'slow-down' ? 'Slow down a little.' : '')
+        else if (msg.type === 'error') setNotice(msg.code === 'not-your-turn' ? 'Wait for your turn.' : msg.code === 'illegal-move' ? 'That column is full.' : msg.code === 'slow-down' ? 'Slow down a little.' : msg.code === 'wrong-phase' ? 'Not yet.' : '')
       }
       ws.onclose = (event) => {
         if (closed) return
@@ -127,6 +135,7 @@ export function RoomPage() {
     return () => clearTimeout(t)
   }, [!!state, oppHere]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const battleship = (game === 'battleship' && state?.board ? state : emptyBattleship) as unknown as BattleshipView
   const checkers = (game === 'checkers' && state?.board ? (state.board as CState) : newCheckers()) as CState
   const targets = new Set<number>()
   if (game === 'checkers' && state && state.turn === state.you) {
@@ -158,7 +167,11 @@ export function RoomPage() {
                 : 'You lose'
             : !oppHere
               ? 'Waiting for your friend…'
-              : myTurn
+              : game === 'battleship' && battleship.board.phase === 'placing'
+                ? battleship.board.ready.you
+                  ? 'Waiting for your friend…'
+                  : 'Place your fleet'
+                : myTurn
                 ? 'Your move'
                 : "Friend's move"
 
@@ -185,7 +198,7 @@ export function RoomPage() {
             </Link>
           </div>
         ) : (
-          <div className={game === 'connect-four' ? 'c4' : game === 'tic-tac-toe' ? 'ttt' : 'ck'}>
+          <div className={game === 'connect-four' ? 'c4' : game === 'tic-tac-toe' ? 'ttt' : game === 'battleship' ? 'bs' : 'ck'}>
             <div className="game-toolbar c4-bar">
               <div>
                 <small>Status</small>
@@ -221,6 +234,15 @@ export function RoomPage() {
                 line={(state?.board as TState | undefined)?.line ?? null}
                 disabled={!myTurn || over || !oppHere}
                 onCell={(cell) => send({ type: 'move', cell })}
+              />
+            ) : game === 'battleship' ? (
+              <BattleshipBoard
+                view={battleship}
+                canFire={myTurn && !over && oppHere && battleship.board.phase === 'battle'}
+                canPlace={battleship.board.phase === 'placing' && !battleship.board.ready.you}
+                onFire={(cell) => send({ type: 'move', cell })}
+                onShuffle={() => send({ type: 'shuffle' })}
+                onReady={() => send({ type: 'ready' })}
               />
             ) : (
               <CheckersBoard

@@ -4,6 +4,7 @@
  */
 import { createOnline, type Kit, type Seat } from '../lib/onlineRoom'
 import * as c4 from './connect4/online'
+import * as bs from './battleship/rules'
 import * as ck from './checkers/rules'
 import * as ttt from './tictactoe/rules'
 
@@ -15,6 +16,9 @@ export type OnlineGame = {
   rematch(room: unknown, seat: Seat): Result
   view(room: unknown, seat: Seat): object
   parse(value: unknown): unknown
+  /** Extra message types this game understands besides move and rematch (e.g. Battleship's shuffle and ready). */
+  extra?: string[]
+  act?(room: unknown, seat: Seat, message: Message): Result
 }
 
 function fromKit<S>(kit: Kit<S>): OnlineGame {
@@ -55,5 +59,15 @@ const connectFour: OnlineGame = {
   parse: c4.parseRoom,
 }
 
-export const ONLINE_GAMES: Record<string, OnlineGame> = { 'connect-four': connectFour, 'tic-tac-toe': tictactoe, checkers }
+const battleship: OnlineGame = {
+  newRoom: () => bs.newRoom(),
+  move: (room, seat, m) => bs.act(room as bs.Room, seat, m),
+  rematch: (room, seat) => bs.act(room as bs.Room, seat, { type: 'rematch' }),
+  view: (room, seat) => bs.viewFor(room as bs.Room, seat),
+  parse: bs.parseRoom,
+  extra: ['shuffle', 'ready'],
+  act: (room, seat, m) => bs.act(room as bs.Room, seat, m),
+}
+
+export const ONLINE_GAMES: Record<string, OnlineGame> = { 'connect-four': connectFour, 'tic-tac-toe': tictactoe, checkers, battleship }
 export const ONLINE_GAME_IDS = Object.keys(ONLINE_GAMES)
