@@ -163,7 +163,11 @@ test('a socket that floods messages gets told to slow down, and the game is unha
   const code = await newRoom(page)
   await connect(page, 'a', code)
   await connect(page, 'b', code)
-  for (let i = 0; i < 30; i++) await send(page, 'a', { type: 'move', col: 99 })
+  // All in one go, so a slow machine cannot spread them across the limiter's window.
+  await page.evaluate(() => {
+    const ws = (window as unknown as Record<string, { ws: WebSocket }>).a.ws
+    for (let i = 0; i < 30; i++) ws.send(JSON.stringify({ type: 'move', col: 99 }))
+  })
   await expect.poll(async () => (await log(page, 'a')).filter((m) => m.code === 'slow-down').length).toBeGreaterThan(0)
   expect((await log(page, 'a')).some((m) => m.closed)).toBe(false)
 })

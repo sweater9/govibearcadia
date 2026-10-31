@@ -9,8 +9,8 @@ async function twoPlayers(browser: Browser, baseURL: string, mobile: boolean, ca
   const b = await (await browser.newContext(opts)).newPage()
   await a.goto('/online')
   await a.getByRole('button', { name: 'Create a room' }).click()
-  await expect(a).toHaveURL(/\/room\/[A-Z2-9]{6}$/)
-  const code = a.url().split('/').pop()!
+  await expect(a).toHaveURL(/\/room\/[A-Z2-9]{6}\?g=connect-four$/)
+  const code = a.url().split('/').pop()!.split('?')[0]
   if (captureSockets) {
     // Remember every WebSocket the page opens, so a test can drop the connection the way a flaky network would.
     await b.addInitScript(() => {
@@ -41,7 +41,7 @@ test('the lobby validates codes and explains when online play is unavailable', a
   await expect(page.getByRole('alert')).toContainText('6 letters and numbers')
   await page.getByLabel('Room code').fill('k7m-2pq')
   await page.getByRole('button', { name: 'Join' }).click()
-  await expect(page).toHaveURL(/\/room\/K7M2PQ$/)
+  await expect(page).toHaveURL(/\/room\/K7M2PQ\?g=connect-four$/)
 
   await page.route('**/api/rooms', (route) => route.abort())
   await page.goto('/online')
