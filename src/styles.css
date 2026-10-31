@@ -50,7 +50,7 @@ html[data-theme=ocean]{filter:hue-rotate(-50deg)}html[data-theme=forest]{filter:
 .online-game{display:flex;align-items:center;gap:10px;margin:14px 0 4px;font-size:14px;color:#ffffffb0}
 .online-game select{background:#1b0f3a;color:#fff;border:1px solid #7c3aed66;border-radius:10px;padding:9px 12px;font:inherit}
 
-.bs{max-width:clamp(260px,calc(100svh - 400px),460px);margin:auto}
+.bs{max-width:clamp(230px,calc(100svh - 430px),460px);margin:auto}
 .bs-tabs{display:flex;gap:6px;margin:6px 0}
 .bs-tabs button{flex:1;padding:6px 8px;border-radius:10px;border:1px solid #7c3aed55;background:#1b0f3a;font-size:13px;cursor:pointer}
 .bs-tabs button[aria-pressed=true]{background:#7c3aed;border-color:#a78bfa}
