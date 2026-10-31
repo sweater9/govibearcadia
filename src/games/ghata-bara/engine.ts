@@ -56,9 +56,9 @@ function evaluate(s:State,ids:number[],indices:number[]):Move|null{
  const distance=first.step<0?0:paired?points/2:points;
  const destinationStep=first.step<0?0:first.step+distance;
  if(destinationStep>24)return null;
- if(first.step>=0&&first.step<16&&destinationStep>=16&&!first.credit)return null;
+ 
  const destination=route(s.player)[destinationStep];
- const path=first.step<0?[]:Array.from({length:distance},(_,i)=>route(s.player)[first.step+i+1]);
+ const path=first.step<0?[]:Array.from({length:distance},(_,i)=>route(s.player)[first.step+i+1>=16&&!first.credit?(first.step+i+1)%16:first.step+i+1]);
  if(path.some(c=>!c))return null;
  // A pawn with no capture credit may circulate the outer ring.
  let finalStep=destinationStep;let dest=destination;
@@ -97,7 +97,7 @@ export function move(s:State,ids:number[],chunkIndices:number[]):State{
  const m=legalMoves(s).find(x=>x.ids.join(',')===selected.join(',')&&x.chunkIndices.join(',')===indices.join(','));
  if(!m)throw Error('Illegal allocation');
  const next=clone(s),moving=selected.map(id=>next.pawns[id]),from=moving[0].step;
- const paired=moving.length===2,step=from<0?0:from+m.points/(paired?2:1);
+ const paired=moving.length===2,rawStep=from<0?0:from+m.points/(paired?2:1),step=from>=0&&from<16&&rawStep>=16&&!moving[0].credit?rawStep%16:rawStep;
  for(const p of moving){p.step=step;p.pinnedBy=null;}
  for(const id of m.captures){const p=next.pawns[id];p.step=-1;p.credit=false;p.juga=null;p.pinnedBy=null;}
  // Rescue releases the pinned pawn, without repinning it.
