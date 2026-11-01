@@ -186,3 +186,14 @@ test('a player chooses a piece, it appears on the board and the player card, and
   await page.reload()
   await expect(page.getByRole('button', { name: /^Piece:/ }).first()).toHaveText(`Piece: ${chosen}`)
 })
+
+test('Roll is a big button at the lower right, within thumb reach and fully on screen', async ({ page }) => {
+  await page.goto('/play/ghata-bara?seed=e2e-gb')
+  const roll = (await page.getByRole('button', { name: 'Roll' }).boundingBox())!
+  const board = (await page.locator('.gb-board').boundingBox())!
+  const view = page.viewportSize()!
+  expect(roll.y).toBeGreaterThan(board.y + board.height - 1) // below the board
+  expect(roll.y + roll.height).toBeLessThanOrEqual(view.height)
+  expect(roll.x + roll.width / 2).toBeGreaterThan(view.width / 2) // right half
+  expect(roll.height).toBeGreaterThanOrEqual(48)
+})

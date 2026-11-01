@@ -265,29 +265,6 @@ export function GhataBara({ onFinish, seed }: GameProps) {
   return (
     <div className="gb">
       <div className="game-toolbar gb-bar">
-        <div className="gb-roller">
-          <div className="gb-dice" aria-hidden={!faces}>
-            {[0, 1].map((i) => (
-              <span key={i} className="gb-die" data-rolling={rolling || undefined} data-blank={faces?.[i] === 6 || undefined} data-face={faces?.[i]}>
-                {faces ? (faces[i] === 6 ? '' : faces[i]) : ''}
-                {faces && faces[i] !== 6 ? Array.from({ length: faces[i] }, (_, k) => <i key={k} />) : null}
-              </span>
-            ))}
-          </div>
-          <button ref={rollButton} className="primary-btn gb-roll" disabled={!canRoll} onClick={roll}>
-            {rolling ? 'Rolling…' : 'Roll'}
-          </button>
-          <div className="gb-queue" aria-label="Moves to place">
-            {(game.phase === 'move' ? game.queue : game.rolls).map((v, i) => (
-              <span key={i} className="gb-chunk">{v}</span>
-            ))}
-          </div>
-          {releases.map((r) => (
-            <button key={r.chunk} className="secondary-btn" onClick={() => play(r)}>
-              Release a pawn ({game.queue[r.chunk]})
-            </button>
-          ))}
-        </div>
         <div className="gb-settings">
         <select aria-label="Board size" value={game.size} onChange={(e) => newMatch(humans, Number(e.target.value) as Size)}>
           <option value={7}>7×7 board</option>
@@ -350,6 +327,30 @@ export function GhataBara({ onFinish, seed }: GameProps) {
             )
           }),
         )}
+      </div>
+
+      <div className="gb-controls">
+          <div className="gb-queue" aria-label="Moves to place">
+            {(game.phase === 'move' ? game.queue : game.rolls).map((v, i) => (
+              <span key={i} className="gb-chunk">{v}</span>
+            ))}
+          </div>
+          {releases.map((r) => (
+            <button key={r.chunk} className="secondary-btn" onClick={() => play(r)}>
+              Release a pawn ({game.queue[r.chunk]})
+            </button>
+          ))}
+          <div className="gb-dice" aria-hidden={!faces}>
+            {[0, 1].map((i) => (
+              <span key={i} className="gb-die" data-rolling={rolling || undefined} data-blank={faces?.[i] === 6 || undefined} data-face={faces?.[i]}>
+                {faces ? (faces[i] === 6 ? '' : faces[i]) : ''}
+                {faces && faces[i] !== 6 ? Array.from({ length: faces[i] }, (_, k) => <i key={k} />) : null}
+              </span>
+            ))}
+          </div>
+          <button ref={rollButton} className="primary-btn gb-roll" disabled={!canRoll} onClick={roll}>
+            {rolling ? 'Rolling…' : 'Roll'}
+          </button>
       </div>
 
       {handoff !== null ? (
