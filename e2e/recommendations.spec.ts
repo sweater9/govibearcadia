@@ -1,14 +1,10 @@
 import { expect, test } from '@playwright/test'
 import { overflowsHorizontally } from './helpers'
 
-test('a new player sees friendly starters', async ({ page }) => {
+test('a new player sees no recommendations yet, just the games', async ({ page }) => {
   await page.goto('/')
-  const recs = page.getByLabel('Recommended for you')
-  await expect(recs).toContainText('Start here')
-  await expect(recs.locator('li')).toHaveCount(3)
-  await expect(recs.locator('li').first()).toContainText('Easy to pick up')
-  await recs.getByRole('link').first().click()
-  await expect(page).toHaveURL(/\/play\//)
+  await expect(page.locator('.game-card').first()).toBeVisible()
+  await expect(page.getByLabel('Recommended for you')).toHaveCount(0)
 })
 
 test('recommendations follow what you play: lots of Logic suggests another Logic game, never the one you just played', async ({ page }) => {

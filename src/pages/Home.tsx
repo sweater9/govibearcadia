@@ -1,4 +1,4 @@
-import { ArrowRight, CloudOff, ShieldCheck, Sparkles, Users } from 'lucide-react'
+import { ArrowRight, Sparkles } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { GameCard } from '../components/GameCard'
@@ -60,20 +60,6 @@ export function Home() {
               Explore the arcade
             </a>
           </div>
-          <div className="trust">
-            <span>
-              <CloudOff />
-              Offline friendly
-            </span>
-            <span>
-              <ShieldCheck />
-              Progress stays local
-            </span>
-            <span>
-              <Users />
-              Play a friend online
-            </span>
-          </div>
         </div>
         <div className="portal" aria-hidden="true">
           <div className="orbit orbit-a" />
@@ -125,9 +111,9 @@ export function Home() {
           </Link>
         </section>
       ) : null}
-      {picks.length ? (
+      {history?.length && picks.length ? (
         <section className="recs" aria-label="Recommended for you">
-          <p className="eyebrow">{history?.length ? 'Recommended for you' : 'Start here'}</p>
+          <p className="eyebrow">Recommended for you</p>
           <ul>
             {picks.map((p) => (
               <li key={p.gameId}>

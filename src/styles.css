@@ -127,3 +127,11 @@ button.bs-cell:disabled{cursor:default}
 .challenge-panel p{margin:0;color:#67e8f9;text-align:center}
 /* A challenge line replaces the eyebrow on short screens, so the play area keeps its height. */
 @media(max-height:900px){.play-title>p.challenge-banner:last-child{display:block;margin:0;font-size:14px}.play-title:has(.challenge-banner) .eyebrow{display:none}}
+/* Home declutter: a shorter hero, cards that are one click target, and one scrolling row of category filters. */
+.hero{min-height:0;padding-top:64px;padding-bottom:40px}.portal{height:380px}
+.game-card{position:relative}.game-card:hover,.game-card:focus-within{border-color:#a78bfa88}
+.card-link::after{content:"";position:absolute;inset:0;z-index:1}.game-card .icon-btn{position:relative;z-index:2}
+.game-card .game-body{padding-bottom:16px}
+.filters{display:flex;flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:none}.filters button{flex:none}
+@media(max-width:700px){.portal{display:none}.hero{padding-top:28px;padding-bottom:12px}.section-head{gap:12px}}
+@media(max-width:700px){.game-card .game-body p.text-sm{display:none}.game-art{height:76px}.game-card h3{font-size:16px}.today-links{display:flex;gap:8px}.today-links .secondary-btn{flex:1;justify-content:center;padding-inline:10px}.home-daily{padding:18px}}
