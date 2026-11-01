@@ -80,4 +80,18 @@ describe('GhataBara', () => {
     render(<GhataBara onFinish={vi.fn()} />)
     expect(screen.getByRole('status')).not.toHaveTextContent('restored')
   })
+
+  it('with two people on one screen it asks to pass the device before the next person rolls', () => {
+    vi.useFakeTimers()
+    const s = newGame()
+    s.turn = 1 // the computer's seat, between the two people (Violet and Amber)
+    store(s, 2)
+    render(<GhataBara onFinish={vi.fn()} />)
+    for (let i = 0; i < 200 && !screen.queryByRole('dialog'); i++) act(() => void vi.advanceTimersByTime(400))
+    expect(screen.getByRole('dialog', { name: 'Pass the device' })).toHaveTextContent('Amber')
+    expect(screen.getByRole('button', { name: 'Roll' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Amber is ready' }))
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(screen.getByRole('button', { name: 'Roll' })).toBeEnabled()
+  })
 })

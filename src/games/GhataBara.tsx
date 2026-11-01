@@ -57,6 +57,7 @@ export function GhataBara({ onFinish, seed }: GameProps) {
   const [selected, setSelected] = useState<string | null>(null)
   const [rolling, setRolling] = useState(false)
   const [faces, setFaces] = useState<[number, number] | null>(null)
+  const [handoff, setHandoff] = useState<Seat | null>(null)
   const [note, setNote] = useState(saved ? 'Welcome back: your saved game was restored.' : '')
   const draws = useRef(saved?.draws ?? 0)
   const reported = useRef(false)
@@ -83,6 +84,7 @@ export function GhataBara({ onFinish, seed }: GameProps) {
       setSelected(null)
       if (action?.type === 'roll') setFaces([action.dice[0], action.dice[1]])
       setNote(describe(next.events))
+      if (humans > 1 && next.phase === 'roll' && next.rolls.length === 0 && next.turn !== game.turn && seats.includes(next.turn)) setHandoff(next.turn)
       if (next.phase === 'over') {
         clearSaved()
         if (!reported.current) {
@@ -98,7 +100,7 @@ export function GhataBara({ onFinish, seed }: GameProps) {
         }
       } else if (seed === undefined) save({ v: 1, seed: matchSeed, draws: draws.current, humans, state: next })
     },
-    [onFinish, seats, humans, seed, matchSeed],
+    [onFinish, seats, humans, seed, matchSeed, game.turn],
   )
 
   const play = useCallback(
@@ -131,7 +133,7 @@ export function GhataBara({ onFinish, seed }: GameProps) {
     }
   }, [rolling, random, play])
 
-  const canRoll = myTurn && game.phase === 'roll' && !rolling
+  const canRoll = myTurn && game.phase === 'roll' && !rolling && handoff === null
   const roll = useCallback(() => {
     if (canRoll) setRolling(true)
   }, [canRoll])
@@ -209,6 +211,7 @@ export function GhataBara({ onFinish, seed }: GameProps) {
     setRolling(false)
     setFaces(null)
     setNote('')
+    setHandoff(null)
   }
 
   const occupancy = board(game)
@@ -239,8 +242,9 @@ export function GhataBara({ onFinish, seed }: GameProps) {
       <div className="game-toolbar gb-bar">
         <div className="gb-dice" aria-hidden={!faces}>
           {[0, 1].map((i) => (
-            <span key={i} className="gb-die" data-rolling={rolling || undefined} data-blank={faces?.[i] === 6 || undefined}>
-              {faces ? (faces[i] === 6 ? '' : faces[i]) : '?'}
+            <span key={i} className="gb-die" data-rolling={rolling || undefined} data-blank={faces?.[i] === 6 || undefined} data-face={faces?.[i]}>
+              {faces ? (faces[i] === 6 ? '' : faces[i]) : ''}
+              {faces && faces[i] !== 6 ? Array.from({ length: faces[i] }, (_, k) => <i key={k} />) : null}
             </span>
           ))}
         </div>
@@ -314,6 +318,16 @@ export function GhataBara({ onFinish, seed }: GameProps) {
         )}
       </div>
 
+      {handoff !== null ? (
+        <div className="gb-handoff" role="dialog" aria-label="Pass the device">
+          <p>
+            Pass the device to <strong style={{ color: SEAT_INFO[handoff].color }}>{SEAT_INFO[handoff].name}</strong>
+          </p>
+          <button className="primary-btn" autoFocus onClick={() => setHandoff(null)}>
+            {SEAT_INFO[handoff].name} is ready
+          </button>
+        </div>
+      ) : null}
       <p className="gb-status" role="status">
         <strong>{status}</strong> {note}
       </p>

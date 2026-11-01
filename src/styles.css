@@ -152,3 +152,21 @@ button.bs-cell:disabled{cursor:default}
 .gb .gb-bar{display:flex}.gb-sq[data-seat]::before{color:var(--c);opacity:.55}.gb-sq[data-seat]{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 45%,transparent)}.gb-sq[data-seat][data-movable]{box-shadow:inset 0 0 0 2px #facc1599}.gb-sq[data-seat][data-target]{box-shadow:inset 0 0 0 2px #22d3ee}
 .gb-yard{display:flex;gap:3px;margin:2px 0}.gb-yard i{width:9px;height:9px;border-radius:50%;border:1px solid var(--c);opacity:.5}.gb-yard i[data-filled]{background:var(--c);opacity:1}
 .game-toolbar>.gb-dice,.game-toolbar>.gb-queue{flex-direction:row}.gb-bar{margin-bottom:6px}
+/* Ghata Bara: the feel of the real thing. Long metal dice, a painted wooden board, chunky pawns. */
+.gb-dice{gap:8px}
+.gb-die{width:22px;height:58px;border-radius:5px;flex-direction:column;gap:5px;font-size:0;background:linear-gradient(90deg,#8d96a3,#e8ecf2 35%,#bfc6d1 60%,#7b8491);box-shadow:inset 0 0 0 1px #4a5260,0 3px 4px #0008;position:relative;color:#1e2530}
+.gb-die{display:flex;align-items:center;justify-content:center}
+.gb-die i{width:7px;height:7px;border-radius:50%;background:#1e2530;box-shadow:inset 0 1px 1px #000a}
+.gb-die[data-blank]::after{content:"";width:12px;height:2px;background:#4a5260;border-radius:2px;font-size:0;opacity:1;align-self:center}
+.gb-die[data-rolling]{animation:gb-clatter .16s linear infinite}
+@keyframes gb-clatter{25%{transform:rotate(-20deg) translateY(-3px)}75%{transform:rotate(18deg) translateY(2px)}}
+.gb-board{background:repeating-linear-gradient(90deg,#8a5a2b 0 9px,#9a6732 9px 18px);border-radius:10px;box-shadow:inset 0 0 0 3px #5b3a19,0 8px 24px #000a;padding:7px;gap:3px}
+.gb-sq{background:linear-gradient(145deg,#e7c993,#d4ac6c);box-shadow:inset 0 0 0 1px #8a5a2b88}
+.gb-sq[data-safe]::before{color:#7a1f1f;opacity:.85;font-weight:900}
+.gb-sq[data-home]{background:radial-gradient(circle,#f3d9a3,#c9953f);box-shadow:inset 0 0 0 3px #7a1f1f}.gb-sq[data-home]::before{color:#7a1f1f}
+.gb-sq[data-seat]{box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--c) 70%,#3a2209)}.gb-sq[data-seat]::before{color:var(--c);opacity:1;text-shadow:0 0 1px #000}
+.gb-sq[data-movable]{box-shadow:inset 0 0 0 3px #1d4ed8}.gb-sq[data-target]{background:linear-gradient(145deg,#bbf7d0,#6ee7b7);box-shadow:inset 0 0 0 3px #047857}.gb-sq[data-selected]{box-shadow:inset 0 0 0 3px #7c3aed}
+.gb-badge{color:#064e3b;font-weight:800}
+.gb-pawn{box-shadow:inset 0 -3px 4px #0005,inset 0 2px 2px #fff6,0 2px 3px #000a;border:1px solid #0006}
+.gb-juga{box-shadow:inset 0 -3px 4px #0005,0 2px 3px #000a,0 0 0 2px #fffc}
+.gb-handoff{position:fixed;inset:0;z-index:50;display:grid;place-content:center;justify-items:center;gap:16px;background:#090514ee;text-align:center;font-size:20px}
