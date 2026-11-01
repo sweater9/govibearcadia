@@ -16,30 +16,120 @@ export const INNER = 8
 
 /** Switches for rules the owner has not specified. Defaults are the choices listed in docs/GHATA_BARA.md. */
 export const RULES = {
-  /** A captured pawn loses its capture credit and must capture again before entering the inner ring. */
+  /** A captured pawn loses its capture credit and must capture again before entering the interior. */
   creditSurvivesCapture: false,
 } as const
 
-// ---------------------------------------------------------------------------------------------------------------
-// Geometry (§2). Rows and columns are zero-based; row 0 is the top.
+export type Size = 5 | 7
+type Cell = readonly [number, number]
 
-/** Outer ring, counterclockwise on screen, starting at the top-centre safe square. */
-export const OUTER_CELLS: readonly (readonly [number, number])[] = [
-  [0, 2], [0, 1], [0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [4, 1],
-  [4, 2], [4, 3], [4, 4], [3, 4], [2, 4], [1, 4], [0, 4], [0, 3],
-]
-/** Inner ring, clockwise on screen, starting just inside the top-centre square. */
-export const INNER_CELLS: readonly (readonly [number, number])[] = [
-  [1, 2], [1, 3], [2, 3], [3, 3], [3, 2], [3, 1], [2, 1], [1, 1],
-]
-export const CENTRE: readonly [number, number] = [2, 2]
+/** Everything that differs between boards. Square ids: `o<n>` outer (counterclockwise from the top centre), `i<n>` interior, `c` Home. */
+export type Layout = {
+  size: Size
+  outerLen: number
+  /** Steps along a seat's interior path (the squares it walks after leaving the outer ring), before Home. */
+  interiorLen: number
+  /** A pawn must finish a whole lap and stand on its own start square again before it can turn inward (7x7). */
+  fullLap: boolean
+  outerCells: readonly Cell[]
+  /** Interior squares by id, e.g. `i3`. */
+  interiorCells: readonly Cell[]
+  centre: Cell
+  /** Index in `outerCells` of each seat's start square: top, left, bottom, right. */
+  start: readonly number[]
+  safe: readonly string[]
+  /** The square id a seat stands on after `at` steps along its interior path. */
+  interiorId: (seat: Seat, at: number) => number
+}
 
-/** Each player's start (a safe square), as an index into OUTER_CELLS: top, left, bottom, right. */
-export const START: readonly number[] = [0, 4, 8, 12]
-/** Where a pawn enters the inner ring: the inner square just inside its own start. */
+const rotate = (cell: Cell, size: number, turns: number): Cell => {
+  let [r, c] = cell
+  for (let i = 0; i < turns; i++) [r, c] = [size - 1 - c, r] // a quarter turn that carries the top edge to the left edge
+  return [r, c]
+}
+
+/** Outer ring, counterclockwise on screen, starting at the top-centre square. */
+const ringOuter = (n: number): Cell[] => {
+  const out: Cell[] = []
+  const m = n - 1
+  for (let c = (n - 1) / 2; c >= 0; c--) out.push([0, c])
+  for (let r = 1; r <= m; r++) out.push([r, 0])
+  for (let c = 1; c <= m; c++) out.push([m, c])
+  for (let r = m - 1; r >= 0; r--) out.push([r, m])
+  for (let c = m - 1; c > (n - 1) / 2; c--) out.push([0, c])
+  return out
+}
+
+/** A square ring of the given half-width round the centre, clockwise, starting at its top-centre square. */
+const ringClockwise = (n: number, inset: number, startAt: 'top' | 'corner'): Cell[] => {
+  const lo = inset
+  const hi = n - 1 - inset
+  const mid = (n - 1) / 2
+  const out: Cell[] = []
+  if (startAt === 'top') for (let c = mid; c <= hi; c++) out.push([lo, c])
+  else for (let c = lo; c <= hi; c++) out.push([lo, c])
+  for (let r = lo + 1; r <= hi; r++) out.push([r, hi])
+  for (let c = hi - 1; c >= lo; c--) out.push([hi, c])
+  for (let r = hi - 1; r > lo; r--) out.push([r, lo])
+  if (startAt === 'top') for (let c = lo; c < mid; c++) out.push([lo, c])
+  return out
+}
+
+const LAYOUT5: Layout = {
+  size: 5,
+  outerLen: 16,
+  interiorLen: 8,
+  fullLap: false,
+  outerCells: OUTER_CELLS_5(),
+  interiorCells: INNER_CELLS_5(),
+  centre: [2, 2],
+  start: [0, 4, 8, 12],
+  safe: ['o0', 'o4', 'o8', 'o12', 'c'],
+  interiorId: (seat, at) => ([0, 6, 4, 2][seat] + at) % 8,
+}
+
+function layout7(): Layout {
+  const outerCells = ringOuter(7)
+  const middle = ringClockwise(7, 1, 'top') // i0..i15, from (1,3)
+  const inner = ringClockwise(7, 2, 'corner') // i16..i23, from (2,2)
+  const interiorCells = [...middle, ...inner]
+  const idOf = new Map(interiorCells.map(([r, c], i) => [`${r},${c}`, i]))
+  const cornerAt = (cell: Cell) => outerCells.findIndex(([r, c]) => r === cell[0] && c === cell[1])
+  const safe = ['c', ...([[0, 0], [0, 3], [0, 6], [3, 0], [3, 6], [6, 0], [6, 3], [6, 6]] as Cell[]).map((x) => `o${cornerAt(x)}`), ...([[1, 1], [1, 5], [5, 1], [5, 5]] as Cell[]).map((x) => `i${idOf.get(x.join(','))}`)]
+  return {
+    size: 7,
+    outerLen: 24,
+    interiorLen: 24,
+    fullLap: true,
+    outerCells,
+    interiorCells,
+    centre: [3, 3],
+    start: [0, 6, 12, 18],
+    safe,
+    interiorId: (seat, at) => idOf.get(rotate(interiorCells[at], 7, seat).join(','))!,
+  }
+}
+
+function OUTER_CELLS_5(): Cell[] {
+  return [
+    [0, 2], [0, 1], [0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [4, 1],
+    [4, 2], [4, 3], [4, 4], [3, 4], [2, 4], [1, 4], [0, 4], [0, 3],
+  ]
+}
+function INNER_CELLS_5(): Cell[] {
+  return [[1, 2], [1, 3], [2, 3], [3, 3], [3, 2], [3, 1], [2, 1], [1, 1]]
+}
+
+export const LAYOUTS: Record<Size, Layout> = { 5: LAYOUT5, 7: layout7() }
+export const layoutOf = (size: Size): Layout => LAYOUTS[size]
+
+/** The 5x5 board's squares, kept for the existing tests and tools. */
+export const OUTER_CELLS: readonly Cell[] = LAYOUT5.outerCells
+export const INNER_CELLS: readonly Cell[] = LAYOUT5.interiorCells
+export const CENTRE: Cell = [2, 2]
+export const START: readonly number[] = LAYOUT5.start
 export const ENTRY: readonly number[] = [0, 6, 4, 2]
-
-export const SAFE_KEYS: readonly string[] = ['o0', 'o4', 'o8', 'o12', 'c']
+export const SAFE_KEYS: readonly string[] = LAYOUT5.safe
 
 export type Where = 'yard' | 'outer' | 'inner' | 'home' | 'juga'
 
@@ -62,6 +152,7 @@ export type GameEvent =
   | { type: 'win'; seat: Seat }
 
 export type State = {
+  size: Size
   pawns: Pawn[]
   jugas: Juga[]
   turn: Seat
@@ -87,12 +178,12 @@ export type Action =
 
 export type Result = { ok: true; state: State } | { ok: false; error: string }
 
-export function newGame(): State {
+export function newGame(size: Size = 5): State {
   const pawns: Pawn[] = []
   for (const seat of SEATS) {
     for (let k = 0; k < PAWNS_PER_SEAT; k++) pawns.push({ id: seat * PAWNS_PER_SEAT + k, seat, where: 'yard', at: 0, credit: false, pinnedBy: null })
   }
-  return { pawns, jugas: [], turn: 0, phase: 'roll', rolls: [], queue: [], captured: false, entered: [false, false, false, false], nextJuga: 1, winner: null, events: [] }
+  return { size, pawns, jugas: [], turn: 0, phase: 'roll', rolls: [], queue: [], captured: false, entered: [false, false, false, false], nextJuga: 1, winner: null, events: [] }
 }
 
 const copy = (s: State): State => JSON.parse(JSON.stringify(s)) as State
@@ -100,21 +191,25 @@ const copy = (s: State): State => JSON.parse(JSON.stringify(s)) as State
 // ---------------------------------------------------------------------------------------------------------------
 // Squares
 
-export const outerKey = (seat: Seat, at: number) => `o${(START[seat] + at) % OUTER}`
-export const innerKey = (seat: Seat, at: number) => `i${(ENTRY[seat] + at) % INNER}`
-export const isSafe = (key: string) => SAFE_KEYS.includes(key)
+export const outerKey = (seat: Seat, at: number, size: Size = 5) => {
+  const l = LAYOUTS[size]
+  return `o${(l.start[seat] + at) % l.outerLen}`
+}
+export const innerKey = (seat: Seat, at: number, size: Size = 5) => `i${LAYOUTS[size].interiorId(seat, at)}`
+export const isSafe = (key: string, size: Size = 5) => LAYOUTS[size].safe.includes(key)
 
-export function keyOf(seat: Seat, where: Where, at: number): string | null {
-  if (where === 'outer') return outerKey(seat, at)
-  if (where === 'inner' || where === 'juga') return innerKey(seat, at)
+export function keyOf(seat: Seat, where: Where, at: number, size: Size = 5): string | null {
+  if (where === 'outer') return outerKey(seat, at, size)
+  if (where === 'inner' || where === 'juga') return innerKey(seat, at, size)
   if (where === 'home') return 'c'
   return null
 }
 
-export function cellOf(key: string): readonly [number, number] {
-  if (key === 'c') return CENTRE
+export function cellOf(key: string, size: Size = 5): readonly [number, number] {
+  const l = LAYOUTS[size]
+  if (key === 'c') return l.centre
   const n = Number(key.slice(1))
-  return key[0] === 'o' ? OUTER_CELLS[n] : INNER_CELLS[n]
+  return key[0] === 'o' ? l.outerCells[n] : l.interiorCells[n]
 }
 
 export const dice = (random: () => number): [number, number] => [FACES[Math.floor(random() * 4)], FACES[Math.floor(random() * 4)]]
@@ -123,8 +218,8 @@ type Occupants = { singles: Pawn[]; jugas: Juga[] }
 
 function occupants(s: State, key: string): Occupants {
   return {
-    singles: s.pawns.filter((p) => (p.where === 'outer' || p.where === 'inner') && keyOf(p.seat, p.where, p.at) === key),
-    jugas: s.jugas.filter((j) => innerKey(j.seat, j.at) === key),
+    singles: s.pawns.filter((p) => (p.where === 'outer' || p.where === 'inner') && keyOf(p.seat, p.where, p.at, s.size) === key),
+    jugas: s.jugas.filter((j) => innerKey(j.seat, j.at, s.size) === key),
   }
 }
 
@@ -137,10 +232,10 @@ export function board(s: State): Map<string, Occupants> {
     return o
   }
   for (const p of s.pawns) {
-    if (p.where === 'outer' || p.where === 'inner') slot(keyOf(p.seat, p.where, p.at)!).singles.push(p)
+    if (p.where === 'outer' || p.where === 'inner') slot(keyOf(p.seat, p.where, p.at, s.size)!).singles.push(p)
     else if (p.where === 'home') slot('c').singles.push(p)
   }
-  for (const j of s.jugas) slot(innerKey(j.seat, j.at)).jugas.push(j)
+  for (const j of s.jugas) slot(innerKey(j.seat, j.at, s.size)).jugas.push(j)
   return map
 }
 
@@ -149,12 +244,18 @@ export function board(s: State): Map<string, Occupants> {
 
 type Place = { where: 'outer' | 'inner' | 'home'; at: number }
 
-function nextStep(where: 'outer' | 'inner', at: number, credit: boolean): Place {
+function nextStep(where: 'outer' | 'inner', at: number, credit: boolean, l: Layout): Place {
   if (where === 'outer') {
-    if (at + 1 < OUTER) return { where: 'outer', at: at + 1 }
-    return credit ? { where: 'inner', at: 0 } : { where: 'outer', at: 0 } // §8: no credit, keep circulating
+    if (!l.fullLap) {
+      if (at + 1 < l.outerLen) return { where: 'outer', at: at + 1 }
+      return credit ? { where: 'inner', at: 0 } : { where: 'outer', at: 0 } // §8: no credit, keep circulating
+    }
+    // Whole-lap boards: a pawn with credit comes back round to its own start square (at === outerLen) and only then turns inward.
+    if (at === l.outerLen) return credit ? { where: 'inner', at: 0 } : { where: 'outer', at: 1 }
+    if (at + 1 < l.outerLen) return { where: 'outer', at: at + 1 }
+    return credit ? { where: 'outer', at: l.outerLen } : { where: 'outer', at: 0 }
   }
-  return at + 1 < INNER ? { where: 'inner', at: at + 1 } : { where: 'home', at: 0 }
+  return at + 1 < l.interiorLen ? { where: 'inner', at: at + 1 } : { where: 'home', at: 0 }
 }
 
 type PawnPlan = { end: Place; path: string[]; capture: number[] }
@@ -166,12 +267,12 @@ export function planPawn(s: State, p: Pawn, n: number): PawnPlan | null {
   const path: string[] = []
   for (let i = 0; i < n; i++) {
     if (place.where === 'home') return null // exact count only
-    place = nextStep(place.where, place.at, p.credit)
-    path.push(place.where === 'home' ? 'c' : keyOf(p.seat, place.where, place.at)!)
+    place = nextStep(place.where, place.at, p.credit, LAYOUTS[s.size])
+    path.push(place.where === 'home' ? 'c' : keyOf(p.seat, place.where, place.at, s.size)!)
   }
   const dest = path[path.length - 1]
   for (const key of path) {
-    if (isSafe(key)) continue // safe squares override blockades
+    if (isSafe(key, s.size)) continue // safe squares override blockades
     const here = occupants(s, key).jugas
     if (here.some((j) => j.seat !== p.seat)) return null // an opposing Juga blocks landing and passing
     if (key === dest && here.length) return null // own Juga: may pass over, may not land
@@ -180,7 +281,7 @@ export function planPawn(s: State, p: Pawn, n: number): PawnPlan | null {
   if (dest !== 'c') {
     const here = occupants(s, dest)
     if (here.singles.filter((x) => x.seat === p.seat && x.id !== p.id).length >= 2) return null // at most two friendly pawns
-    if (!isSafe(dest)) capture = here.singles.filter((x) => x.seat !== p.seat).map((x) => x.id)
+    if (!isSafe(dest, s.size)) capture = here.singles.filter((x) => x.seat !== p.seat).map((x) => x.id)
   }
   return { end: place, path, capture }
 }
@@ -191,9 +292,10 @@ type JugaPlan = { home: boolean; to: number; captureJugas: number[]; pin: number
 export function planJuga(s: State, j: Juga, n: number): JugaPlan | null {
   if (n <= 0 || n % 2 !== 0) return null
   const to = j.at + n / 2
-  if (to > INNER) return null
-  if (to === INNER) return { home: true, to, captureJugas: [], pin: null }
-  const here = occupants(s, innerKey(j.seat, to))
+  const len = LAYOUTS[s.size].interiorLen
+  if (to > len) return null
+  if (to === len) return { home: true, to, captureJugas: [], pin: null }
+  const here = occupants(s, innerKey(j.seat, to, s.size))
   if (here.jugas.some((x) => x.seat === j.seat && x.id !== j.id)) return null // friendly Jugas keep to different squares
   const enemy = here.jugas.filter((x) => x.seat !== j.seat)
   if (enemy.length) return { home: false, to, captureJugas: enemy.map((x) => x.id), pin: null }
@@ -217,7 +319,7 @@ function subsets(count: number): number[][] {
 function canRelease(s: State): boolean {
   const seat = s.turn
   if (!s.pawns.some((p) => p.seat === seat && p.where === 'yard')) return false
-  return occupants(s, outerKey(seat, 0)).singles.filter((x) => x.seat === seat).length < 2
+  return occupants(s, outerKey(seat, 0, s.size)).singles.filter((x) => x.seat === seat).length < 2
 }
 
 /** Every legal action in the move phase. Passing is never offered: a chunk with a legal use cannot be discarded (§6). */
@@ -291,8 +393,8 @@ function checkWin(s: State) {
 function formJugas(s: State) {
   for (const seat of SEATS) {
     if (!s.entered.some((e, other) => e && other !== seat)) continue
-    for (let at = 0; at < INNER; at++) {
-      const key = innerKey(seat, at)
+    for (let at = 0; at < LAYOUTS[s.size].interiorLen; at++) {
+      const key = innerKey(seat, at, s.size)
       const here = occupants(s, key)
       const mine = here.singles.filter((x) => x.seat === seat && x.pinnedBy === null)
       if (mine.length !== 2 || here.jugas.length) continue
@@ -459,7 +561,7 @@ export function actionDestination(s: State, a: Action): string | null {
   const j = s.jugas.find((x) => x.id === a.id)
   const plan = j && planJuga(s, j, n)
   if (!plan || !j) return null
-  return plan.home ? 'c' : innerKey(j.seat, plan.to)
+  return plan.home ? 'c' : innerKey(j.seat, plan.to, s.size)
 }
 
 export const homeCount = (s: State, seat: Seat) => s.pawns.filter((p) => p.seat === seat && p.where === 'home').length
@@ -471,8 +573,8 @@ export function progress(s: State, seat: Seat): number {
   for (const p of s.pawns) {
     if (p.seat !== seat) continue
     if (p.where === 'outer') total += 1 + p.at
-    else if (p.where === 'inner' || p.where === 'juga') total += 17 + p.at
-    else if (p.where === 'home') total += 30
+    else if (p.where === 'inner' || p.where === 'juga') total += LAYOUTS[s.size].outerLen + 1 + p.at
+    else if (p.where === 'home') total += LAYOUTS[s.size].outerLen + LAYOUTS[s.size].interiorLen + 2
   }
   return total
 }
@@ -498,7 +600,7 @@ export function invariantErrors(s: State): string[] {
   for (const seat of SEATS) if (s.jugas.filter((j) => j.seat === seat).length > MAX_JUGAS) errors.push('too many Jugas')
   const keys = new Set<string>()
   for (const p of s.pawns) {
-    const k = keyOf(p.seat, p.where, p.at)
+    const k = keyOf(p.seat, p.where, p.at, s.size)
     if (k) keys.add(k)
   }
   for (const k of keys) {
@@ -508,9 +610,9 @@ export function invariantErrors(s: State): string[] {
       if (here.singles.filter((x) => x.seat === seat).length > 2) errors.push(`more than two pawns of ${seat} on ${k}`)
       if (here.jugas.filter((x) => x.seat === seat).length > 1) errors.push(`two Jugas of ${seat} on ${k}`)
     }
-    if (!isSafe(k) && here.jugas.length > 1) errors.push(`two Jugas on ${k}`)
+    if (!isSafe(k, s.size) && here.jugas.length > 1) errors.push(`two Jugas on ${k}`)
     const seatsHere = new Set(here.singles.map((x) => x.seat))
-    if (!isSafe(k) && seatsHere.size > 1 && !here.jugas.length) errors.push(`opposing pawns share unsafe ${k}`)
+    if (!isSafe(k, s.size) && seatsHere.size > 1 && !here.jugas.length) errors.push(`opposing pawns share unsafe ${k}`)
   }
   return errors
 }

@@ -13,6 +13,7 @@ export function loadSaved(): Saved | null {
     const state = s?.state
     if (s?.v !== 1 || typeof s.seed !== 'string' || !Number.isInteger(s.draws) || ![1, 2, 3, 4].includes(s.humans)) return null
     if (!state || state.pawns?.length !== 24 || !Array.isArray(state.jugas) || !Array.isArray(state.queue) || state.phase === 'over') return null
+    if (state.size !== 5 && state.size !== 7) state.size = 5 // games saved before the 7x7 board existed
     return s
   } catch {
     return null

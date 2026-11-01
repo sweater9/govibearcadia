@@ -22,12 +22,19 @@ beforeEach(() => localStorage.clear())
 afterEach(() => vi.useRealTimers())
 
 describe('GhataBara', () => {
-  it('shows the 5x5 board with five safe squares, four seats and a Roll button', () => {
+  it('shows the 7x7 board with its 13 X squares, four seats and a Roll button', () => {
     const { container } = render(<GhataBara onFinish={vi.fn()} seed="ui" />)
-    expect(container.querySelectorAll('.gb-sq')).toHaveLength(25)
-    expect(container.querySelectorAll('.gb-sq[data-safe]')).toHaveLength(5)
+    expect(container.querySelectorAll('.gb-sq')).toHaveLength(49)
+    expect(container.querySelectorAll('.gb-sq[data-safe]')).toHaveLength(13)
     expect(screen.getAllByRole('listitem')).toHaveLength(4)
     expect(screen.getByRole('button', { name: 'Roll' })).toBeEnabled()
+  })
+
+  it('the 5x5 board is still available, with its five X squares', () => {
+    const { container } = render(<GhataBara onFinish={vi.fn()} seed="ui" />)
+    fireEvent.change(screen.getByLabelText('Board size'), { target: { value: '5' } })
+    expect(container.querySelectorAll('.gb-sq')).toHaveLength(25)
+    expect(container.querySelectorAll('.gb-sq[data-safe]')).toHaveLength(5)
   })
 
   it('reports a finished run exactly once under StrictMode, and clears the saved game', () => {

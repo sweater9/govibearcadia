@@ -1,5 +1,7 @@
 # Ghata Bara
 
+> **Update:** the owner's real board is a **7x7** cloth (13 X squares), not 10x10. The 7x7 is now the default board and the 5x5 stays as the quick version. The 7x7 rules are in the section "The 7x7 board" below; the rest of this page describes the 5x5 first built.
+
 A faithful, local-first adaptation of the traditional four-player board game. Pure rules live in `src/games/ghata/rules.ts` (no React, no randomness: dice values are passed in), the computer player in `bot.ts`, the interface in `src/games/GhataBara.tsx`. Tests: `rules.test.ts` (engine, including seeded full games checked after every action) and `GhataBara.test.tsx` and `e2e/ghata-bara.spec.ts` (interface).
 
 ## Built
@@ -43,3 +45,27 @@ These are the places where the rules did not say, listed so nothing is silently 
 ## Safe squares
 
 `o0 o4 o8 o12` (the four edge centres, also the four start squares) and the Home square. Captures, pins and blockades do not apply on them. Jugas only ever stand on the inner ring, so in practice the safe-square exceptions matter for individual pawns and for Home.
+
+
+## The 7x7 board
+
+Built from the owner's photo of the cloth and a drawing of the directions. Squares: outer ring 24, middle ring 16, inner ring 8, Home 1 (49).
+
+**Safe squares (13, as on the cloth):** the four corners, the four middles of the edges (these are also the starts), the centre (Home), and the four squares diagonally inside the corners.
+
+**Starts:** each player starts on the X at the middle of their own edge (top, left, bottom, right); waiting pawns sit in the Home Yard (shown in the player panel).
+
+**Directions:** outer ring counterclockwise; middle and inner rings clockwise.
+
+**Turning inward (the owner's words):** a pawn enters the interior strictly from its own start square after completing a full counterclockwise loop, stepping straight forward into the adjacent square. A pawn with no capture keeps looping the outer ring and cannot enter the middle or inner ring until it makes a capture.
+
+**Path of one pawn:** 24 steps round the outer ring back onto its own start square, then 24 interior squares (the whole 16-square middle ring clockwise, then the 8-square inner ring clockwise, from the corner of the inner ring), then exactly one more step into Home.
+
+### Choices made for the 7x7 (please confirm or correct)
+
+1. **"Inner ring" means the whole interior** (middle and inner rings): capture credit is needed to enter the interior, and Jugas form and move anywhere in it.
+2. **The middle ring is walked in full** before stepping into the inner ring, at the square next to where the pawn entered (the inner ring starts at its corner beside the middle ring's last square).
+3. **A pawn that earns credit part-way round** still finishes the lap to its start square before turning in; an uncredited pawn passing its start square goes round again.
+4. **The diagonal arrows in the drawing** (near the four X squares inside the corners) were not used as turn-in points, following the owner's written answer that pawns enter only from their own start.
+5. **Yards** are shown as dots in the player panel, not drawn as trays beside the board.
+6. Everything else is as for the 5x5 (dice, bonus rolls, bust, chunks, captures, Jugas, pins, rescues, bonuses, exact Home).

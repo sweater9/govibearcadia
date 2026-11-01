@@ -25,14 +25,17 @@ function jugaNextToEnemy(pinned: boolean): State {
   return s
 }
 
-test('the board has 25 squares, five safe squares marked, a Home in the middle, and four seats', async ({ page }) => {
+test('the 7x7 board has the 13 X squares of the cloth, a Home in the middle, and four seats; the 5x5 is still there', async ({ page }) => {
   await page.goto('/play/ghata-bara?seed=e2e-gb')
-  await expect(page.locator('.gb-sq')).toHaveCount(25)
-  await expect(page.locator('.gb-sq[data-safe]')).toHaveCount(5)
-  for (const sq of ['o0', 'o4', 'o8', 'o12', 'c']) await expect(page.locator(`[data-square="${sq}"]`)).toHaveAttribute('data-safe', 'true')
+  await expect(page.locator('.gb-sq')).toHaveCount(49)
+  await expect(page.locator('.gb-sq[data-safe]')).toHaveCount(13)
+  for (const sq of ['o0', 'o6', 'o12', 'o18', 'c']) await expect(page.locator(`[data-square="${sq}"]`)).toHaveAttribute('data-safe', 'true')
   await expect(page.locator('.gb-seats li')).toHaveCount(4)
   await expect(page.locator('.gb-seats li').first()).toContainText('Yard 6 · Home 0/6')
   expect(await overflowsHorizontally(page)).toBe(false)
+  await page.getByLabel('Board size').selectOption('5')
+  await expect(page.locator('.gb-sq')).toHaveCount(25)
+  await expect(page.locator('.gb-sq[data-safe]')).toHaveCount(5)
 })
 
 test('pressing R rolls the two dice; the seeded roll is the one the rules produce', async ({ page }) => {
@@ -134,4 +137,34 @@ test('a whole four-player game can be played to the end, and the result is saved
   const home = Number((await page.locator('.gb-seats li').first().innerText()).match(/Home (\d)\/6/)![1])
   expect(row.score).toBe(home * 100 + (row.won ? 400 : 0))
   expect(await page.evaluate((k) => localStorage.getItem(k), KEY)).toBeNull()
+})
+
+/** The 7x7 board with Violet's pawn 0 on the last square before its own start, ready to move. */
+function sevenAtLapEnd(credit: boolean, queue: number[]): State {
+  const s = newGame(7)
+  s.phase = 'move'
+  s.queue = queue
+  Object.assign(s.pawns[0], { where: 'outer', at: 23, credit })
+  return s
+}
+
+test('7x7: a pawn with a capture comes back to its own start square, then steps straight in', async ({ page }) => {
+  await stage(page, sevenAtLapEnd(true, [1, 1]))
+  await page.goto('/play/ghata-bara')
+  await page.locator('[data-square="o23"]').click()
+  await expect(page.locator('[data-square="o0"]')).toHaveAttribute('data-target', '')
+  await page.locator('[data-square="o0"]').click() // the lap is complete
+  await expect(page.locator('[data-square="o0"] .gb-pawn')).toHaveCount(1)
+  await page.locator('[data-square="o0"]').click()
+  await expect(page.locator('[data-square="i0"]')).toHaveAttribute('data-target', '') // the square just inside the start
+  await page.locator('[data-square="i0"]').click()
+  await expect(page.locator('[data-square="i0"] .gb-pawn')).toHaveCount(1)
+})
+
+test('7x7: a pawn with no capture keeps circling the outer ring', async ({ page }) => {
+  await stage(page, sevenAtLapEnd(false, [2]))
+  await page.goto('/play/ghata-bara')
+  await page.locator('[data-square="o23"]').click()
+  await expect(page.locator('[data-square="o1"]')).toHaveAttribute('data-target', '') // past its start, round again
+  await expect(page.locator('[data-target]')).toHaveCount(1)
 })

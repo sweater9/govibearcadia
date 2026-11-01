@@ -5,8 +5,8 @@ import { createRandom } from '../lib/rng'
 import type { GameProps } from '../types'
 import { chooseAction } from './ghata/bot'
 import {
-  FACES, INNER_CELLS, OUTER_CELLS, actionDestination, apply, board, dice as rollDice, homeCount, innerKey, isSafe, keyOf, legalActions, newGame, yardCount,
-  type Action, type GameEvent, type Seat, type State,
+  FACES, LAYOUTS, actionDestination, apply, board, dice as rollDice, homeCount, innerKey, isSafe, keyOf, legalActions, newGame, yardCount,
+  type Action, type GameEvent, type Seat, type Size, type State,
 } from './ghata/rules'
 import { clearSaved, loadSaved, save } from './ghata/save'
 import { HUMAN_SEATS, SEAT_INFO } from './ghata/seats'
@@ -15,12 +15,16 @@ import { HUMAN_SEATS, SEAT_INFO } from './ghata/seats'
 const BOT_MS = 380
 const ROLL_MS = 480
 
-const SQUARE = new Map<string, string>()
-OUTER_CELLS.forEach(([r, c], i) => SQUARE.set(`${r},${c}`, `o${i}`))
-INNER_CELLS.forEach(([r, c], i) => SQUARE.set(`${r},${c}`, `i${i}`))
-SQUARE.set('2,2', 'c')
+/** `row,column` to square id, for each board. */
+const SQUARES: Record<Size, Map<string, string>> = { 5: new Map(), 7: new Map() }
+for (const size of [5, 7] as const) {
+  const l = LAYOUTS[size]
+  l.outerCells.forEach(([r, c], i) => SQUARES[size].set(`${r},${c}`, `o${i}`))
+  l.interiorCells.forEach(([r, c], i) => SQUARES[size].set(`${r},${c}`, `i${i}`))
+  SQUARES[size].set(l.centre.join(','), 'c')
+}
 
-const START_SEAT: Record<string, Seat> = { o0: 0, o4: 1, o8: 2, o12: 3 }
+const startSeats = (size: Size): Record<string, Seat> => Object.fromEntries(LAYOUTS[size].start.map((i, seat) => [`o${i}`, seat as Seat]))
 
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`
 
@@ -52,7 +56,7 @@ type Move = { action: Extract<Action, { type: 'move' }>; dest: string; points: n
 export function GhataBara({ onFinish, seed }: GameProps) {
   const saved = useMemo(() => (seed === undefined ? loadSaved() : null), [seed])
   const [humans, setHumans] = useState(saved?.humans ?? 1)
-  const [game, setGame] = useState<State>(() => saved?.state ?? newGame())
+  const [game, setGame] = useState<State>(() => saved?.state ?? newGame(7))
   const [matchSeed, setMatchSeed] = useState(() => seed ?? saved?.seed ?? randomSeed())
   const [selected, setSelected] = useState<string | null>(null)
   const [rolling, setRolling] = useState(false)
@@ -167,10 +171,10 @@ export function GhataBara({ onFinish, seed }: GameProps) {
   const pieceSquare = (kind: 'pawn' | 'juga', id: number) => {
     if (kind === 'pawn') {
       const p = game.pawns[id]
-      return keyOf(p.seat, p.where, p.at)!
+      return keyOf(p.seat, p.where, p.at, game.size)!
     }
     const j = game.jugas.find((x) => x.id === id)!
-    return innerKey(j.seat, j.at)
+    return innerKey(j.seat, j.at, game.size)
   }
   const movableAt = useMemo(() => {
     const map = new Map<string, string[]>()
@@ -199,14 +203,14 @@ export function GhataBara({ onFinish, seed }: GameProps) {
     else setSelected(null)
   }
 
-  const newMatch = (n: number) => {
+  const newMatch = (n: number, size: Size = game.size) => {
     clearSaved()
     draws.current = 0
     reported.current = false
     startedAt.current = Date.now()
     setHumans(n)
     setMatchSeed(seed ?? randomSeed())
-    setGame(newGame())
+    setGame(newGame(size))
     setSelected(null)
     setRolling(false)
     setFaces(null)
@@ -215,10 +219,13 @@ export function GhataBara({ onFinish, seed }: GameProps) {
   }
 
   const occupancy = board(game)
+  const size = game.size
+  const START_SEAT = startSeats(size)
+  const squares = SQUARES[size]
   const label = (r: number, c: number, key: string) => {
     const occ = occupancy.get(key)
     const bits = [`Row ${r + 1}, column ${c + 1}`]
-    if (isSafe(key)) bits.push(key === 'c' ? 'Home' : START_SEAT[key] !== undefined ? `safe square, ${SEAT_INFO[START_SEAT[key]].name}'s start` : 'safe square')
+    if (isSafe(key, size)) bits.push(key === 'c' ? 'Home' : START_SEAT[key] !== undefined ? `safe square, ${SEAT_INFO[START_SEAT[key]].name}'s start` : 'safe square')
     if (key === 'c') {
       for (const s of [0, 1, 2, 3] as Seat[]) if (homeCount(game, s)) bits.push(`${SEAT_INFO[s].name}: ${plural(homeCount(game, s), 'pawn')} home`)
     } else {
@@ -261,6 +268,10 @@ export function GhataBara({ onFinish, seed }: GameProps) {
             Release a pawn ({game.queue[r.chunk]})
           </button>
         ))}
+        <select aria-label="Board size" value={game.size} onChange={(e) => newMatch(humans, Number(e.target.value) as Size)}>
+          <option value={7}>7×7 board</option>
+          <option value={5}>5×5 board</option>
+        </select>
         <select aria-label="Players" value={humans} onChange={(e) => newMatch(Number(e.target.value))}>
           {[1, 2, 3, 4].map((n) => (
             <option key={n} value={n}>{n === 1 ? '1 player' : `${n} players`}</option>
@@ -271,10 +282,10 @@ export function GhataBara({ onFinish, seed }: GameProps) {
         </button>
       </div>
 
-      <div className="gb-board" role="group" aria-label="Ghata Bara board">
-        {Array.from({ length: 5 }, (_, r) =>
-          Array.from({ length: 5 }, (_, c) => {
-            const key = SQUARE.get(`${r},${c}`)!
+      <div className="gb-board" data-size={size} style={{ ['--n' as string]: size }} role="group" aria-label={`Ghata Bara board, ${size} by ${size}`}>
+        {Array.from({ length: size }, (_, r) =>
+          Array.from({ length: size }, (_, c) => {
+            const key = squares.get(`${r},${c}`)!
             const occ = occupancy.get(key)
             const target = targets.get(key)
             const movable = movableAt.has(key)
@@ -284,7 +295,7 @@ export function GhataBara({ onFinish, seed }: GameProps) {
                 key={key}
                 className="gb-sq"
                 data-square={key}
-                data-safe={isSafe(key) || undefined}
+                data-safe={isSafe(key, size) || undefined}
                 data-home={key === 'c' || undefined}
                 data-seat={START_SEAT[key]}
                 data-target={target ? '' : undefined}

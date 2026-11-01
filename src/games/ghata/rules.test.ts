@@ -498,7 +498,7 @@ describe('victory', () => {
 
 describe('safe squares', () => {
   it('the five safe squares are the four edge centres and the centre', () => {
-    expect(['o0', 'o4', 'o8', 'o12', 'c'].every(isSafe)).toBe(true)
+    expect(['o0', 'o4', 'o8', 'o12', 'c'].every((k) => isSafe(k))).toBe(true)
     expect(isSafe('o1') || isSafe('i0')).toBe(false)
   })
   it('the board lists everyone on a square', () => {
