@@ -20,8 +20,8 @@ export const INNER = 8
 
 /** Switches for rules the owner has not specified. Defaults are the choices listed in docs/GHATA_BARA.md. */
 export const RULES = {
-  /** A captured pawn loses its capture credit and must capture again before entering the interior. */
-  creditSurvivesCapture: false,
+  /** Capture credit belongs to the player: one capture lets all their pawns turn inward, and being captured never takes it away. */
+  creditSurvivesCapture: true,
 } as const
 
 export type Size = 5 | 7
@@ -362,6 +362,11 @@ export function legalActions(s: State): Action[] {
 
 const pawnById = (s: State, id: number) => s.pawns[id]
 
+/** One capture by a player credits every pawn of that player (owner's rule). */
+function grantCredit(s: State, seat: Seat) {
+  for (const q of s.pawns) if (q.seat === seat) q.credit = true
+}
+
 function sendHome(s: State, id: number) {
   const p = pawnById(s, id)
   p.where = 'yard'
@@ -500,7 +505,7 @@ export function apply(prev: State, action: Action): Result {
       sendHome(s, id)
       captures++
     }
-    if (plan.capture.length) p.credit = true
+    if (plan.capture.length) grantCredit(s, p.seat)
     p.where = plan.end.where
     p.at = plan.end.at
     if (p.where === 'home') finished = 1
@@ -515,7 +520,7 @@ export function apply(prev: State, action: Action): Result {
       sendHome(s, j.pinned)
       j.pinned = null
       captures++
-      pa.credit = pb.credit = true
+      grantCredit(s, pa.seat)
     }
     if (plan.home) {
       s.jugas = s.jugas.filter((x) => x.id !== j.id)
@@ -533,7 +538,7 @@ export function apply(prev: State, action: Action): Result {
           s.events.push({ type: 'rescue', seat })
         }
         s.jugas = s.jugas.filter((x) => x.id !== id)
-        pa.credit = pb.credit = true
+        grantCredit(s, pa.seat)
       }
       if (plan.pin !== null) {
         pawnById(s, plan.pin).pinnedBy = j.id

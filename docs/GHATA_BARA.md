@@ -31,13 +31,13 @@ A game is long: computer-only games take about 900 to 1,600 actions. That is the
 
 These are the places where the rules did not say, listed so nothing is silently invented. Each is one small, isolated change if you want it different.
 
-1. **A captured pawn loses its capture credit** and must capture again to reach the inner ring (`RULES.creditSurvivesCapture` in `rules.ts` switches this).
+1. **Capture credit belongs to the player** (owner's rule): once a player captures, all their pawns, in the yard or on the board, can enter the inner squares, and being captured later does not take it away (`RULES.creditSurvivesCapture`).
 2. **"Once at least one opponent has entered the inner ring"** means: some other player has entered the inner ring at any time in this game. Pairs already waiting on an inner square become Jugas the moment that happens.
 3. **A combined movement lands only on its final square.** The squares in between are passed over, and blockades apply to the whole path.
 4. **The two-pawn limit also applies on start squares**, so a start square already holding two of your pawns cannot take a released pawn.
 5. **A Juga may not land on a square holding one of its own single pawns.** (Friendly individual pawns cannot land on a friendly Juga, and the reverse is treated the same way.)
 6. **A rescuing Juga and the pawn it frees share the square**; the rescuer does not repin it (as written), and if the rescuer later moves away nothing is captured.
-7. **A capture credits both pawns of a Juga**, including a delayed capture on leaving a pin and a captured Juga.
+7. **A capture credits the whole player (all pawns), including by a Juga**, including a delayed capture on leaving a pin and a captured Juga.
 8. **A Juga needs an exact, even total to enter Home**, and any even total that does not overshoot is a legal movement.
 9. **Pinning needs exactly one enemy single pawn** on the square. (A square cannot hold two opposing singles on the inner ring once Jugas exist, so this never arises.)
 10. **Scores:** a finished game is reported as won if a person won; the score is 100 per Violet pawn home plus 400 for a win.

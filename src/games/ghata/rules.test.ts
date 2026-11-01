@@ -221,12 +221,16 @@ describe('entering the inner ring', () => {
     expect(keyOf(0, 'inner', 0)).toBe('i0')
     expect(after.entered[0]).toBe(true)
   })
-  it('a captured pawn loses its credit and must capture again', () => {
+  it('one capture credits every pawn of that player, and being captured later keeps the credit', () => {
     const s = moving(1, [2])
     put(s, 0, 'outer', 'o3', true)
     put(s, 6, 'outer', 'o1', true)
+    put(s, 1, 'yard', 0, false)
+    put(s, 2, 'outer', 'o9', false)
     const after = ok(s, pawnMove(6, [0]))
-    expect(after.pawns[0]).toMatchObject({ where: 'yard', credit: false })
+    expect(after.pawns[0]).toMatchObject({ where: 'yard', credit: true })
+    for (const id of [6, 7, 8, 9, 10, 11]) expect(after.pawns[id].credit).toBe(true)
+    expect(after.pawns[1].credit).toBe(false)
   })
 })
 
