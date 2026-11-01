@@ -263,6 +263,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./GhataBara').then((m) => ({ default: m.GhataBara }))),
   },
+  {
+    meta: {
+      id: 'pallanguzhi',
+      title: 'Pallanguzhi',
+      description: 'The traditional seed-sowing game of Karnataka (Ali Guli Mane): relay sowing, Saada captures and piggy pits.',
+      category: 'Strategy',
+      accent: 'from-amber-500 to-fuchsia-500',
+      glyph: '◉',
+      estimated: '10–25 min',
+    },
+    Component: lazy(() => import('./Pallanguzhi').then((m) => ({ default: m.Pallanguzhi }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)

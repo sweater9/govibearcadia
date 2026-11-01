@@ -23,6 +23,7 @@ const PLAY_AREA = {
   twofold: '.tf',
   carve: '.cv',
   'ghata-bara': '.gb-board',
+  pallanguzhi: '.pg-table',
 } as const
 
 type Box = { top: number; bottom: number }
