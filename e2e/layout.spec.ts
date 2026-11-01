@@ -22,6 +22,7 @@ const PLAY_AREA = {
   vibeline: '.vl',
   twofold: '.tf',
   carve: '.cv',
+  'ghata-bara': '.gb-board',
 } as const
 
 type Box = { top: number; bottom: number }
