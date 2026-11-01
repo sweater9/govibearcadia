@@ -1,6 +1,8 @@
 import { Trophy } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Avatar } from '../components/Avatar'
+import { getAvatar, DEFAULT_AVATAR, storedAvatar } from '../lib/avatars'
 import { RANKED_GAMES, nickName, randomNick, type Board, type Nick } from '../lib/leaderboard'
 import { ONLINE_GAME_LIST, fetchBoard, getNick, leaveLeaderboards, setNick } from '../lib/online'
 
@@ -99,7 +101,10 @@ export function Leaderboard() {
       <section className="lb-join" aria-label="Your nickname">
         {mine ? (
           <>
-            <h2>You are {myName}</h2>
+            <div className="pp-head">
+              <Avatar avatar={getAvatar(storedAvatar()) ?? getAvatar(DEFAULT_AVATAR)!} size={48} />
+              <h2>You are {myName}</h2>
+            </div>
             <p>Your online wins are ranked under this nickname.</p>
             <button type="button" className="secondary-btn" onClick={() => void leave()}>
               Leave the leaderboards

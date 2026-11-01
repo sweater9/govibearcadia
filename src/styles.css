@@ -112,3 +112,18 @@ button.bs-cell:disabled{cursor:default}
 .lb-notice{min-height:1.4em;color:#67e8f9}
 .lb a,.online a{color:#67e8f9;text-decoration:underline}
 @media(max-width:560px){.lb h1{font-size:30px}.lb-list li{grid-template-columns:34px 1fr auto;padding:10px 12px}}
+
+.avatar{display:inline-grid;place-items:center;border-radius:50%;color:#fff;font-weight:900;line-height:1;box-shadow:0 0 0 2px #ffffff30,0 6px 18px #0006;text-shadow:0 1px 3px #0008;flex:none}
+.pp-head{display:flex;align-items:center;gap:16px}
+.pp-head h1{margin:0}
+.pp-avatars{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:10px 0}
+.pp-avatars button{display:grid;justify-items:center;gap:6px;padding:12px 6px;border-radius:14px;border:1px solid #ffffff1c;background:#ffffff08;cursor:pointer}
+.pp-avatars button.on{border-color:#67e8f9;background:#22d3ee14}
+.pp-avatars button:disabled{opacity:.45;cursor:not-allowed}
+.pp-avatars small{color:#ffffffb0;font-size:12px}
+@media(max-width:700px){.pp-avatars{grid-template-columns:repeat(4,1fr)}}
+.play-title .challenge-banner{color:#67e8f9}
+.challenge-panel{display:grid;justify-items:center;gap:10px;margin:14px 0}
+.challenge-panel p{margin:0;color:#67e8f9;text-align:center}
+/* A challenge line replaces the eyebrow on short screens, so the play area keeps its height. */
+@media(max-height:900px){.play-title>p.challenge-banner:last-child{display:block;margin:0;font-size:14px}.play-title:has(.challenge-banner) .eyebrow{display:none}}

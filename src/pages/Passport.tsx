@@ -2,7 +2,9 @@ import { Flame, Lock, Trophy } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { games } from '../data/games'
+import { Avatar } from '../components/Avatar'
 import { ShareButton } from '../components/ShareButton'
+import { AVATARS, isUnlocked as avatarUnlocked, resolveAvatar, saveAvatar, storedAvatar, type AvatarId } from '../lib/avatars'
 import { parseBackup } from '../lib/backup'
 import { db, exportAll, importBackup } from '../lib/db'
 import { THEMES, applyTheme, isUnlocked, resolveTheme, storedTheme, type ThemeId } from '../lib/themes'
@@ -16,6 +18,7 @@ export function Passport() {
   const [history, setHistory] = useState<PlayRecord[] | null>(null)
   const [message, setMessage] = useState('')
   const [theme, setTheme] = useState<ThemeId>(() => storedTheme() ?? 'neon')
+  const [avatarId, setAvatarId] = useState<AvatarId | null>(() => storedAvatar())
   const fileInput = useRef<HTMLInputElement>(null)
   const load = () => db.history.toArray().then(setHistory)
   useEffect(() => {
@@ -54,7 +57,10 @@ export function Passport() {
   return (
     <main className="passport">
       <p className="eyebrow">Arcadia Passport</p>
-      <h1>Level {lvl.level}</h1>
+      <div className="pp-head">
+        <Avatar avatar={resolveAvatar(avatarId, lvl.level)} size={64} />
+        <h1>Level {lvl.level}</h1>
+      </div>
       <div className="xp-bar" role="progressbar" aria-label="XP to next level" aria-valuemin={0} aria-valuemax={lvl.span} aria-valuenow={lvl.into}>
         <span style={{ width: `${(lvl.into / lvl.span) * 100}%` }} />
       </div>
@@ -122,6 +128,33 @@ export function Passport() {
       </ul>
 
       <ShareButton text={sharePassport(s)} label="Share my passport" />
+
+      <h2>Avatar</h2>
+      <div className="pp-avatars" role="radiogroup" aria-label="Avatar">
+        {AVATARS.map((a) => {
+          const open = avatarUnlocked(a.id, lvl.level)
+          const active = resolveAvatar(avatarId, lvl.level).id === a.id
+          return (
+            <button
+              key={a.id}
+              role="radio"
+              aria-checked={active}
+              aria-label={open ? a.name : `${a.name}, unlocks at level ${a.level}`}
+              disabled={!open}
+              data-avatar-option={a.id}
+              className={active ? 'on' : ''}
+              onClick={() => {
+                saveAvatar(a.id)
+                setAvatarId(a.id)
+              }}
+            >
+              <Avatar avatar={a} size={44} />
+              <small>{open ? a.name : `Level ${a.level}`}</small>
+            </button>
+          )
+        })}
+      </div>
+      <p className="game-help">Avatars stay on this device. They are never sent to anyone.</p>
 
       <h2>Themes</h2>
       <div className="pp-themes" role="radiogroup" aria-label="Theme">

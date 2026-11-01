@@ -6,6 +6,8 @@ import { getGame } from '../games/registry'
 import { games } from '../data/games'
 import { db, recordPlay, toggleFavorite } from '../lib/db'
 import { ShareButton } from '../components/ShareButton'
+import { challengePath, parseChallenge, randomSeed, shareChallenge, verdict, verdictText } from '../lib/challenge'
+import { getNick } from '../lib/online'
 import { dailyChallenge, shareDaily, today } from '../lib/passport'
 import type { GameResult } from '../types'
 
@@ -13,14 +15,20 @@ export function Play() {
   const { id } = useParams()
   // `?seed=` makes a game deterministic: the same seed always deals the same game. Daily challenges will use it.
   const params = useSearchParams()[0]
-  const seed = params.get('seed') ?? undefined
+  const entry = getGame(id)
+  // Challengeable puzzles always get a seed, so any run can be sent to a friend afterwards to be dealt the same puzzle.
+  const [fallbackSeed] = useState(() => randomSeed())
+  const seed = params.get('seed') ?? (entry?.meta.challenge ? fallbackSeed : undefined)
+  const incoming = entry?.meta.challenge ? parseChallenge(params) : null
   // `?daily=<day>` counts only when it is today's challenge for this game, with the challenge's seed.
   const challenge = dailyChallenge(today(), games.filter((g) => g.daily).map((g) => g.id))
   const daily = params.get('daily') === challenge.day && id === challenge.gameId && seed === challenge.seed ? challenge.day : undefined
-  const entry = getGame(id)
   const gameId = entry?.meta.id
   const [favorite, setFavorite] = useState(false)
   const [dailyWin, setDailyWin] = useState<GameResult | null>(null)
+  const [lastRun, setLastRun] = useState<{ score: number; won: boolean } | null>(null)
+
+  useEffect(() => setLastRun(null), [seed, gameId])
 
   useEffect(() => {
     if (gameId) void db.favorites.get(gameId).then(Boolean).then(setFavorite)
@@ -30,6 +38,7 @@ export function Play() {
     (result: GameResult) => {
       if (gameId) void recordPlay(gameId, result, daily)
       if (daily && result.won) setDailyWin(result)
+      setLastRun({ score: result.score, won: !!result.won })
     },
     [gameId, daily],
   )
@@ -58,7 +67,13 @@ export function Play() {
       <div className="play-title">
         <p className="eyebrow">{daily ? `Daily challenge · ${meta.category}` : meta.category}</p>
         <h1>{meta.title}</h1>
-        <p>{meta.description}</p>
+        {incoming ? (
+          <p className="challenge-banner" role="note">
+            {incoming.from ?? 'A friend'} {incoming.won ? 'won this with' : 'scored'} {incoming.beat.toLocaleString()} on this puzzle. Can you beat it?
+          </p>
+        ) : (
+          <p>{meta.description}</p>
+        )}
       </div>
       <section className="game-shell">
         <GameBoundary key={meta.id}>
@@ -67,6 +82,15 @@ export function Play() {
           </Suspense>
         </GameBoundary>
       </section>
+      {meta.challenge && lastRun && seed ? (
+        <div className="challenge-panel" aria-label="Challenge a friend">
+          {incoming ? <p role="status">{verdictText(verdict(lastRun, { score: incoming.beat, won: incoming.won }), lastRun.score, incoming)}</p> : null}
+          <ShareButton
+            label={incoming ? 'Challenge back' : 'Challenge a friend'}
+            text={shareChallenge(meta.title, lastRun, location.origin + challengePath(meta.id, seed, lastRun, getNick()))}
+          />
+        </div>
+      ) : null}
       {daily && dailyWin ? <ShareButton text={shareDaily(meta.title, daily, dailyWin.score, dailyWin.durationMs)} /> : null}
       <p className="game-help">Keyboard and touch controls supported · Progress is saved on this device</p>
     </main>
