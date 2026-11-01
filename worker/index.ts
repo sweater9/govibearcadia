@@ -1,9 +1,11 @@
 import { isRoomCode, makeRoomCode } from '../src/lib/roomcode'
 import { createLimiter } from '../src/lib/ratelimit'
 export { Room } from './room'
+export { Leaderboard } from './leaderboard'
 
 interface Env {
   ROOMS: DurableObjectNamespace
+  LEADERBOARD: DurableObjectNamespace<import('./leaderboard').Leaderboard>
 }
 
 // Best effort: counters live in one Worker isolate's memory, so they slow abuse down rather than stop it outright.
@@ -27,6 +29,11 @@ export default {
     const parts = url.pathname.split('/').filter(Boolean) // ['api', ...]
 
     if (url.pathname === '/api/health') return json({ ok: true, service: 'govibearcadia', protocol: 1 })
+
+    if (url.pathname === '/api/leaderboard/status') {
+      const stub = env.LEADERBOARD.get(env.LEADERBOARD.idFromName('global'))
+      return json({ service: 'leaderboard', ...(await stub.status()) })
+    }
 
     if (url.pathname === '/api/rooms' && request.method === 'POST') {
       const ip = who(request)

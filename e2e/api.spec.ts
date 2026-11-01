@@ -171,3 +171,10 @@ test('a socket that floods messages gets told to slow down, and the game is unha
   await expect.poll(async () => (await log(page, 'a')).filter((m) => m.code === 'slow-down').length).toBeGreaterThan(0)
   expect((await log(page, 'a')).some((m) => m.closed)).toBe(false)
 })
+
+test('the leaderboard store exists, starts empty, and answers through the Worker', async ({ page }) => {
+  await page.goto('/')
+  const r = await api(page, '/api/leaderboard/status')
+  expect(r.status).toBe(200)
+  expect(JSON.parse(r.body)).toEqual({ service: 'leaderboard', ok: true, players: 0, rows: 0 })
+})
