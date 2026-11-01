@@ -43,6 +43,7 @@ Independent, free-to-play, local-first browser arcade. The long-term plan is in 
 
 - Plan and decisions: `docs/PHASE3_PLAN.md`. Only `/api/*` runs the Worker (`run_worker_first` in `wrangler.jsonc`); every other request is served from static assets, so a Worker bug cannot take the arcade pages down.
 - `worker/room.ts` is the `Room` Durable Object (hibernatable WebSockets, SQLite-backed). The server is authoritative: it validates every move with the same pure `rules.ts` the client uses. Single-player must keep working without it.
+- `worker/leaderboard.ts` is the `Leaderboard` Durable Object (one global instance, SQLite). `Room` tells it about a win only when the winner opted in with a word-list nickname and both players were present. It stores a hash of the player token, never the token, and never free text. The e2e server starts from a fresh `.wrangler/e2e-state` every run, so leaderboard data cannot leak between runs.
 - Never commit `.wrangler/` (local runtime state). Never send hidden information (e.g. an opponent's ships) to a client.
 - A Durable Object migration cannot be casually undone; ship and check each migration on its own.
 

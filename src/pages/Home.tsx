@@ -101,9 +101,14 @@ export function Home() {
             <h2>Private online rooms</h2>
             <p>Connect Four, Tic-Tac-Toe, Checkers or Battleship. Send a code, no account needed.</p>
           </div>
-          <Link className="secondary-btn" to="/online">
-            Play online <ArrowRight size={18} />
-          </Link>
+          <div className="today-links">
+            <Link className="secondary-btn" to="/online">
+              Play online <ArrowRight size={18} />
+            </Link>
+            <Link className="secondary-btn" to="/leaderboard">
+              Leaderboards
+            </Link>
+          </div>
         </section>
       </div>
       {recent ? (

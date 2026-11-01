@@ -64,3 +64,10 @@ describe('online battleship through the Worker interface', () => {
     expect(mine.reveal).toBeNull()
   })
 })
+
+import { RANKED_GAMES } from './leaderboard'
+describe('leaderboard and rooms agree', () => {
+  it('ranks exactly the games that have online rooms', () => {
+    expect([...RANKED_GAMES].sort()).toEqual(Object.keys(ONLINE_GAMES).sort())
+  })
+})

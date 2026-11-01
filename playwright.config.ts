@@ -21,7 +21,8 @@ export default defineConfig({
     { name: 'phone', use: { ...devices['Pixel 7'] } },
   ],
   webServer: {
-    command: `npm run build && WRANGLER_SEND_METRICS=false npx wrangler dev --port ${PORT} --ip localhost`,
+    // A fresh state directory every run, so leaderboard and room data from earlier runs can never leak into a test.
+    command: `npm run build && rm -rf .wrangler/e2e-state && WRANGLER_SEND_METRICS=false npx wrangler dev --port ${PORT} --ip localhost --persist-to .wrangler/e2e-state`,
     url: `http://localhost:${PORT}`,
     // Always build and serve fresh. Reusing a running server would silently test a stale build.
     reuseExistingServer: false,

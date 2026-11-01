@@ -11,7 +11,7 @@ import type { View as BattleshipView } from '../games/battleship/rules'
 import { TicTacToeBoard } from '../games/tictactoe/Board'
 import type { TState } from '../games/tictactoe/rules'
 import { recordPlay } from '../lib/db'
-import { ONLINE_GAME_LIST, gameFromParam, roomSocketUrl, type OnlineGameId } from '../lib/online'
+import { ONLINE_GAME_LIST, gameFromParam, getNick, roomSocketUrl, type OnlineGameId } from '../lib/online'
 import { isRoomCode } from '../lib/roomcode'
 
 type Connected = [boolean, boolean]
@@ -78,6 +78,9 @@ export function RoomPage() {
         everOpen.current = true
         attempt = 0
         setStatus('open')
+        // Opted into the leaderboards on this device: tell the room which nickname to rank a win under.
+        const nick = getNick()
+        if (nick) ws.send(JSON.stringify({ type: 'nick', ...nick }))
       }
       ws.onmessage = (event) => {
         let msg: { type?: string; code?: string }

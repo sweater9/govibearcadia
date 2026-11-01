@@ -1,6 +1,6 @@
 import { Users } from 'lucide-react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ONLINE_GAME_LIST, createRoom, type OnlineGameId } from '../lib/online'
 import { isRoomCode, normaliseRoomCode } from '../lib/roomcode'
 
@@ -60,6 +60,9 @@ export function Online() {
       </div>
       <p role="alert" className="online-error">
         {error}
+      </p>
+      <p className="text-white/70">
+        Win online and climb the <Link to="/leaderboard">leaderboards</Link>.
       </p>
       <p className="text-white/55">Rooms are private, hold two players, and a friend joining by code must pick the same game. Rooms close after two idle hours. Nothing about you is shared except the moves you make.</p>
     </main>

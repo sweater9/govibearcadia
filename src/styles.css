@@ -91,3 +91,24 @@ button.bs-cell:disabled{cursor:default}
 @media(max-width:850px){.game-grid{grid-template-columns:repeat(2,1fr)}.today{grid-template-columns:1fr;margin:0 20px 30px}.portal{height:240px}.hero{padding-top:36px;padding-bottom:20px}}
 @media(max-width:560px){.today .home-daily{flex-direction:column;align-items:flex-start}.portal{display:none}.hero{padding-bottom:12px}.game-art{height:92px}.game-art>span{font-size:44px}.game-body{padding:12px}.game-body p.min-h-12{display:none}.game-body h3{font-size:16px}.game-grid{gap:12px}}
 .hero-glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 70% at 78% 45%,#7c3aed33,transparent 70%),radial-gradient(ellipse 40% 50% at 15% 10%,#22d3ee14,transparent 70%)}
+
+.today-links{display:flex;gap:10px;flex-wrap:wrap}
+.lb{max-width:760px;margin:0 auto;padding:48px 20px 80px}
+.lb h1{display:flex;align-items:center;gap:12px;font-size:40px;letter-spacing:-.04em;margin:6px 0 10px}
+.lb-controls{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:22px 0 14px}
+.lb-controls label{display:flex;align-items:center;gap:8px;font-size:14px;color:#ffffffb0}
+.lb-controls select{background:#1b0f3a;color:#fff;border:1px solid #7c3aed66;border-radius:10px;padding:9px 12px;font:inherit}
+.lb-tabs{display:flex;gap:6px}
+.lb-tabs button{padding:9px 14px;border-radius:10px;border:1px solid #7c3aed55;background:#1b0f3a;cursor:pointer}
+.lb-tabs button[aria-pressed=true]{background:#7c3aed;border-color:#a78bfa}
+.lb-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.lb-list li{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:10px;padding:12px 16px;border:1px solid #ffffff1c;background:#ffffff08;border-radius:14px}
+.lb-list li[data-me]{border-color:#67e8f9aa;background:#22d3ee14}
+.lb-rank{color:#67e8f9;font-weight:800}
+.lb-join{margin-top:36px;padding:24px;border:1px solid #8b5cf655;background:linear-gradient(100deg,#7c3aed20,#22d3ee09);border-radius:20px}
+.lb-join h2{margin:0 0 8px;font-size:24px}
+.lb-suggest{font-size:22px;margin:14px 0}
+.lb-actions{display:flex;gap:10px;flex-wrap:wrap}
+.lb-notice{min-height:1.4em;color:#67e8f9}
+.lb a,.online a{color:#67e8f9;text-decoration:underline}
+@media(max-width:560px){.lb h1{font-size:30px}.lb-list li{grid-template-columns:34px 1fr auto;padding:10px 12px}}

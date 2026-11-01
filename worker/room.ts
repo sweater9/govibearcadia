@@ -1,5 +1,8 @@
 import { DurableObject } from 'cloudflare:workers'
 import { createLimiter } from '../src/lib/ratelimit'
+import { dayKey, isNick, weekKey, type Nick } from '../src/lib/leaderboard'
+import { sha256Hex } from './hash'
+import type { Leaderboard } from './leaderboard'
 import { ONLINE_GAMES, ONLINE_GAME_IDS, type OnlineGame } from '../src/games/onlineGames'
 import type { Seat } from '../src/lib/onlineRoom'
 
@@ -21,7 +24,9 @@ const json = (body: unknown, status: number) => new Response(JSON.stringify(body
  * The room state lives in Durable Object storage (so it survives hibernation) and every move is validated by the
  * same pure rules the client uses. Clients send intentions; the server decides.
  */
-export class Room extends DurableObject {
+type Env = { LEADERBOARD: DurableObjectNamespace<Leaderboard> }
+
+export class Room extends DurableObject<Env> {
   async fetch(request: Request): Promise<Response> {
     if (request.headers.get('Upgrade') !== 'websocket') return new Response('Expected a WebSocket', { status: 426 })
     const url = new URL(request.url)
@@ -70,6 +75,13 @@ export class Room extends DurableObject {
     const seat = (ws.deserializeAttachment() as Attachment | null)?.seat
     if (seat === undefined) return ws.close(1008, 'no seat')
     if (!messageLimit.hit(`${this.ctx.id.toString()}:${seat}`, Date.now())) return void ws.send(JSON.stringify({ type: 'error', code: 'slow-down' }))
+    if (data.type === 'nick') {
+      // Opt-in leaderboard nickname: three word-list indices, or anything else to opt out.
+      const nicks = (await this.ctx.storage.get<[Nick | null, Nick | null]>('nicks')) ?? [null, null]
+      nicks[seat] = isNick(data) ? { a: data.a, n: data.n, k: data.k } : null
+      await this.ctx.storage.put('nicks', nicks)
+      return
+    }
     const game = await this.gameOf()
     if (!game) return ws.close(1011, 'room state lost')
     const room = game.impl.parse(await this.ctx.storage.get('room'))
@@ -85,6 +97,34 @@ export class Room extends DurableObject {
     await this.ctx.storage.put('room', outcome.room)
     await this.touch()
     await this.broadcast(outcome.room)
+    await this.recordIfWon(game, room, outcome.room)
+  }
+
+  /** When a move ends a round with a winner who opted in, tell the leaderboard. Never lets a failure reach the game. */
+  private async recordIfWon(game: { id: string; impl: OnlineGame }, before: unknown, after: unknown): Promise<void> {
+    try {
+      const was = game.impl.view(before, 0) as { turn: number | null }
+      const now = game.impl.view(after, 0) as { turn: number | null; winner: number | null }
+      if (was.turn === null || now.turn !== null || now.winner === null) return
+      const seat = now.winner as Seat
+      const nicks = (await this.ctx.storage.get<[Nick | null, Nick | null]>('nicks')) ?? [null, null]
+      const nick = nicks[seat]
+      const seats = await this.ctx.storage.get<[string | null, string | null]>('seats')
+      if (!nick || !seats?.[0] || !seats[1]) return
+      const present = new Set(this.ctx.getWebSockets().map((ws) => (ws.deserializeAttachment() as Attachment | null)?.seat))
+      if (!present.has(0) || !present.has(1)) return // both players must be in the room
+      const when = new Date()
+      await this.env.LEADERBOARD.get(this.env.LEADERBOARD.idFromName('global')).recordWin({
+        game: game.id,
+        week: weekKey(when),
+        day: dayKey(when),
+        winner: await sha256Hex(seats[seat]!),
+        loser: await sha256Hex(seats[seat === 0 ? 1 : 0]!),
+        nick,
+      })
+    } catch {
+      /* the leaderboard is optional: a failure here must never affect the game */
+    }
   }
 
   async webSocketClose(ws: WebSocket, code: number): Promise<void> {

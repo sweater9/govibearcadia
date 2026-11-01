@@ -1,5 +1,7 @@
 import { isRoomCode, makeRoomCode } from '../src/lib/roomcode'
 import { createLimiter } from '../src/lib/ratelimit'
+import { weekKey, isRankedGame } from '../src/lib/leaderboard'
+import { sha256Hex } from './hash'
 export { Room } from './room'
 export { Leaderboard } from './leaderboard'
 
@@ -17,6 +19,10 @@ const who = (request: Request) => {
   return ip === '127.0.0.1' || ip === '::1' ? null : ip // local development and tests share one address
 }
 
+const viewLimit = createLimiter(60, 60_000) // leaderboard reads per visitor per minute
+const forgetLimit = createLimiter(10, 60_000)
+const TOKEN = /^[A-Za-z0-9_-]{16,64}$/
+
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } })
 
 /**
@@ -29,6 +35,27 @@ export default {
     const parts = url.pathname.split('/').filter(Boolean) // ['api', ...]
 
     if (url.pathname === '/api/health') return json({ ok: true, service: 'govibearcadia', protocol: 1 })
+
+    if (url.pathname === '/api/leaderboard' && request.method === 'GET') {
+      const ip = who(request)
+      if (ip && !viewLimit.hit(ip, Date.now())) return json({ error: 'slow-down' }, 429)
+      const game = url.searchParams.get('game') ?? 'all'
+      const period = url.searchParams.get('period') ?? 'week'
+      if ((game !== 'all' && !isRankedGame(game)) || (period !== 'week' && period !== 'all')) return json({ error: 'bad-request' }, 400)
+      const week = weekKey(new Date())
+      const rows = await env.LEADERBOARD.get(env.LEADERBOARD.idFromName('global')).top(game, period, week)
+      return new Response(JSON.stringify({ game, period, week, rows }), { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=30' } })
+    }
+
+    // "Remove me from leaderboards": deletes every row stored for this player.
+    if (url.pathname === '/api/leaderboard/me' && request.method === 'DELETE') {
+      const ip = who(request)
+      if (ip && !forgetLimit.hit(ip, Date.now())) return json({ error: 'slow-down' }, 429)
+      const token = request.headers.get('x-player-token') ?? ''
+      if (!TOKEN.test(token)) return json({ error: 'bad-token' }, 400)
+      const removed = await env.LEADERBOARD.get(env.LEADERBOARD.idFromName('global')).forget(await sha256Hex(token))
+      return json({ ok: true, removed }, 200)
+    }
 
     if (url.pathname === '/api/leaderboard/status') {
       const stub = env.LEADERBOARD.get(env.LEADERBOARD.idFromName('global'))

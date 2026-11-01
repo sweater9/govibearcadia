@@ -1,3 +1,5 @@
+import { isNick, type Board, type Nick } from './leaderboard'
+
 /** Browser side of online play: the anonymous player token and the WebSocket address. */
 
 const KEY = 'govibearcadia.player'
@@ -48,3 +50,53 @@ export type OnlineGameId = (typeof ONLINE_GAME_LIST)[number]['id']
 
 /** The game named by a `?g=` link, falling back to Connect Four (the only game early links ever named). */
 export const gameFromParam = (value: string | null): OnlineGameId => ONLINE_GAME_LIST.find((g) => g.id === value)?.id ?? 'connect-four'
+
+// ---- Leaderboards ---------------------------------------------------------------------------------------------
+
+const NICK_KEY = 'govibearcadia.nick'
+let memoryNick: Nick | null = null
+
+/** The leaderboard nickname this device opted into, or null. Nothing is recorded for anyone who has not opted in. */
+export function getNick(): Nick | null {
+  try {
+    const raw = localStorage.getItem(NICK_KEY)
+    if (raw) {
+      const parsed: unknown = JSON.parse(raw)
+      if (isNick(parsed)) return parsed
+    }
+  } catch {
+    /* storage blocked or corrupt: fall back to this tab's memory */
+  }
+  return memoryNick
+}
+
+export function setNick(nick: Nick | null): void {
+  memoryNick = nick
+  try {
+    if (nick) localStorage.setItem(NICK_KEY, JSON.stringify(nick))
+    else localStorage.removeItem(NICK_KEY)
+  } catch {
+    /* ignore */
+  }
+}
+
+export async function fetchBoard(game: string, period: 'week' | 'all'): Promise<Board | null> {
+  try {
+    const r = await fetch(`/api/leaderboard?game=${encodeURIComponent(game)}&period=${period}`)
+    return r.ok ? ((await r.json()) as Board) : null
+  } catch {
+    return null
+  }
+}
+
+/** Deletes everything the server stored for this player, then forgets the nickname here. Returns false if the server could not be reached. */
+export async function leaveLeaderboards(): Promise<boolean> {
+  try {
+    const r = await fetch('/api/leaderboard/me', { method: 'DELETE', headers: { 'x-player-token': playerToken() } })
+    if (!r.ok) return false
+    setNick(null)
+    return true
+  } catch {
+    return false
+  }
+}
