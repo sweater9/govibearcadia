@@ -1,4 +1,4 @@
-import { ArrowRight, CloudOff, ShieldCheck, Sparkles, Trophy } from 'lucide-react'
+import { ArrowRight, CloudOff, ShieldCheck, Sparkles, Users } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { GameCard } from '../components/GameCard'
@@ -51,7 +51,7 @@ export function Home() {
             <br />
             <span>next obsession.</span>
           </h1>
-          <p>A premium browser arcade built for quick escapes and long streaks. No account. No tracking. Just play.</p>
+          <p>{games.length} free games for quick escapes and long streaks. No account. No tracking. Just play.</p>
           <div className="hero-actions">
             <Link className="primary-btn" to={`/play/${recent?.id ?? games[0].id}`}>
               {recent ? 'Continue playing' : 'Start playing'} <ArrowRight size={18} />
@@ -70,8 +70,8 @@ export function Home() {
               Progress stays local
             </span>
             <span>
-              <Trophy />
-              Personal bests
+              <Users />
+              Play a friend online
             </span>
           </div>
         </div>
@@ -84,26 +84,28 @@ export function Home() {
           </div>
         </div>
       </section>
-      <section className="home-daily daily-card" aria-label="Daily challenge">
-        <div>
-          <p className="eyebrow">Daily challenge · {challenge.day}</p>
-          <h2>{challengeGame.title}</h2>
-          <p>Same puzzle for everyone today. Win it for +50 XP and to keep your streak.</p>
-        </div>
-        <Link className="primary-btn" to={`/play/${challenge.gameId}?seed=${challenge.seed}&daily=${challenge.day}`}>
-          Play today's challenge <ArrowRight size={18} />
-        </Link>
-      </section>
-      <section className="home-daily" aria-label="Play online">
-        <div>
-          <p className="eyebrow">New · Play with a friend</p>
-          <h2>Online Connect Four</h2>
-          <p>Make a private room and send the code. No account, nothing to install.</p>
-        </div>
-        <Link className="secondary-btn" to="/online">
-          Play online <ArrowRight size={18} />
-        </Link>
-      </section>
+      <div className="today">
+        <section className="home-daily daily-card" aria-label="Daily challenge">
+          <div>
+            <p className="eyebrow">Daily challenge · {challenge.day}</p>
+            <h2>{challengeGame.title}</h2>
+            <p>Same puzzle for everyone today. Win it for +50 XP and to keep your streak.</p>
+          </div>
+          <Link className="primary-btn" to={`/play/${challenge.gameId}?seed=${challenge.seed}&daily=${challenge.day}`}>
+            Play today's challenge <ArrowRight size={18} />
+          </Link>
+        </section>
+        <section className="home-daily" aria-label="Play online">
+          <div>
+            <p className="eyebrow">Play with a friend</p>
+            <h2>Private online rooms</h2>
+            <p>Connect Four, Tic-Tac-Toe, Checkers or Battleship. Send a code, no account needed.</p>
+          </div>
+          <Link className="secondary-btn" to="/online">
+            Play online <ArrowRight size={18} />
+          </Link>
+        </section>
+      </div>
       {recent ? (
         <section className="continue">
           <div>
@@ -177,7 +179,7 @@ export function Home() {
           </p>
         )}
         <p className="phase-note">
-          Phase 1 collection · {games.length} complete games, growing toward a 15-game arcade.
+          {games.length} games · free, no account, and they work offline once loaded.
         </p>
       </section>
     </main>

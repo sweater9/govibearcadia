@@ -82,3 +82,16 @@ Each slice follows the repo rules: pure rules plus tests, component tests under 
 2. Confirm: no chat in version 1.
 3. Confirm: leaderboards later, with opt-in word-list nicknames only.
 4. Stay on the free Cloudflare plan for now (my recommendation) and move to Paid ($5 per month) only if a limit is hit.
+
+
+## Slice 3.6 design: leaderboards (decided 2026-11-01)
+
+**What is ranked.** Only results the server itself witnessed: wins in online rooms. Single-player scores are reported by the browser, so anyone could post any number; ranking them would be a cheaters' board. (They can be added later as an explicitly "self-reported" daily board if wanted.) Boards: wins this week (resets Monday 00:00 UTC, matching weekly goals) and wins all-time, per game and overall.
+
+**Identity.** Opt-in only, no accounts. A player picks a word-list nickname (adjective + noun + number, for example "Brave Otter 42"); the browser sends three small indices and the server checks them against its own word list, so there is no free text and nothing to moderate. Until a player opts in, their wins are not recorded at all. The server stores only a SHA-256 hash of the anonymous player token (never the token itself, which is also the seat key), the nickname indices, and win counts. A "remove me from leaderboards" button deletes every row for that token.
+
+**Fair play.** A win counts only when both seats were connected and at least one move per side was made. At most 3 wins per day count against the same opponent, so two friends cannot farm each other without limit. This does not stop someone with two devices; it is a fun board, not a tournament, and the page says so.
+
+**Architecture.** A new `Leaderboard` Durable Object (one global instance, SQLite) with a tiny RPC: `recordWin`, `top`, `forget`. The `Room` object calls it when a round ends. `GET /api/leaderboard?game=&period=` returns the top 20, cacheable for 30 seconds. Per CLAUDE.md a Durable Object migration cannot be casually undone, so the migration (v2, new class) ships alone first and is checked live before any feature code depends on it.
+
+**Free-tier cost.** One small write per counted win and one read per leaderboard view (cached), so well inside the limits that already bound the rooms themselves.

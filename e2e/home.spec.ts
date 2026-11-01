@@ -60,3 +60,26 @@ test('unknown games redirect home', async ({ page }) => {
   await page.goto('/play/does-not-exist')
   await expect(page).toHaveURL('/')
 })
+
+test('the hero sits side by side with the portal on a wide screen, and the first cards are on screen without scrolling far', async ({ page, isMobile }) => {
+  test.skip(!!isMobile, 'desktop layout')
+  await page.setViewportSize({ width: 1366, height: 768 })
+  await page.goto('/')
+  const copy = await page.locator('.hero-copy').boundingBox()
+  const portal = await page.locator('.portal').boundingBox()
+  expect(portal!.x).toBeGreaterThan(copy!.x + copy!.width - 1) // portal is to the right of the text, not below it
+  expect(Math.abs(portal!.y - copy!.y)).toBeLessThan(300)
+  const daily = await page.locator('.today').boundingBox()
+  expect(daily!.y).toBeLessThan(900)
+})
+
+test('exactly the four games with online rooms carry the Online badge, and the phone page does not overflow', async ({ page }) => {
+  await page.goto('/')
+  const badged = page.locator('article.game-card', { has: page.locator('.online-badge') })
+  await expect(badged).toHaveCount(4)
+  for (const title of ['Connect Four', 'Tic-Tac-Toe', 'Checkers', 'Battleship']) {
+    await expect(badged.getByRole('heading', { name: title })).toBeVisible()
+  }
+  expect(await overflowsHorizontally(page)).toBe(false)
+  await expect(page.getByText(`${GAMES.length} free games`)).toBeVisible()
+})
