@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { createRandom } from '../src/lib/rng'
-import { dice, newGame, type State } from '../src/games/ghata/rules'
+import { dice, rollTotal, newGame, type State } from '../src/games/ghata/rules'
 import { expectRows, overflowsHorizontally, readTable } from './helpers'
 
 // Ghata Bara: crafted positions are put in through the saved-game slot, so the real UI is checked against exact rules.
@@ -40,7 +40,7 @@ test('the 7x7 board has the 13 X squares of the cloth, a Home in the middle, and
 
 test('pressing R rolls the two dice; the seeded roll is the one the rules produce', async ({ page }) => {
   const [a, b] = dice(createRandom('e2e-gb'))
-  const total = a + b
+  const total = rollTotal(a, b)
   await page.clock.install({ time: T0 })
   await page.goto('/play/ghata-bara?seed=e2e-gb')
   await expect(page.getByRole('button', { name: 'Roll' })).toBeEnabled()

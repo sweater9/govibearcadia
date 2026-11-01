@@ -6,10 +6,14 @@ export const SEATS: readonly Seat[] = [0, 1, 2, 3]
 export const PAWNS_PER_SEAT = 6
 export const MAX_JUGAS = 3
 
-/** The four faces of a long die: 1, 2, 3 and a blank that counts as 6 (§4). */
+/** The four faces of a long die: 1, 2, 3 and a blank (stored as 6, never added as 6; see rollTotal). */
 export const FACES = [1, 2, 3, 6] as const
+export const BLANK = 6
 export const BONUS_TOTALS: readonly number[] = [6, 12] // Chowka and Baara
-export const COMBINED_TOTALS = [2, 3, 4, 5, 6, 7, 8, 9, 12] as const
+export const COMBINED_TOTALS = [1, 2, 3, 4, 5, 6, 12] as const
+
+/** A blank counts 0 beside a numbered face; two blanks make 12 (Baara). Results: 1 to 6, or 12. */
+export const rollTotal = (a: number, b: number): number => (a === BLANK && b === BLANK ? 12 : (a === BLANK ? 0 : a) + (b === BLANK ? 0 : b))
 
 export const OUTER = 16
 export const INNER = 8
@@ -447,7 +451,7 @@ export function apply(prev: State, action: Action): Result {
     if (s.phase !== 'roll') return fail('not-rolling')
     const [a, b] = action.dice
     if (!FACES.includes(a as 1) || !FACES.includes(b as 1)) return fail('bad-dice')
-    const total = a + b
+    const total = rollTotal(a, b)
     s.rolls.push(total)
     s.events.push({ type: 'roll', seat: s.turn, total })
     if (BONUS_TOTALS.includes(total)) {

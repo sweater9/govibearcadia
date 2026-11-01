@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { createRandom } from '../../lib/rng'
 import { chooseAction } from './bot'
 import {
-  COMBINED_TOTALS, FACES, apply, board, invariantErrors, isSafe, keyOf, legalActions, newGame, planJuga, planPawn,
+  COMBINED_TOTALS, FACES, rollTotal, apply, board, invariantErrors, isSafe, keyOf, legalActions, newGame, planJuga, planPawn,
   type Action, type Juga, type Seat, type State, type Where,
 } from './rules'
 
@@ -49,12 +49,12 @@ const hasEvent = (s: State, type: string) => s.events.some((e) => e.type === typ
 
 describe('dice', () => {
   const totals = new Set<number>()
-  for (const a of FACES) for (const b of FACES) totals.add(a + b)
-  it('two dice of 1, 2, 3 and blank (6) give exactly 2, 3, 4, 5, 6, 7, 8, 9 and 12', () => {
+  for (const a of FACES) for (const b of FACES) totals.add(rollTotal(a, b))
+  it('two dice of 1, 2, 3 and blank (6) give exactly 1, 2, 3, 4, 5, 6 and 12 (blank is 0, two blanks 12)', () => {
     expect([...totals].sort((x, y) => x - y)).toEqual([...COMBINED_TOTALS])
   })
   it('only 3+3 makes Chowka (6) and only blank+blank makes Baara (12)', () => {
-    const pairs = (t: number) => FACES.flatMap((a) => FACES.filter((b) => a + b === t).map((b) => [a, b]))
+    const pairs = (t: number) => FACES.flatMap((a) => FACES.filter((b) => rollTotal(a, b) === t).map((b) => [a, b]))
     expect(pairs(6)).toEqual([[3, 3]])
     expect(pairs(12)).toEqual([[6, 6]])
   })
