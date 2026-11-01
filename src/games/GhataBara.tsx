@@ -26,6 +26,8 @@ for (const size of [5, 7] as const) {
 
 const startSeats = (size: Size): Record<string, Seat> => Object.fromEntries(LAYOUTS[size].start.map((i, seat) => [`o${i}`, seat as Seat]))
 
+const ringOf = (key: string, size: Size) => (key === 'c' ? 'home' : key[0] === 'o' ? 'outer' : size === 7 && Number(key.slice(1)) < 16 ? 'middle' : 'inner')
+
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`
 
 function describe(events: GameEvent[]): string {
@@ -247,27 +249,30 @@ export function GhataBara({ onFinish, seed }: GameProps) {
   return (
     <div className="gb">
       <div className="game-toolbar gb-bar">
-        <div className="gb-dice" aria-hidden={!faces}>
-          {[0, 1].map((i) => (
-            <span key={i} className="gb-die" data-rolling={rolling || undefined} data-blank={faces?.[i] === 6 || undefined} data-face={faces?.[i]}>
-              {faces ? (faces[i] === 6 ? '' : faces[i]) : ''}
-              {faces && faces[i] !== 6 ? Array.from({ length: faces[i] }, (_, k) => <i key={k} />) : null}
-            </span>
-          ))}
-        </div>
-        <button ref={rollButton} className="primary-btn gb-roll" disabled={!canRoll} onClick={roll}>
-          {rolling ? 'Rolling…' : 'Roll'}
-        </button>
-        <div className="gb-queue" aria-label="Moves to place">
-          {(game.phase === 'move' ? game.queue : game.rolls).map((v, i) => (
-            <span key={i} className="gb-chunk">{v}</span>
-          ))}
-        </div>
-        {releases.map((r) => (
-          <button key={r.chunk} className="secondary-btn" onClick={() => play(r)}>
-            Release a pawn ({game.queue[r.chunk]})
+        <div className="gb-roller">
+          <div className="gb-dice" aria-hidden={!faces}>
+            {[0, 1].map((i) => (
+              <span key={i} className="gb-die" data-rolling={rolling || undefined} data-blank={faces?.[i] === 6 || undefined} data-face={faces?.[i]}>
+                {faces ? (faces[i] === 6 ? '' : faces[i]) : ''}
+                {faces && faces[i] !== 6 ? Array.from({ length: faces[i] }, (_, k) => <i key={k} />) : null}
+              </span>
+            ))}
+          </div>
+          <button ref={rollButton} className="primary-btn gb-roll" disabled={!canRoll} onClick={roll}>
+            {rolling ? 'Rolling…' : 'Roll'}
           </button>
-        ))}
+          <div className="gb-queue" aria-label="Moves to place">
+            {(game.phase === 'move' ? game.queue : game.rolls).map((v, i) => (
+              <span key={i} className="gb-chunk">{v}</span>
+            ))}
+          </div>
+          {releases.map((r) => (
+            <button key={r.chunk} className="secondary-btn" onClick={() => play(r)}>
+              Release a pawn ({game.queue[r.chunk]})
+            </button>
+          ))}
+        </div>
+        <div className="gb-settings">
         <select aria-label="Board size" value={game.size} onChange={(e) => newMatch(humans, Number(e.target.value) as Size)}>
           <option value={7}>7×7 board</option>
           <option value={5}>5×5 board</option>
@@ -280,6 +285,7 @@ export function GhataBara({ onFinish, seed }: GameProps) {
         <button className="icon-btn" aria-label="New game" onClick={() => newMatch(humans)}>
           <RotateCcw size={16} />
         </button>
+        </div>
       </div>
 
       <div className="gb-board" data-size={size} style={{ ['--n' as string]: size }} role="group" aria-label={`Ghata Bara board, ${size} by ${size}`}>
@@ -298,6 +304,7 @@ export function GhataBara({ onFinish, seed }: GameProps) {
                 data-safe={isSafe(key, size) || undefined}
                 data-home={key === 'c' || undefined}
                 data-seat={START_SEAT[key]}
+                data-ring={ringOf(key, size)}
                 data-target={target ? '' : undefined}
                 data-movable={movable ? '' : undefined}
                 data-selected={isSel || undefined}
@@ -339,7 +346,7 @@ export function GhataBara({ onFinish, seed }: GameProps) {
           </button>
         </div>
       ) : null}
-      <p className="gb-status" role="status">
+      <p className="gb-status" role="status" data-seat={over ? game.winner! : game.turn}>
         <strong>{status}</strong> {note}
       </p>
 
