@@ -168,3 +168,21 @@ test('7x7: a pawn with no capture keeps circling the outer ring', async ({ page 
   await expect(page.locator('[data-square="o1"]')).toHaveAttribute('data-target', '') // past its start, round again
   await expect(page.locator('[data-target]')).toHaveCount(1)
 })
+
+test('a player chooses a piece, it appears on the board and the player card, and it is remembered for next time', async ({ page }) => {
+  await stage(page, jugaNextToEnemy(false))
+  await page.goto('/play/ghata-bara')
+  const button = page.getByRole('button', { name: /^Piece:/ }).first()
+  const before = await button.innerText()
+  await button.click()
+  const free = page.locator('[data-token-option]:not([disabled])[aria-checked="false"]').first() // some piece nobody holds
+  const chosen = (await free.getAttribute('aria-label'))!
+  await free.click()
+  await expect(button).toHaveText(`Piece: ${chosen}`)
+  expect(`Piece: ${chosen}`).not.toBe(before)
+  await expect(page.locator('.gb-seats li').first().locator('svg')).toBeVisible()
+  await expect(page.locator('.gb-juga svg')).toHaveCount(2) // the Juga carries the same piece
+  await page.evaluate((k) => localStorage.removeItem(k), KEY) // a brand new game, same device
+  await page.reload()
+  await expect(page.getByRole('button', { name: /^Piece:/ }).first()).toHaveText(`Piece: ${chosen}`)
+})

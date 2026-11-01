@@ -1,7 +1,7 @@
 import type { State } from './rules'
 
 /** A game in progress, kept only in this browser. The dice come from `seed` and `draws`, so play continues the same way. */
-export type Saved = { v: 1; seed: string; draws: number; humans: number; state: State }
+export type Saved = { v: 1; seed: string; draws: number; humans: number; state: State; tokens?: number[] }
 
 const KEY = 'govibearcadia.ghata'
 
@@ -31,6 +31,26 @@ export function save(s: Saved) {
 export function clearSaved() {
   try {
     localStorage.removeItem(KEY)
+  } catch {
+    /* ignore */
+  }
+}
+
+const TOKEN_KEY = 'govibearcadia.ghata.token'
+
+/** The piece the first player picked last time, kept only on this device. */
+export function loadTokenPref(): number | null {
+  try {
+    const n = Number(localStorage.getItem(TOKEN_KEY))
+    return localStorage.getItem(TOKEN_KEY) !== null && Number.isInteger(n) ? n : null
+  } catch {
+    return null
+  }
+}
+
+export function saveTokenPref(n: number) {
+  try {
+    localStorage.setItem(TOKEN_KEY, String(n))
   } catch {
     /* ignore */
   }

@@ -8,7 +8,9 @@ import {
   FACES, LAYOUTS, actionDestination, apply, board, dice as rollDice, homeCount, innerKey, isSafe, keyOf, legalActions, newGame, yardCount,
   type Action, type GameEvent, type Seat, type Size, type State,
 } from './ghata/rules'
-import { clearSaved, loadSaved, save } from './ghata/save'
+import { TokenIcon } from '../components/TokenIcon'
+import { clearSaved, loadSaved, loadTokenPref, save, saveTokenPref } from './ghata/save'
+import { TOKENS, assignTokens, validTokens } from './ghata/tokens'
 import { HUMAN_SEATS, SEAT_INFO } from './ghata/seats'
 
 /** Pause before the computer acts, and how long the dice tumble, so every step can be followed. */
@@ -60,6 +62,8 @@ export function GhataBara({ onFinish, seed }: GameProps) {
   const [humans, setHumans] = useState(saved?.humans ?? 1)
   const [game, setGame] = useState<State>(() => saved?.state ?? newGame(7))
   const [matchSeed, setMatchSeed] = useState(() => seed ?? saved?.seed ?? randomSeed())
+  const [tokens, setTokens] = useState<number[]>(() => (validTokens(saved?.tokens) ? saved!.tokens! : assignTokens(HUMAN_SEATS[saved?.humans ?? 1], loadTokenPref(), saved?.seed ?? seed ?? 'new')))
+  const [choosing, setChoosing] = useState<Seat | null>(null)
   const [selected, setSelected] = useState<string | null>(null)
   const [rolling, setRolling] = useState(false)
   const [faces, setFaces] = useState<[number, number] | null>(null)
@@ -104,9 +108,9 @@ export function GhataBara({ onFinish, seed }: GameProps) {
             stats: { players: humans, winner, pawnsHome: homeCount(next, 0) },
           })
         }
-      } else if (seed === undefined) save({ v: 1, seed: matchSeed, draws: draws.current, humans, state: next })
+      } else if (seed === undefined) save({ v: 1, seed: matchSeed, draws: draws.current, humans, state: next, tokens })
     },
-    [onFinish, seats, humans, seed, matchSeed, game.turn],
+    [onFinish, seats, humans, seed, matchSeed, game.turn, tokens],
   )
 
   const play = useCallback(
@@ -211,13 +215,25 @@ export function GhataBara({ onFinish, seed }: GameProps) {
     reported.current = false
     startedAt.current = Date.now()
     setHumans(n)
-    setMatchSeed(seed ?? randomSeed())
+    const nextSeed = seed ?? randomSeed()
+    setMatchSeed(nextSeed)
+    setTokens(assignTokens(HUMAN_SEATS[n], loadTokenPref(), nextSeed))
+    setChoosing(null)
     setGame(newGame(size))
     setSelected(null)
     setRolling(false)
     setFaces(null)
     setNote('')
     setHandoff(null)
+  }
+
+  const pick = (seat: Seat, token: number) => {
+    if (tokens.some((t, other) => t === token && other !== seat)) return
+    const next = tokens.map((t, i) => (i === seat ? token : t))
+    setTokens(next)
+    setChoosing(null)
+    if (seat === seats[0]) saveTokenPref(token)
+    if (seed === undefined && !over) save({ v: 1, seed: matchSeed, draws: draws.current, humans, state: game, tokens: next })
   }
 
   const occupancy = board(game)
@@ -319,12 +335,12 @@ export function GhataBara({ onFinish, seed }: GameProps) {
                 ) : (
                   <>
                     {occ?.singles.map((p) => (
-                      <span key={p.id} className="gb-pawn" data-seat={p.seat} data-pinned={p.pinnedBy !== null || undefined}>{SEAT_INFO[p.seat].glyph}</span>
+                      <span key={p.id} className="gb-pawn" data-seat={p.seat} data-pinned={p.pinnedBy !== null || undefined} data-token={TOKENS[tokens[p.seat]].id}><TokenIcon token={tokens[p.seat]} /></span>
                     ))}
                     {occ?.jugas.map((j) => (
                       <span key={`j${j.id}`} className="gb-juga" data-seat={j.seat} data-holding={j.pinned !== null || undefined}>
-                        <i />
-                        <i />
+                        <i><TokenIcon token={tokens[j.seat]} /></i>
+                        <i><TokenIcon token={tokens[j.seat]} /></i>
                       </span>
                     ))}
                   </>
@@ -350,15 +366,32 @@ export function GhataBara({ onFinish, seed }: GameProps) {
         <strong>{status}</strong> {note}
       </p>
 
+      {choosing !== null ? (
+        <div className="gb-picker" data-seat={choosing} role="radiogroup" aria-label={`Piece for ${SEAT_INFO[choosing].name}`}>
+          {TOKENS.map((t, i) => {
+            const taken = tokens.some((x, other) => x === i && other !== choosing)
+            return (
+              <button key={t.id} role="radio" aria-checked={tokens[choosing] === i} aria-label={taken ? `${t.name}, taken` : t.name} disabled={taken} data-token-option={t.id} onClick={() => pick(choosing, i)}>
+                <TokenIcon token={i} />
+              </button>
+            )
+          })}
+        </div>
+      ) : null}
       <ul className="gb-seats" aria-label="Seats">
         {([0, 1, 2, 3] as Seat[]).map((s) => (
           <li key={s} data-seat={s} data-turn={game.turn === s && !over ? '' : undefined}>
             <strong>
-              <span className="gb-key" data-seat={s}>{SEAT_INFO[s].glyph}</span> {SEAT_INFO[s].name}
+              <span className="gb-key" data-seat={s}><TokenIcon token={tokens[s]} /></span> {SEAT_INFO[s].name}
             </strong>
             <small>
               {seats.includes(s) ? 'Player' : 'Computer'} · {SEAT_INFO[s].side}
             </small>
+            {seats.includes(s) ? (
+              <button className="gb-piece-btn" aria-expanded={choosing === s} onClick={() => setChoosing(choosing === s ? null : s)}>
+                Piece: {TOKENS[tokens[s]].name}
+              </button>
+            ) : null}
             <span className="gb-yard" aria-hidden="true">
               {Array.from({ length: 6 }, (_, i) => (
                 <i key={i} data-filled={i < yardCount(game, s) || undefined} />

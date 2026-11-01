@@ -165,19 +165,25 @@ button.bs-cell:disabled{cursor:default}
 .gb-sq:hover:not(:disabled){filter:brightness(1.25)}
 .gb-sq:focus-visible{outline:3px solid #fff;outline-offset:1px;z-index:2}
 .gb-badge{position:absolute;right:3px;bottom:1px;font-size:clamp(9px,2.6vw,13px);font-weight:800;color:#a5f3fc;z-index:2}
-.gb-pawn{position:relative;z-index:1;display:grid;place-items:center;width:clamp(14px,4.6vw,30px);aspect-ratio:1;border-radius:50%;font-size:clamp(7px,2.4vw,14px);color:#0a0618;background:radial-gradient(circle at 34% 28%,#fffa,transparent 46%),var(--c);box-shadow:0 0 0 2px #080414,0 0 10px color-mix(in srgb,var(--c) 65%,transparent)}
+.gb-pawn{position:relative;z-index:1;display:grid;place-items:center;width:clamp(14px,4.6vw,30px);aspect-ratio:1;border-radius:50%;padding:18%;color:#0a0618;background:radial-gradient(circle at 34% 28%,#fffa,transparent 46%),var(--c);box-shadow:0 0 0 2px #080414,0 0 10px color-mix(in srgb,var(--c) 65%,transparent)}
 .gb-pawn[data-pinned]{outline:2px dashed #fb7185;outline-offset:2px;opacity:.85}
 .gb-juga{position:relative;z-index:1;display:flex;padding:3px;border-radius:999px;background:#080414;box-shadow:0 0 0 2px #fff,0 0 12px color-mix(in srgb,var(--c) 65%,transparent)}
-.gb-juga i{width:clamp(10px,3.3vw,21px);aspect-ratio:1;border-radius:50%;background:var(--c);margin:0 -1px}
+.gb-juga i{display:grid;place-items:center;width:clamp(10px,3.3vw,21px);aspect-ratio:1;border-radius:50%;padding:16%;color:#0a0618;background:var(--c);margin:0 -1px}
 .gb-juga[data-holding]{outline:2px dashed #fb7185;outline-offset:2px}
 .gb-homes{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;max-width:70%}.gb-homes i{width:clamp(5px,1.6vw,9px);aspect-ratio:1;border-radius:50%;background:var(--c);box-shadow:0 0 5px var(--c)}
-.gb-board[data-size="7"] .gb-pawn{width:clamp(11px,3.6vw,24px);font-size:clamp(6px,1.9vw,12px)}.gb-board[data-size="7"] .gb-juga i{width:clamp(8px,2.3vw,16px)}
+.gb-board[data-size="7"] .gb-pawn{width:clamp(11px,3.6vw,24px);padding:16%}.gb-board[data-size="7"] .gb-juga i{width:clamp(8px,2.3vw,16px)}
 .gb-status{margin:12px 0 0;text-align:center;font-size:15px;color:#ffffffb8;min-height:2.6em}.gb-status strong{color:#fff}
 .gb-status strong::before{content:"";display:inline-block;width:.62em;height:.62em;margin-right:.5em;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c)}
 .gb-seats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;list-style:none;padding:0;margin:10px 0 0}
 .gb-seats li{display:grid;gap:3px;padding:9px 11px;border-radius:12px;background:#120a2b;box-shadow:inset 0 0 0 1px #2b1d57;font-size:12px}
 .gb-seats li[data-turn]{box-shadow:inset 0 0 0 2px var(--c),0 0 18px color-mix(in srgb,var(--c) 35%,transparent)}
-.gb-seats small{color:#ffffff80}.gb-key{color:var(--c)}
+.gb-seats small{color:#ffffff80}.gb-key{display:inline-block;width:1.15em;height:1.15em;vertical-align:-.2em;color:var(--c)}
+.gb-piece-btn{justify-self:start;padding:2px 0;background:none;border:0;border-bottom:1px dashed #ffffff44;color:#c4b5fd;font-size:12px;cursor:pointer}
+.gb-picker{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:12px 0 0;padding:10px;border-radius:14px;background:#120a2b;box-shadow:inset 0 0 0 2px var(--c)}
+.gb-picker button{width:44px;height:44px;padding:9px;border:0;border-radius:12px;background:#1c1244;color:var(--c);cursor:pointer;box-shadow:inset 0 0 0 1px #2b1d57}
+.gb-picker button[aria-checked=true]{box-shadow:inset 0 0 0 2px var(--c),0 0 14px color-mix(in srgb,var(--c) 45%,transparent)}
+.gb-picker button:disabled{opacity:.28;cursor:not-allowed}
+.gb-picker button:focus-visible{outline:3px solid #fff}
 .gb-yard{display:flex;gap:3px;margin:2px 0}.gb-yard i{width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--c);opacity:.5}.gb-yard i[data-filled]{background:var(--c);box-shadow:0 0 6px var(--c);opacity:1}
 .gb-handoff{position:fixed;inset:0;z-index:50;display:grid;place-content:center;justify-items:center;gap:18px;background:#080414f2;text-align:center;font-size:22px}
 @media(max-width:700px){.gb-seats{grid-template-columns:repeat(2,1fr)}.gb-bar{justify-content:center}}

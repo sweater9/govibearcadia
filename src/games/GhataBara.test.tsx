@@ -101,4 +101,20 @@ describe('GhataBara', () => {
     expect(screen.queryByRole('dialog')).toBeNull()
     expect(screen.getByRole('button', { name: 'Roll' })).toBeEnabled()
   })
+
+  it('lets a player choose a piece, never the same as another seat, and remembers it', () => {
+    const { container } = render(<GhataBara onFinish={vi.fn()} seed="ui" />)
+    fireEvent.change(screen.getByLabelText('Players'), { target: { value: '2' } })
+    fireEvent.click(screen.getAllByRole('button', { name: /^Piece:/ })[0])
+    const group = screen.getByRole('radiogroup', { name: 'Piece for Violet' })
+    expect(group.querySelectorAll('button')).toHaveLength(8)
+    expect(screen.getByRole('radio', { name: 'Rocket, taken' })).toBeDisabled() // Amber already holds it
+    fireEvent.click(screen.getByRole('radio', { name: 'Star' }))
+    expect(screen.getAllByRole('button', { name: /^Piece:/ })[0]).toHaveTextContent('Piece: Star')
+    expect(localStorage.getItem('govibearcadia.ghata.token')).toBe('4')
+    // Amber (the second person) cannot take it
+    fireEvent.click(screen.getAllByRole('button', { name: /^Piece:/ })[1])
+    expect(screen.getByRole('radio', { name: 'Star, taken' })).toBeDisabled()
+    expect(container.querySelectorAll('.gb-seats svg')).toHaveLength(4)
+  })
 })
