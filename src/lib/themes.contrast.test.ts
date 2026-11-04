@@ -1,8 +1,9 @@
 import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { THEMES } from './themes'
 
-const css = readFileSync(new URL('../styles.css', import.meta.url), 'utf8')
+const css = readFileSync(resolve(process.cwd(), 'src/styles.css'), 'utf8')
 
 const lum = (hex: string) => {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
