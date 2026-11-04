@@ -1,13 +1,13 @@
-/** Colour themes, unlocked by level. Pure helpers plus a tiny DOM/storage layer at the bottom. */
+/** Accent colour themes, unlocked by level: a theme changes only the primary colour (see the theme block in styles.css). Pure helpers plus a tiny DOM/storage layer at the bottom. */
 
 export type ThemeId = 'neon' | 'ocean' | 'forest' | 'ember'
 export type Theme = { id: ThemeId; name: string; level: number; blurb: string }
 
 export const THEMES: readonly Theme[] = [
-  { id: 'neon', name: 'Neon', level: 1, blurb: 'Electric purple and cyan' },
-  { id: 'ocean', name: 'Ocean', level: 2, blurb: 'Deep blues and sea green' },
-  { id: 'forest', name: 'Forest', level: 3, blurb: 'Teal and moss' },
-  { id: 'ember', name: 'Ember', level: 5, blurb: 'Warm amber and rose' },
+  { id: 'neon', name: 'Neon', level: 1, blurb: 'Cyan, the arcade’s own' },
+  { id: 'ocean', name: 'Ocean', level: 2, blurb: 'A cool blue accent' },
+  { id: 'forest', name: 'Forest', level: 3, blurb: 'A fresh green accent' },
+  { id: 'ember', name: 'Ember', level: 5, blurb: 'A warm coral accent' },
 ]
 
 export const DEFAULT_THEME: ThemeId = 'neon'

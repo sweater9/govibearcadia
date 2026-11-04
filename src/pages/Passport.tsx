@@ -174,6 +174,7 @@ export function Passport() {
                 setTheme(t.id)
               }}
             >
+              <span className="theme-swatch" aria-hidden="true" />
               <strong>{t.name}</strong>
               <small>{open ? t.blurb : `Unlocks at level ${t.level}`}</small>
             </button>

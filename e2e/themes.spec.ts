@@ -3,6 +3,7 @@ import { overflowsHorizontally } from './helpers'
 
 const theme = (page: Page) => page.evaluate(() => document.documentElement.dataset.theme)
 const filter = (page: Page) => page.evaluate(() => getComputedStyle(document.documentElement).filter)
+const primary = (page: Page) => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--primary').trim().toUpperCase())
 
 /** Imports `n` won runs (25 XP each) so the passport reaches a given level. */
 async function giveXp(page: Page, wins: number) {
@@ -30,7 +31,9 @@ test('themes unlock with level, apply instantly and survive a reload', async ({ 
 
   await page.locator('[data-theme-option="ember"]').click()
   expect(await theme(page)).toBe('ember')
-  expect(await filter(page)).toContain('hue-rotate')
+  expect(await primary(page)).toBe('#FF8A65') // the accent changes...
+  expect(await filter(page)).toBe('none') // ...and the page is never colour-shifted, so the palette and its contrast stay as designed
+  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(11, 13, 20)')
   await expect(page.locator('[data-theme-option="ember"]')).toHaveAttribute('aria-checked', 'true')
 
   await page.reload()
@@ -43,6 +46,7 @@ test('themes unlock with level, apply instantly and survive a reload', async ({ 
   await page.locator('[data-theme-option="neon"]').click()
   expect(await theme(page)).toBe('neon')
   expect(await filter(page)).toBe('none')
+  expect(await primary(page)).toBe('#3DD9F5')
 })
 
 test('a locked theme smuggled into storage is ignored', async ({ page }) => {
