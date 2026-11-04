@@ -344,3 +344,22 @@ button.bs-cell:disabled{cursor:default}
 @media(max-width:700px){.hero{padding:40px 16px 24px}.hero .lead{font-size:18px}.today,.recs{padding:0 16px}.library{padding:40px 16px 56px}.continue{width:calc(100% - 32px)}.home-daily,.continue{padding:20px}.section-head h2{font-size:30px}.game-card .card-desc{display:-webkit-box}.thumb{display:block}.today-links .secondary-btn{flex:1}}
 .play-title .eyebrow{font-size:11px!important;line-height:normal}
 .play-head .icon-btn{width:40px;height:40px}
+
+/* Redesign step 3: game pages. Frame, title, toolbar and overlays only: colours, borders and radii, never sizes, so every board still fits on screen. Boards keep their own look. */
+.back{color:var(--text-muted)}.back:hover{color:var(--text)}
+.play-title h1{letter-spacing:-.02em}
+.play-title>p:last-child{color:var(--text-muted)}
+.play-title .challenge-banner,.challenge-panel p{color:var(--primary)}
+.game-shell{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:none}
+.game-over{background:#0B0D14ee;backdrop-filter:none;border-radius:16px}
+.game-toolbar small{font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;color:var(--text-muted)}
+.game-toolbar strong{font-family:var(--font-display);color:var(--accent)}
+.game-toolbar button{background:transparent;border:1px solid var(--border);color:var(--text)}
+.game-toolbar button:hover{background:var(--surface-inset)}
+.game-help{color:var(--text-muted)}
+.win-message{color:var(--primary)}
+.gb-settings select,.pg-settings select{background:var(--surface-inset);border:1px solid var(--border);border-radius:6px;color:var(--text)}
+.pg-round{border-color:var(--border);color:var(--text-muted)}
+.pg-tray{background:var(--surface-inset);border-color:var(--border)}
+.pg-banner,.pg-lesson{border-color:var(--border);background:var(--surface-inset)}
+.pg-more{color:var(--text-muted)}
