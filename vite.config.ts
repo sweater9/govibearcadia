@@ -8,14 +8,14 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       // Multiplayer lives behind /api (a Worker); the service worker must never answer those requests.
-      workbox: { navigateFallbackDenylist: [/^\/api\//] },
+      workbox: { navigateFallbackDenylist: [/^\/api\//], globPatterns: ['**/*.{js,css,html,woff2}'] },
       includeAssets: ['favicon.svg'],
       manifest: {
         name: 'GoVibeArcadia',
         short_name: 'Arcadia',
         description: 'A premium local-first browser arcade.',
-        theme_color: '#090514',
-        background_color: '#090514',
+        theme_color: '#0B0D14',
+        background_color: '#0B0D14',
         display: 'standalone',
         start_url: '/',
         icons: [
