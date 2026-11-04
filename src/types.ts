@@ -9,6 +9,8 @@ export type GameMeta = {
   accent: string
   glyph: string
   estimated: string
+  /** Made for this arcade rather than a classic: shown with an Original badge. */
+  original?: boolean
   /** Eligible for the daily challenge: seeded, solvable, and reports `won`. */
   daily?: boolean
   /** Can be sent to a friend as a challenge: a seeded puzzle whose score is comparable and which reports `won`. */

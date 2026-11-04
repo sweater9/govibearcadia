@@ -27,8 +27,9 @@ test('search narrows the collection and explains an empty result', async ({ page
 test('category filters come from the registry and combine with search', async ({ page }) => {
   await page.goto('/')
   const filters = page.locator('.filters button')
-  await expect(filters.first()).toHaveText('All')
-  await expect(filters).toHaveText(['All', ...new Set(GAMES.map((game) => game.category))])
+  await expect(filters.first()).toHaveText(`All ${GAMES.length}`)
+  const cats = [...new Set(GAMES.map((game) => game.category))]
+  await expect(filters).toHaveText(['All', ...cats].map((c) => `${c} ${c === 'All' ? GAMES.length : GAMES.filter((g) => g.category === c).length}`))
 
   await filters.filter({ hasText: 'Focus' }).click()
   await expect(page.locator('article.game-card')).toHaveCount(1)
@@ -61,14 +62,15 @@ test('unknown games redirect home', async ({ page }) => {
   await expect(page).toHaveURL('/')
 })
 
-test('the hero sits side by side with the portal on a wide screen, and the first cards are on screen without scrolling far', async ({ page, isMobile }) => {
+test('the hero is left-aligned with the trust line, and the start-here cards are on screen without scrolling far', async ({ page, isMobile }) => {
   test.skip(!!isMobile, 'desktop layout')
   await page.setViewportSize({ width: 1366, height: 768 })
   await page.goto('/')
+  await expect(page.locator('.hero .trust')).toHaveText(/No tracking, no account, works offline once loaded/)
   const copy = await page.locator('.hero-copy').boundingBox()
-  const portal = await page.locator('.portal').boundingBox()
-  expect(portal!.x).toBeGreaterThan(copy!.x + copy!.width - 1) // portal is to the right of the text, not below it
-  expect(Math.abs(portal!.y - copy!.y)).toBeLessThan(300)
+  const h1 = await page.locator('.hero h1').boundingBox()
+  expect(Math.abs(h1!.x - copy!.x)).toBeLessThan(2) // starts at the left edge of the content column, not centred
+  expect(h1!.width).toBeLessThan(700) // headline measure is about twelve characters
   const daily = await page.locator('.today').boundingBox()
   expect(daily!.y).toBeLessThan(900)
 })
