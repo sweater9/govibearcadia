@@ -363,3 +363,41 @@ button.bs-cell:disabled{cursor:default}
 .pg-tray{background:var(--surface-inset);border-color:var(--border)}
 .pg-banner,.pg-lesson{border-color:var(--border);background:var(--surface-inset)}
 .pg-more{color:var(--text-muted)}
+
+/* Redesign step 4: leaderboard, passport and online pages (docs/DESIGN.md). Colours, borders and radii only. */
+.passport h1,.lb h1,.online h1{letter-spacing:-.02em;font-size:40px}
+.passport h2,.lb h2,.online h2{font-family:var(--font-display);letter-spacing:-.02em}
+.xp-bar{background:var(--surface-inset);border:1px solid var(--border)}
+.xp-bar span{background:var(--primary)}
+.xp-text{color:var(--text-muted)}
+.pp-stats div{background:var(--surface-inset);border:1px solid var(--border);border-radius:10px;padding:16px}
+.pp-stats small{font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);order:-1}
+.pp-stats strong{font-family:var(--font-display);font-size:28px;color:var(--text)}
+.pp-ach li{background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--text-muted)}
+.pp-ach li.got{color:var(--text);border-color:var(--primary);background:var(--surface-inset)}
+.pp-ach li.got svg{color:var(--primary)}
+.pp-records th{font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);font-weight:500}
+.pp-records th,.pp-records td{border-bottom:1px solid var(--border)}
+.pp-msg,.pp-weekly li.done>span,.lb-notice{color:var(--primary)}
+.pp-weekly small{color:var(--text-muted)}
+.pp-themes button{background:var(--surface-inset);border:1px solid var(--border);border-radius:10px;color:var(--text)}
+.pp-themes button.on{border-color:var(--primary);background:var(--surface)}
+.pp-themes small{color:var(--text-muted)}
+.lb-controls label{color:var(--text-muted)}
+.lb-controls select,.online-game select{background:var(--surface-inset);color:var(--text);border:1px solid var(--border);border-radius:6px}
+.online-game{color:var(--text-muted)}
+.lb-tabs button{min-height:44px;border:1px solid var(--border);background:transparent;color:var(--text);border-radius:10px}
+.lb-tabs button:hover{background:var(--surface)}
+.lb-tabs button[aria-pressed=true]{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.lb-list{gap:0;counter-reset:none}
+.lb-list li{background:transparent;border:0;border-bottom:1px solid var(--border);border-radius:0;padding:14px 8px}
+.lb-list li:nth-child(-n+3){background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:12px}
+.lb-list li:nth-child(1){border-color:var(--accent)}
+.lb-list li[data-me]{border-color:var(--primary);background:var(--surface-inset)}
+.lb-rank{font-family:var(--font-mono);color:var(--accent);font-weight:500}
+.lb-list strong{font-family:var(--font-display);font-size:22px}
+.lb-join{background:var(--surface);border:1px solid var(--border);border-radius:16px}
+.lb a,.online a{color:var(--primary)}.lb a:hover,.online a:hover{color:var(--primary-hover)}
+.online-actions input{background:var(--surface-inset);border:1px solid var(--border);border-radius:6px;min-height:44px}
+.online-error{color:#FF8FA3}
+@media(max-width:700px){.passport h1,.lb h1,.online h1{font-size:32px}}
