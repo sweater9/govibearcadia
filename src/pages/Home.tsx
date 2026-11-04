@@ -1,4 +1,4 @@
-import { ArrowRight, Sparkles } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { GameCard } from '../components/GameCard'
@@ -41,32 +41,17 @@ export function Home() {
   return (
     <main>
       <section className="hero">
-        <div className="hero-glow" />
         <div className="hero-copy">
-          <div className="pill">
-            <Sparkles size={14} /> Independent. Instant. Yours.
-          </div>
-          <h1>
-            Step into your
-            <br />
-            <span>next obsession.</span>
-          </h1>
-          <p>{games.length} free games for quick escapes and long streaks. No account. No tracking. Just play.</p>
+          <p className="trust">No tracking, no account, works offline once loaded, progress stays on your device.</p>
+          <h1>Step into your next obsession.</h1>
+          <p className="lead">{games.length} free games for quick escapes and long streaks. Just play.</p>
           <div className="hero-actions">
             <Link className="primary-btn" to={`/play/${recent?.id ?? games[0].id}`}>
-              {recent ? 'Continue playing' : 'Start playing'} <ArrowRight size={18} />
+              {recent ? 'Continue playing' : 'Start playing'} <ArrowRight size={20} strokeWidth={1.5} />
             </Link>
             <a className="secondary-btn" href="#library">
               Explore the arcade
             </a>
-          </div>
-        </div>
-        <div className="portal" aria-hidden="true">
-          <div className="orbit orbit-a" />
-          <div className="orbit orbit-b" />
-          <div className="portal-core">
-            <span>G</span>
-            <small>ENTER ARCADIA</small>
           </div>
         </div>
       </section>
@@ -78,7 +63,7 @@ export function Home() {
             <p>Same puzzle for everyone today. Win it for +50 XP and to keep your streak.</p>
           </div>
           <Link className="primary-btn" to={`/play/${challenge.gameId}?seed=${challenge.seed}&daily=${challenge.day}`}>
-            Play today's challenge <ArrowRight size={18} />
+            Play today's challenge <ArrowRight size={20} strokeWidth={1.5} />
           </Link>
         </section>
         <section className="home-daily" aria-label="Play online">
@@ -89,7 +74,7 @@ export function Home() {
           </div>
           <div className="today-links">
             <Link className="secondary-btn" to="/online">
-              Play online <ArrowRight size={18} />
+              Play online <ArrowRight size={20} strokeWidth={1.5} />
             </Link>
             <Link className="secondary-btn" to="/leaderboard">
               Leaderboards
@@ -107,7 +92,7 @@ export function Home() {
             </p>
           </div>
           <Link className="primary-btn" to={`/play/${recent.id}`}>
-            Jump back in <ArrowRight size={18} />
+            Jump back in <ArrowRight size={20} strokeWidth={1.5} />
           </Link>
         </section>
       ) : null}
@@ -132,19 +117,19 @@ export function Home() {
             <p className="eyebrow">The collection</p>
             <h2>Pick your portal</h2>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="library-tools">
             <input
               type="search"
               aria-label="Search games"
               placeholder="Search games"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white outline-none placeholder:text-white/40 focus:border-cyan-300/60 sm:w-56"
+              className="search"
             />
             <div className="filters">
               {categories.map((x) => (
-                <button key={x} className={filter === x ? 'active' : ''} onClick={() => setFilter(x)}>
-                  {x}
+                <button key={x} className={filter === x ? 'active' : ''} onClick={() => setFilter(x)} aria-pressed={filter === x}>
+                  {x} <span className="count">{x === 'All' ? games.length : games.filter((g) => g.category === x).length}</span>
                 </button>
               ))}
             </div>
@@ -165,7 +150,7 @@ export function Home() {
             ))}
           </div>
         ) : (
-          <p className="text-white/55" role="status">
+          <p className="muted" role="status">
             No games match “{query}”. Try a different word or clear the category filter.
           </p>
         )}
