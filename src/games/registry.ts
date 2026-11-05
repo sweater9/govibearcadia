@@ -276,6 +276,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./Pallanguzhi').then((m) => ({ default: m.Pallanguzhi }))),
   },
+  {
+    meta: {
+      id: 'carrom',
+      title: 'Carrom',
+      description: 'Flick the striker, pocket your coins and cover the queen. Two or four players, or the computer.',
+      category: 'Arcade',
+      accent: 'from-amber-500 to-orange-600',
+      glyph: '◎',
+      estimated: '15–40 min',
+    },
+    Component: lazy(() => import('./Carrom').then((m) => ({ default: m.Carrom }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)

@@ -411,3 +411,22 @@ button.bs-cell:disabled{cursor:default}
 .theme-swatch{width:16px;height:16px;border-radius:50%;background:var(--sw);margin-bottom:4px;display:block}
 .pp-themes [data-theme-option=neon]{--sw:#3DD9F5}.pp-themes [data-theme-option=ocean]{--sw:#6EA8FF}.pp-themes [data-theme-option=forest]{--sw:#5BD08A}.pp-themes [data-theme-option=ember]{--sw:#FF8A65}
 .pp-themes button:disabled .theme-swatch{opacity:.5}
+
+/* Carrom */
+.cm-setup,.cm-wrap{display:flex;flex-direction:column;gap:6px;align-items:center}
+.cm-setup{gap:10px;padding:8px}.cm-setup h2{font-family:var(--font-display);font-size:26px;margin:0}.cm-setup .secondary-btn,.cm-setup .primary-btn{padding:8px 14px;min-height:40px;font-size:14px}
+.cm-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.cm-wrap .primary-btn,.cm-wrap .secondary-btn{padding:8px 16px}
+.cm-note{color:var(--text-muted);font-size:13px;margin:0}
+.cm-scores{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;height:24px;overflow:hidden}
+.cm-score{display:inline-flex;align-items:baseline;gap:4px;padding:0 8px;border:1px solid var(--border);border-radius:8px;background:var(--surface-inset);font-size:13px;white-space:nowrap}
+.cm-score strong{font-family:var(--font-display);font-size:15px}.cm-score small{color:var(--text-muted);font-size:11px}
+.cm-score-turn{border-color:var(--primary)}
+.cm-board{width:min(100%,calc(100svh - 445px));aspect-ratio:1/1;border-radius:8px;overflow:hidden;touch-action:none;background:#5a3a1e}
+.cm-board canvas{display:block;width:100%!important;height:100%!important}
+.cm-status{margin:0;height:36px;overflow:hidden;font-size:13px;line-height:18px;text-align:center}
+.cm-controls{display:flex;gap:12px;justify-content:center}
+.cm-controls label{display:flex;flex-direction:column;font-size:11px;color:var(--text-muted)}
+.cm-controls input{width:120px;height:20px;margin:0}
+.cm-on{border-color:var(--primary)!important;color:var(--primary)}
+@media(max-width:700px){.cm-board{width:min(100%,calc(100svh - 432px))}.cm-controls{gap:8px}.cm-controls input{width:min(30vw,110px)}}

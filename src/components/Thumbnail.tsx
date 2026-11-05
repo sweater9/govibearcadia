@@ -33,6 +33,7 @@ const ART: Record<string, ReactNode> = {
   carve: <><rect x="40" y="16" width="80" height="58" rx="4" {...stroke} /><path d="M40 52 H84 V16" fill="none" stroke={H} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /><rect x="44" y="20" width="36" height="28" fill="currentColor" opacity=".45" /></>,
   'ghata-bara': <><rect x="40" y="8" width="74" height="74" rx="4" {...stroke} /><path d="M40 8 L114 82 M114 8 L40 82" stroke={N} strokeWidth="1.5" opacity=".5" /><rect x="68" y="36" width="18" height="18" fill="none" stroke={N} strokeWidth="2" /><circle cx="77" cy="18" r="5" fill={H} /><circle cx="50" cy="45" r="5" fill="currentColor" /><circle cx="104" cy="45" r="5" fill="currentColor" /><circle cx="77" cy="72" r="5" fill="currentColor" /></>,
   pallanguzhi: <>{grid(7, 2, 22, 24, 14, 6).map((t) => <g key={t.i}><circle cx={t.x + 7} cy={t.y + 7} r="8" {...stroke} strokeWidth="1.8" /><circle cx={t.x + 7} cy={t.y + 7} r="3" fill={t.i === 4 ? H : 'currentColor'} /></g>)}</>,
+  carrom: <><rect x="50" y="6" width="78" height="78" rx="4" {...stroke} /><circle cx="89" cy="45" r="8" fill={H} /><circle cx="89" cy="27" r="6" fill="currentColor" /><circle cx="107" cy="45" r="6" {...stroke} /><circle cx="71" cy="45" r="6" fill="currentColor" /><circle cx="89" cy="63" r="6" {...stroke} /><circle cx="54" cy="10" r="5" fill={N} /><circle cx="124" cy="80" r="5" fill={N} /><circle cx="54" cy="80" r="5" fill={N} /><circle cx="124" cy="10" r="5" fill={N} /></>,
 }
 
 export function Thumbnail({ id }: { id: string }) {
