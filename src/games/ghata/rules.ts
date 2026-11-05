@@ -79,6 +79,10 @@ const ringClockwise = (n: number, inset: number, startAt: 'top' | 'corner'): Cel
   return out
 }
 
+/** The 5x5 interior route of the bottom seat, the same shape as the 7x7 inner ring: up from the square above the turn square, along the top, down the right, back along the bottom, then up into Home (row, column). */
+const BOTTOM_PATH_5: readonly Cell[] = [[3, 1], [2, 1], [1, 1], [1, 2], [1, 3], [2, 3], [3, 3], [3, 2]]
+const INNER5_ID = new Map(INNER_CELLS_5().map(([r, c], i) => [`${r},${c}`, i]))
+
 const LAYOUT5: Layout = {
   size: 5,
   outerLen: 16,
@@ -89,7 +93,7 @@ const LAYOUT5: Layout = {
   centre: [2, 2],
   start: [0, 4, 8, 12],
   safe: ['o0', 'o4', 'o8', 'o12', 'c'],
-  interiorId: (seat, at) => ([0, 6, 4, 2][seat] + at) % 8,
+  interiorId: (seat, at) => INNER5_ID.get(rotate(BOTTOM_PATH_5[at], 5, (seat + 2) % 4).join(','))!,
 }
 
 /**
@@ -143,7 +147,6 @@ export const OUTER_CELLS: readonly Cell[] = LAYOUT5.outerCells
 export const INNER_CELLS: readonly Cell[] = LAYOUT5.interiorCells
 export const CENTRE: Cell = [2, 2]
 export const START: readonly number[] = LAYOUT5.start
-export const ENTRY: readonly number[] = [0, 6, 4, 2]
 export const SAFE_KEYS: readonly string[] = LAYOUT5.safe
 
 export type Where = 'yard' | 'outer' | 'inner' | 'home' | 'juga'
