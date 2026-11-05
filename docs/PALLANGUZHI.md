@@ -44,6 +44,12 @@ Where the sources are silent or disagree, the choice made is below, and each one
 
 Open: whether traditional players choose which pits to refill (the build chooses by a fixed order), and whether the sources' "ties" differ regionally. Neither could be confirmed from the sources above; they are kept configurable rather than invented.
 
+## Choosing the rules
+
+The **Rules** button (not shown in the tutorial) lets a player choose, before a match: seeds per pit (4, 5 or 6), sowings per turn (1, 2 or 3), whether a Saada that captures nothing still earns the next sowing, what happens when a player has no seeds to sow (round ends and the seeds go to the row's owner, or the player passes), and a full match or a single round. Defaults are the choices in the table above. Changing a rule starts a new match; the rules are locked once a move is made, saved with a match in progress, and remembered for the next one. A match with non-default rules shows "custom rules" beside the round number.
+
+One safeguard: a round with no capture for 100 sowings in a row ends (leftover seeds go to the owners of their rows). Under the "pass" variant a single seed could otherwise circle the board for ever.
+
 ## Modes and interface
 
 - Play the computer (Easy, Medium, Hard), two players on one device, and an eight-lesson tutorial played on the real engine.

@@ -1,5 +1,6 @@
 import type { Level } from './ai'
-import { PITS, type State } from './rules'
+import { normaliseConfig } from './config'
+import { DEFAULT_CONFIG, PITS, type Config, type State } from './rules'
 
 export type Mode = 'local' | 'computer'
 
@@ -66,6 +67,26 @@ export function loadSettings(): Settings {
 export function saveSettings(s: Settings) {
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(s))
+  } catch {
+    /* ignore */
+  }
+}
+
+export const RULES_KEY = 'govibearcadia.pallanguzhi.rules'
+
+/** The rules chosen last time, for the next new match. */
+export function loadRules(): Config {
+  try {
+    const raw = localStorage.getItem(RULES_KEY)
+    return normaliseConfig(raw ? JSON.parse(raw) : null)
+  } catch {
+    return DEFAULT_CONFIG
+  }
+}
+
+export function saveRules(c: Config) {
+  try {
+    localStorage.setItem(RULES_KEY, JSON.stringify(c))
   } catch {
     /* ignore */
   }
