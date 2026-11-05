@@ -3,12 +3,13 @@ import { RotateCcw, Undo2 } from 'lucide-react'
 import { createRandom } from '../lib/rng'
 import type { GameProps } from '../types'
 import { LEVELS, choosePit, type Level } from './pallanguzhi/ai'
+import { SEED_OPTIONS, SOWING_OPTIONS, describeConfig, isDefaultConfig, seedsNote } from './pallanguzhi/config'
 import {
   PITS, apply, fillable, legalPits, newGame, ownerOf, rowOf,
-  type GameEvent, type Player, type State, type Step,
+  type Config, type GameEvent, type Player, type State, type Step,
 } from './pallanguzhi/rules'
 import {
-  DEFAULT_SETTINGS, clearSaved, loadSaved, loadSettings, save, saveSettings,
+  DEFAULT_SETTINGS, clearSaved, loadRules, loadSaved, loadSettings, save, saveRules, saveSettings,
   type Mode, type Settings, type Speed,
 } from './pallanguzhi/save'
 import { TUTORIAL, stepStart } from './pallanguzhi/tutorial'
@@ -111,7 +112,9 @@ export function Pallanguzhi({ onFinish, seed }: GameProps) {
   const saved = useMemo(() => (seed === undefined ? loadSaved() : null), [seed])
   const [view, setView] = useState<View>(saved?.mode ?? 'computer')
   const [level, setLevel] = useState<Level>(saved?.level ?? 'medium')
-  const [game, setGame] = useState<State>(() => saved?.state ?? newGame())
+  const [rules, setRules] = useState<Config>(() => saved?.state.config ?? loadRules())
+  const [rulesOpen, setRulesOpen] = useState(false)
+  const [game, setGame] = useState<State>(() => saved?.state ?? newGame(rules))
   const [history, setHistory] = useState<State[]>(saved?.history ?? [])
   const [settings, setSettings] = useState<Settings>(() => loadSettings())
   const [anim, setAnim] = useState<Anim | null>(null)
@@ -209,7 +212,7 @@ export function Pallanguzhi({ onFinish, seed }: GameProps) {
     else save({ v: 1, mode: view as Mode, level, state: game, history: history.slice(-60) })
   }, [tutorial, seed, game, view, level, history])
 
-  const freshMatch = (nextView: View = view, nextLevel: Level = level) => {
+  const freshMatch = (nextView: View = view, nextLevel: Level = level, nextRules: Config = rules) => {
     setView(nextView)
     setLevel(nextLevel)
     setAnim(null)
@@ -220,7 +223,7 @@ export function Pallanguzhi({ onFinish, seed }: GameProps) {
     reported.current = false
     startedAt.current = Date.now()
     if (nextView === 'tutorial') setGame(stepStart(TUTORIAL[0], newGame()))
-    else setGame(newGame())
+    else setGame(newGame(nextRules))
     clearSaved()
   }
 
@@ -314,6 +317,13 @@ export function Pallanguzhi({ onFinish, seed }: GameProps) {
       : `${names[game.turn]}${vsComputer && game.turn === 1 ? ' is thinking' : ''}${game.sowings > 0 ? ': second sowing' : ''}`
 
   const rowsTopToBottom: number[][] = [[...rowOf(1)].reverse(), rowOf(0)]
+  const pristine = history.length === 0 && !anim && game.round === 1 && game.sowings === 0 && game.phase === 'play'
+  const chooseRules = (patch: Partial<Config>) => {
+    const next = { ...rules, ...patch }
+    setRules(next)
+    saveRules(next)
+    freshMatch(view, level, next)
+  }
   const refillPlan = ([0, 1] as const).map((p) => fillable(game.stores[p], game.config))
 
   return (
@@ -348,6 +358,7 @@ export function Pallanguzhi({ onFinish, seed }: GameProps) {
         </div>
         <div className="pg-buttons">
           <button type="button" onClick={undo} disabled={tutorial || !!anim || history.length === 0 || over} aria-label="Undo"><Undo2 size={16} />Undo</button>
+          {!tutorial && <button type="button" onClick={() => setRulesOpen((o) => !o)} aria-expanded={rulesOpen} aria-controls="pg-rules">Rules</button>}
           <button type="button" onClick={() => freshMatch()} aria-label="New match"><RotateCcw size={16} />New</button>
         </div>
       </div>
@@ -355,8 +366,45 @@ export function Pallanguzhi({ onFinish, seed }: GameProps) {
       <div className="pg-status">
         <span className="pg-turn" data-player={game.turn} aria-hidden="true" />
         <strong>{turnText}</strong>
-        <span className="pg-round">Round {game.round}</span>
+        <span className="pg-round">Round {game.round}{!tutorial && !isDefaultConfig(game.config) ? ' · custom rules' : ''}</span>
       </div>
+
+      {rulesOpen && !tutorial && (
+        <div className="pg-rules" id="pg-rules" role="dialog" aria-label="Rules for this match">
+          <h3>Rules for this match</h3>
+          <p className="pg-rules-note">{pristine ? 'Changing a rule starts a new match. Your choice is remembered for next time.' : 'Rules are locked while a match is in progress. Press New, then choose.'}</p>
+          <label>Seeds in each pit
+            <select value={game.config.seedsPerPit} disabled={!pristine} onChange={(e) => chooseRules({ seedsPerPit: Number(e.target.value) })}>
+              {SEED_OPTIONS.map((n) => <option key={n} value={n}>{n} ({seedsNote(n)})</option>)}
+            </select>
+          </label>
+          <label>Sowings in a turn
+            <select value={game.config.maxSowings} disabled={!pristine} onChange={(e) => chooseRules({ maxSowings: Number(e.target.value) })}>
+              {SOWING_OPTIONS.map((n) => <option key={n} value={n}>{n === 1 ? '1 (no extra sowing)' : n === 2 ? '2 (standard)' : '3'}</option>)}
+            </select>
+          </label>
+          <label>A Saada that captures nothing
+            <select value={game.config.zeroCaptureGrantsSecond ? 'yes' : 'no'} disabled={!pristine} onChange={(e) => chooseRules({ zeroCaptureGrantsSecond: e.target.value === 'yes' })}>
+              <option value="no">Ends the turn (default)</option>
+              <option value="yes">Still earns the next sowing</option>
+            </select>
+          </label>
+          <label>When a player has no seeds to sow
+            <select value={game.config.stranded} disabled={!pristine} onChange={(e) => chooseRules({ stranded: e.target.value as Config['stranded'] })}>
+              <option value="owner-keeps">The round ends, seeds stay with their row's owner (default)</option>
+              <option value="pass">They pass, the other keeps sowing</option>
+            </select>
+          </label>
+          <label>Length
+            <select value={game.config.match} disabled={!pristine} onChange={(e) => chooseRules({ match: e.target.value as Config['match'] })}>
+              <option value="match">A match of rounds with refills (default)</option>
+              <option value="single">A single round</option>
+            </select>
+          </label>
+          <ul>{describeConfig(game.config).map((line) => <li key={line}>{line}</li>)}</ul>
+          <button type="button" className="secondary-btn" onClick={() => setRulesOpen(false)}>Close</button>
+        </div>
+      )}
 
       <div className="pg-table">
         {([1, 0] as const).map((p) => (

@@ -77,11 +77,16 @@ export type State = {
   firstPlayer: Player
   phase: Phase
   winner: Player | 'draw' | null
+  /** Sowings in a row without a capture. A round with no captures for QUIET_LIMIT sowings is over (a lone seed could otherwise circle for ever). */
+  quiet: number
   /** The pit that last ended a sowing as a Saada, for highlighting. */
   lastEmpty: number | null
   /** What the last action did, oldest first. */
   events: GameEvent[]
 }
+
+/** Sowings in a row with no capture after which the round ends and the seeds left go to the owners of their rows. */
+export const QUIET_LIMIT = 100
 
 export function newGame(config: Partial<Config> = {}): State {
   const c = { ...DEFAULT_CONFIG, ...config }
@@ -96,6 +101,7 @@ export function newGame(config: Partial<Config> = {}): State {
     firstPlayer: 0,
     phase: 'play',
     winner: null,
+    quiet: 0,
     lastEmpty: null,
     events: [],
   }
@@ -264,6 +270,7 @@ function refill(s: State): void {
   s.firstPlayer = other(s.firstPlayer)
   s.turn = s.firstPlayer
   s.sowings = 0
+  s.quiet = 0
   s.phase = 'play'
   s.lastEmpty = null
   s.events.push({ type: 'round-start', round: s.round, first: s.firstPlayer, filled })
@@ -288,7 +295,9 @@ export function apply(prev: State, action: Action, record = true): Result {
   if (prev.sowings >= prev.config.maxSowings) return fail('no-sowings-left')
   const trace: Step[] | null = record ? [] : null
   sow(s, pit, trace)
-  endTurn(s)
+  s.quiet = s.stores[0] + s.stores[1] > prev.stores[0] + prev.stores[1] ? 0 : (prev.quiet ?? 0) + 1
+  if (s.quiet >= QUIET_LIMIT) endRound(s)
+  else endTurn(s)
   return { ok: true, state: s, trace: trace ?? [] }
 }
 

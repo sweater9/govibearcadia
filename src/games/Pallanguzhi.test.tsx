@@ -150,3 +150,50 @@ describe('Pallanguzhi', () => {
     expect(pit('Player 1', 2).getAttribute('data-count')).not.toBe('5')
   })
 })
+
+describe('Pallanguzhi rules panel', () => {
+  const openRules = () => fireEvent.click(screen.getByRole('button', { name: 'Rules' }))
+  const field = (label: RegExp) => screen.getByLabelText(label) as HTMLSelectElement
+
+  it('starts a new match with the chosen seeds per pit, and remembers the choice', () => {
+    const { container, unmount } = render(<Pallanguzhi onFinish={vi.fn()} seed="r" />)
+    openRules()
+    fireEvent.change(field(/Seeds in each pit/), { target: { value: '6' } })
+    expect([...container.querySelectorAll('.pg-pit')].every((p) => p.getAttribute('data-count') === '6')).toBe(true)
+    expect(screen.getByText(/custom rules/)).toBeInTheDocument()
+    unmount()
+    const again = render(<Pallanguzhi onFinish={vi.fn()} seed="r" />)
+    expect([...again.container.querySelectorAll('.pg-pit')].every((p) => p.getAttribute('data-count') === '6')).toBe(true)
+  })
+
+  it('applies every option to the match, and the sentences say what is chosen', () => {
+    render(<Pallanguzhi onFinish={vi.fn()} seed="r" />)
+    openRules()
+    fireEvent.change(field(/Sowings in a turn/), { target: { value: '1' } })
+    fireEvent.change(field(/captures nothing/), { target: { value: 'yes' } })
+    fireEvent.change(field(/no seeds to sow/), { target: { value: 'pass' } })
+    fireEvent.change(field(/Length/), { target: { value: 'single' } })
+    const dialog = screen.getByRole('dialog', { name: 'Rules for this match' })
+    expect(dialog).toHaveTextContent('One sowing a turn')
+    expect(dialog).toHaveTextContent('still earns the next sowing')
+    expect(dialog).toHaveTextContent('they pass')
+    expect(dialog).toHaveTextContent('A single round')
+  })
+
+  it('locks the rules once a move has been made', () => {
+    render(<Pallanguzhi onFinish={vi.fn()} seed="r" />)
+    fireEvent.click(pit('Player 1', 3))
+    openRules()
+    expect(field(/Seeds in each pit/).disabled).toBe(true)
+    expect(screen.getByText(/locked while a match is in progress/)).toBeInTheDocument()
+  })
+
+  it('a saved match keeps the rules it started with', () => {
+    const s = newGame({ seedsPerPit: 4, match: 'single' })
+    store(s)
+    render(<Pallanguzhi onFinish={vi.fn()} />)
+    openRules()
+    expect(field(/Seeds in each pit/).value).toBe('4')
+    expect(field(/Length/).value).toBe('single')
+  })
+})

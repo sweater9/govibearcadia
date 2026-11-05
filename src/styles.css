@@ -411,3 +411,10 @@ button.bs-cell:disabled{cursor:default}
 .theme-swatch{width:16px;height:16px;border-radius:50%;background:var(--sw);margin-bottom:4px;display:block}
 .pp-themes [data-theme-option=neon]{--sw:#3DD9F5}.pp-themes [data-theme-option=ocean]{--sw:#6EA8FF}.pp-themes [data-theme-option=forest]{--sw:#5BD08A}.pp-themes [data-theme-option=ember]{--sw:#FF8A65}
 .pp-themes button:disabled .theme-swatch{opacity:.5}
+.pg{position:relative}
+.pg-rules{position:absolute;z-index:6;left:0;right:0;top:44px;max-height:calc(100% - 52px);overflow:auto;display:flex;flex-direction:column;gap:8px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.pg-rules h3{margin:0;font-family:var(--font-display);font-size:18px}
+.pg-rules label{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--text-muted)}
+.pg-rules select{background:var(--surface-inset);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px;font-size:14px}
+.pg-rules-note{margin:0;font-size:13px;color:var(--text-muted)}
+.pg-rules ul{margin:0;padding-left:18px;font-size:13px;color:var(--text-muted)}
