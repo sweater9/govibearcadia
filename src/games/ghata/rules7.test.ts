@@ -71,55 +71,63 @@ describe('7x7 geometry', () => {
     expect(isSafe('c', 7)).toBe(true)
     expect(isSafe(outerAt(0, 1), 7)).toBe(false)
   })
-  it('each seat walks the same interior path turned to face its own start: straight in from the start, clockwise, 24 squares, then Home', () => {
-    const expectEntry: [number, number][] = [[1, 3], [3, 1], [5, 3], [3, 5]]
+  it('each seat walks the same interior path turned to face its own start: in beside its turn square, clockwise, 24 squares, then Home', () => {
+    const expectEntry: [number, number][] = [[1, 5], [1, 1], [5, 1], [5, 5]]
     for (const seat of [0, 1, 2, 3] as const) {
       const cells = Array.from({ length: 24 }, (_, a) => cellOf(`i${L.interiorId(seat, a)}`, 7))
       expect(new Set(cells.map((c) => c.join(','))).size).toBe(24)
       expect(cells[0]).toEqual(expectEntry[seat])
-      const [sr, sc] = L.outerCells[L.start[seat]]
-      expect(Math.abs(cells[0][0] - sr) + Math.abs(cells[0][1] - sc)).toBe(1) // directly beside the start square
+      const [tr, tc] = L.outerCells[(L.start[seat] + L.turnAt) % L.outerLen]
+      expect(Math.abs(cells[0][0] - tr) + Math.abs(cells[0][1] - tc)).toBe(1) // directly beside the turn square
       for (let a = 1; a < 24; a++) expect(Math.abs(cells[a][0] - cells[a - 1][0]) + Math.abs(cells[a][1] - cells[a - 1][1])).toBe(1)
       const [lr, lc] = cells[23]
       expect(Math.abs(lr - 3) + Math.abs(lc - 3)).toBe(1) // the last square touches Home
     }
   })
-  it('the middle ring runs clockwise for the top seat: east along the top, down the right, west along the bottom, up the left', () => {
-    const c = (a: number) => cellOf(`i${L.interiorId(0, a)}`, 7)
-    expect([c(0), c(1), c(2), c(3)]).toEqual([[1, 3], [1, 4], [1, 5], [2, 5]])
-    expect(c(8)).toEqual([5, 3])
-    expect(c(15)).toEqual([1, 2])
-    expect([c(16), c(17), c(19), c(21), c(23)]).toEqual([[2, 2], [2, 3], [3, 4], [4, 3], [3, 2]])
+  it("follows the owner's arrows for the bottom seat: up the middle ring's left side, along its top, down its right, back along its bottom, then the inner ring from its bottom-left corner", () => {
+    const c = (a: number) => cellOf(`i${L.interiorId(2, a)}`, 7)
+    expect([c(0), c(1), c(4), c(5), c(8), c(9), c(12), c(13), c(15)]).toEqual([[5, 1], [4, 1], [1, 1], [1, 2], [1, 5], [2, 5], [5, 5], [5, 4], [5, 2]])
+    expect([c(16), c(17), c(18), c(19), c(20), c(21), c(22), c(23)]).toEqual([[4, 2], [3, 2], [2, 2], [2, 3], [2, 4], [3, 4], [4, 4], [4, 3]])
   })
 })
 
 describe('7x7 turning inward', () => {
-  it('a pawn with no capture keeps circling the outer ring: it passes its start square and goes round again', () => {
-    const s = moving(0, [2])
-    put(s, 0, 'outer', 23, false)
+  it('the turn square is two before the start square, and a pawn with no capture goes past it and past its start, round again', () => {
+    expect(L.turnAt).toBe(22)
+    const s = moving(0, [3])
+    put(s, 0, 'outer', 22, false)
     const after = ok(s, pawnMove(0, [0]))
-    expect(after.pawns[0]).toMatchObject({ where: 'outer', at: 1 })
+    expect(after.pawns[0]).toMatchObject({ where: 'outer', at: 1 }) // 22 -> 23 -> 0 (start) -> 1
   })
-  it('a pawn with a capture must complete the whole lap and stand on its own start square again, then step straight in', () => {
-    const s = moving(0, [1, 1])
-    put(s, 0, 'outer', 23, true)
-    let after = ok(s, pawnMove(0, [0]))
-    expect(after.pawns[0]).toMatchObject({ where: 'outer', at: 24 })
-    expect(keyOf(0, 'outer', 24, 7)).toBe(keyOf(0, 'outer', 0, 7))
-    after = ok(after, pawnMove(0, [0]))
+  it('a pawn with a capture turns inward from the turn square, without stepping back onto its start square', () => {
+    const s = moving(0, [1])
+    put(s, 0, 'outer', 22, true)
+    const after = ok(s, pawnMove(0, [0]))
     expect(after.pawns[0]).toMatchObject({ where: 'inner', at: 0 })
-    expect(keyOf(0, 'inner', 0, 7)).toBe(idAt(1, 3))
+    expect(cellOf(keyOf(0, 'inner', 0, 7)!, 7)).toEqual([1, 5])
+  })
+  it('it does not turn before the turn square, even one step short of it', () => {
+    const s = moving(0, [1])
+    put(s, 0, 'outer', 21, true)
+    expect(planPawn(s, s.pawns[0], 1)!.end).toEqual({ where: 'outer', at: 22 })
+  })
+  it('a pawn that starts on its own start square needs 22 steps, then one more to enter the middle ring', () => {
+    const s = moving(0, [6, 6, 6, 4, 1])
+    put(s, 0, 'outer', 0, true)
+    expect(planPawn(s, s.pawns[0], 22)!.end).toEqual({ where: 'outer', at: 22 })
+    expect(planPawn(s, s.pawns[0], 23)!.end).toEqual({ where: 'inner', at: 0 })
   })
   it('it does not turn in half way round, however close it passes to the middle', () => {
     const s = moving(0, [9])
     put(s, 0, 'outer', 4, true)
     expect(planPawn(s, s.pawns[0], 9)!.end).toEqual({ where: 'outer', at: 13 })
   })
-  it('every seat turns in from its own start: left goes to the middle of the left side, bottom up, right left', () => {
-    for (const [seat, cell] of [[1, [3, 1]], [2, [5, 3]], [3, [3, 5]]] as const) {
+  it('every seat turns in from the square two before its own start', () => {
+    for (const [seat, cell] of [[1, [1, 1]], [2, [5, 1]], [3, [5, 5]]] as const) {
       const s = moving(seat, [1])
-      put(s, seat * 6, 'outer', 24, true)
+      put(s, seat * 6, 'outer', 22, true)
       const after = ok(s, pawnMove(seat * 6, [0]))
+      expect(after.pawns[seat * 6].where).toBe('inner')
       expect(cellOf(keyOf(seat, 'inner', after.pawns[seat * 6].at, 7)!, 7)).toEqual(cell)
     }
   })
@@ -144,22 +152,22 @@ describe('7x7 turning inward', () => {
 describe('7x7 Jugas', () => {
   it('a Juga moves at half speed along the 24-square interior path and needs an exact even count into Home', () => {
     const s = moving(0, [6])
-    const j = juga(s, 0, idAt(3, 5), [0, 1]) // interior step 4: right side, middle ring
+    const j = juga(s, 0, idAt(5, 5), [0, 1]) // interior step 4: the middle ring's bottom-right corner (top seat)
     expect(j.at).toBe(4)
     expect(planJuga(s, j, 6)).toMatchObject({ to: 7 })
-    const near = juga(moving(0, [6]), 0, idAt(3, 2), [0, 1]) // the last square, 1 from Home
+    const near = juga(moving(0, [6]), 0, idAt(2, 3), [0, 1]) // the last square, 1 from Home
     expect(near.at).toBe(23)
     const t = moving(0, [2, 4])
-    const k = juga(t, 0, idAt(3, 2), [0, 1])
+    const k = juga(t, 0, idAt(2, 3), [0, 1])
     expect(planJuga(t, k, 4)).toBeNull()
     expect(ok(t, jugaMove(k.id, [0])).pawns[0].where).toBe('home')
   })
   it('pins, blockades and captures work on the middle ring too', () => {
     const s = moving(0, [2])
-    const j = juga(s, 0, idAt(1, 3), [0, 1])
-    put(s, 12, 'inner', idAt(1, 4), true)
+    const j = juga(s, 0, idAt(1, 5), [0, 1])
+    put(s, 12, 'inner', idAt(2, 5), true)
     s.pawns[12].seat = 2
-    s.pawns[12].at = at7(2, idAt(1, 4))
+    s.pawns[12].at = at7(2, idAt(2, 5))
     const after = ok(s, jugaMove(j.id, [0]))
     expect(after.jugas[0].at).toBe(1)
     expect(after.jugas[0].pinned).toBe(12)

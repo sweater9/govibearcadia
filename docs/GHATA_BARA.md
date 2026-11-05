@@ -6,7 +6,7 @@ A faithful, local-first adaptation of the traditional four-player board game. Pu
 
 ## Built
 
-The 5x5 game for four seats, as specified: 25 squares (16 outer counterclockwise, 8 inner clockwise, Home in the centre), five safe squares, six pawns each, two long dice (1, 2, 3 and a blank; a blank counts 0 beside a numbered face and two blanks make 12, so results are 1 to 6 or 12), Chowka and Baara bonus rolls, the three-strike bust, whole indivisible movement chunks with free allocation and combination, mandatory use (no pass while a chunk has a legal use), outer-ring captures (one or two pawns), capture credit before entering the inner ring, automatic Juga formation, half-speed Juga movement, blockades, pinning with delayed capture, rescue, Juga-versus-Juga capture, Twin-Capture, chain pin-and-capture, exactly one capture bonus per allocation sequence, chained bonus sequences, capture checkpoints, exact Home entry and immediate victory.
+The 5x5 game for four seats, as specified: 25 squares (16 outer counterclockwise, 8 inner clockwise, Home in the centre; pawns turn in from the square before their own start), five safe squares, six pawns each, two long dice (1, 2, 3 and a blank; a blank counts 0 beside a numbered face and two blanks make 12, so results are 1 to 6 or 12), Chowka and Baara bonus rolls, the three-strike bust, whole indivisible movement chunks with free allocation and combination, mandatory use (no pass while a chunk has a legal use), outer-ring captures (one or two pawns), capture credit before entering the inner ring, automatic Juga formation, half-speed Juga movement, blockades, pinning with delayed capture, rescue, Juga-versus-Juga capture, Twin-Capture, chain pin-and-capture, exactly one capture bonus per allocation sequence, chained bonus sequences, capture checkpoints, exact Home entry and immediate victory.
 
 Seats are Violet (top), Cyan (left), Amber (bottom), Rose (right). One to four people can play; the computer plays the other seats. A game in progress is saved in this browser only.
 
@@ -22,7 +22,7 @@ A game is long: computer-only games take about 900 to 1,600 actions. That is the
 
 | Question | Answer |
 |---|---|
-| Routes and the outer-to-inner transition | Each player starts on the safe square in the middle of their own edge. After a full outer lap (16 steps) a pawn with capture credit steps onto the inner square just inside its own start, then follows the inner ring clockwise through all 8 inner squares, and Home is the next step (24 steps from the start). A pawn without credit keeps circulating. |
+| Routes and the outer-to-inner transition | Each player starts on the safe square in the middle of their own edge. Following the owner's arrows, a pawn with capture credit turns inward from the outer square just before its own start (the one right after the corner), straight into the inner ring's corner above it, then goes up, along the top, down the right side and back along the bottom of the inner ring (8 squares clockwise), and Home is the next step. A pawn without credit goes past that square and its start and circles again. The 7x7 board follows the same drawing, one ring further in (see below). |
 | Releasing with several qualifying rolls | One pawn per qualifying roll: each 6 or 12 in the queue can release one pawn. |
 | Does Juga formation need credit for both pawns? | No separate check. Only pawns with capture credit can reach the inner ring, so any two same-player pawns meeting there qualify. |
 | Is the three-strike counter reset between rolling sequences? | Yes. Every rolling sequence, including a capture-bonus one, counts its own strikes from zero. |
@@ -57,15 +57,17 @@ Built from the owner's photo of the cloth and a drawing of the directions. Squar
 
 **Directions:** outer ring counterclockwise; middle and inner rings clockwise.
 
-**Turning inward (the owner's words):** a pawn enters the interior strictly from its own start square after completing a full counterclockwise loop, stepping straight forward into the adjacent square. A pawn with no capture keeps looping the outer ring and cannot enter the middle or inner ring until it makes a capture.
+**Turning inward (the owner's arrows, bottom seat as the example):** a pawn walks the outer ring counterclockwise from its start square. Two squares before its own start (22 steps, the square after the bottom-left corner for the bottom seat) it turns up into the middle ring, if it has capture credit. A pawn with no capture goes past that square and its start, and circles again.
 
-**Path of one pawn:** 24 steps round the outer ring back onto its own start square, then 24 interior squares (the whole 16-square middle ring clockwise, then the 8-square inner ring clockwise, from the corner of the inner ring), then exactly one more step into Home.
+**Interior route (bottom seat):** up the left side of the middle ring, along its top, down its right side and back along its bottom, stopping at the square beside where it began (16 squares). Then up into the inner ring's bottom-left corner, up its left side, along its top, down its right side and back along its bottom (8 squares), and finally up into Home. Every seat walks the same route turned a quarter turn.
+
+**Path of one pawn:** 22 steps round the outer ring to the turn square, then 24 interior squares (the whole middle ring, then the whole inner ring, both clockwise), then exactly one more step into Home.
 
 ### Choices made for the 7x7 (please confirm or correct)
 
 1. **"Inner ring" means the whole interior** (middle and inner rings): capture credit is needed to enter the interior, and Jugas form and move anywhere in it.
-2. **The middle ring is walked in full** before stepping into the inner ring, at the square next to where the pawn entered (the inner ring starts at its corner beside the middle ring's last square).
-3. **A pawn that earns credit part-way round** still finishes the lap to its start square before turning in; an uncredited pawn passing its start square goes round again.
-4. **The diagonal arrows in the drawing** (near the four X squares inside the corners) were not used as turn-in points, following the owner's written answer that pawns enter only from their own start.
+2. **The middle ring is walked in full** before stepping into the inner ring, which it enters at the corner beside the middle ring's last square.
+3. **A pawn that earns credit part-way round** turns in at its turn square when it next reaches it; an uncredited pawn passing the turn square goes round again.
+4. **Superseded:** an earlier version turned pawns in from their own start square. The owner's arrow drawing replaced that (the 5x5 board is unchanged).
 5. **Yards** are shown as dots in the player panel, not drawn as trays beside the board.
 6. Everything else is as for the 5x5 (dice, bonus rolls, bust, chunks, captures, Jugas, pins, rescues, bonuses, exact Home).

@@ -2,13 +2,13 @@ import { describe, expect, it } from 'vitest'
 import { createRandom } from '../../lib/rng'
 import { chooseAction } from './bot'
 import {
-  COMBINED_TOTALS, FACES, rollTotal, apply, board, invariantErrors, isSafe, keyOf, legalActions, newGame, planJuga, planPawn,
+  COMBINED_TOTALS, FACES, rollTotal, apply, board, invariantErrors, isSafe, keyOf, LAYOUTS, legalActions, newGame, planJuga, planPawn,
   type Action, type Juga, type Seat, type State, type Where,
 } from './rules'
 
 // Pawn ids: seat 0 is 0 to 5, seat 1 is 6 to 11, seat 2 is 12 to 17, seat 3 is 18 to 23.
 // Squares: outer o0..o15 (safe: o0 o4 o8 o12), inner i0..i7, centre c. `at` is relative to the owner's start or entry.
-// Seat 0 enters the inner ring at i0, seat 1 at i6, seat 2 at i4, seat 3 at i2.
+// Seat 0 enters the inner ring at i1, seat 1 at i7, seat 2 at i5, seat 3 at i3 (straight in from the turn square, the one before its start).
 
 const at = (seat: Seat, key: string): number => (key[0] === 'o' ? (Number(key.slice(1)) - [0, 4, 8, 12][seat] + 16) % 16 : (Number(key.slice(1)) - [0, 6, 4, 2][seat] + 8) % 8)
 
@@ -218,8 +218,23 @@ describe('entering the inner ring', () => {
     put(s, 0, 'outer', 15, true)
     const after = ok(s, pawnMove(0, [0]))
     expect(after.pawns[0]).toMatchObject({ where: 'inner', at: 1 })
-    expect(keyOf(0, 'inner', 0)).toBe('i0')
+    expect(keyOf(0, 'inner', 0)).toBe('i1') // the square below the turn square (0,3): the inner ring's top-right corner for the top seat
     expect(after.entered[0]).toBe(true)
+  })
+  it("follows the owner's arrows on the 5x5: in beside the turn square, up, across, down, back along the bottom, then Home (bottom seat)", () => {
+    const L = LAYOUTS[5]
+    const cell = (at: number) => L.interiorCells[L.interiorId(2, at)]
+    expect(Array.from({ length: 8 }, (_, a) => cell(a))).toEqual([[3, 1], [2, 1], [1, 1], [1, 2], [1, 3], [2, 3], [3, 3], [3, 2]])
+    const [tr, tc] = L.outerCells[(L.start[2] + L.turnAt) % L.outerLen]
+    expect([tr, tc]).toEqual([4, 1]) // the square before its start, right after the corner
+    for (const seat of [0, 1, 2, 3] as const) {
+      const cells = Array.from({ length: 8 }, (_, a) => L.interiorCells[L.interiorId(seat, a)])
+      expect(new Set(cells.map((c) => c.join(','))).size).toBe(8)
+      const [r, c] = L.outerCells[(L.start[seat] + L.turnAt) % L.outerLen]
+      expect(Math.abs(cells[0][0] - r) + Math.abs(cells[0][1] - c)).toBe(1) // straight in from the turn square
+      for (let a = 1; a < 8; a++) expect(Math.abs(cells[a][0] - cells[a - 1][0]) + Math.abs(cells[a][1] - cells[a - 1][1])).toBe(1)
+      expect(Math.abs(cells[7][0] - 2) + Math.abs(cells[7][1] - 2)).toBe(1) // the last square touches Home
+    }
   })
   it('one capture credits every pawn of that player, and being captured later keeps the credit', () => {
     const s = moving(1, [2])

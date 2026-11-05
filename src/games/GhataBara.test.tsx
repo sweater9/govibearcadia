@@ -45,7 +45,7 @@ describe('GhataBara', () => {
         <GhataBara onFinish={onFinish} />
       </StrictMode>,
     )
-    fireEvent.click(container.querySelector('[data-square="i5"]')!) // pick the pawn
+    fireEvent.click(container.querySelector('[data-square="i6"]')!) // pick the pawn
     fireEvent.click(container.querySelector('[data-square="c"]')!) // move Home
     expect(screen.getByRole('status')).toHaveTextContent('Violet wins!')
     expect(onFinish).toHaveBeenCalledTimes(1)
@@ -58,7 +58,7 @@ describe('GhataBara', () => {
     const { container } = render(<GhataBara onFinish={vi.fn()} />)
     const home = container.querySelector<HTMLButtonElement>('[data-square="c"]')!
     expect(home).toBeDisabled()
-    fireEvent.click(container.querySelector('[data-square="i5"]')!)
+    fireEvent.click(container.querySelector('[data-square="i6"]')!)
     expect(home).toBeEnabled()
     expect(home).toHaveTextContent('3')
     fireEvent.keyDown(window, { key: 'Escape' })
