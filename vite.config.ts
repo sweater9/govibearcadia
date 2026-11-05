@@ -8,7 +8,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       // Multiplayer lives behind /api (a Worker); the service worker must never answer those requests.
-      workbox: { navigateFallbackDenylist: [/^\/api\//], globPatterns: ['**/*.{js,css,html,woff2}'] },
+      workbox: { navigateFallbackDenylist: [/^\/api\//], globPatterns: ['**/*.{js,css,html,woff2}'], maximumFileSizeToCacheInBytes: 4 * 1024 * 1024 },
       includeAssets: ['favicon.svg'],
       manifest: {
         name: 'GoVibeArcadia',

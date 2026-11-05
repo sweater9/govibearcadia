@@ -342,3 +342,28 @@ export function invariantErrors(s: State): string[] {
   if (s.owed.some((n) => n < 0)) errors.push('negative penalty')
   return errors
 }
+
+// ---------- aiming (shared by the board, the computer and the tests) ----------
+
+export type Aim = { /** -1..1 along the baseline */ t: number; /** radians away from straight ahead */ angle: number; /** 0..1 */ power: number }
+export const MAX_ANGLE = (70 * Math.PI) / 180
+export const DEFAULT_AIM: Aim = { t: 0, angle: 0, power: 0.55 }
+
+/** The unit direction of a shot for a seat, `angle` radians from straight ahead (positive turns clockwise on screen). */
+export function aimDir(seat: number, angle: number): { x: number; y: number } {
+  const { fx, fy } = baseline(seat)
+  const c = Math.cos(angle)
+  const s = Math.sin(angle)
+  return { x: fx * c - fy * s, y: fx * s + fy * c }
+}
+/** The angle (clamped) that points from the striker along (dx, dy). */
+export function angleFor(seat: number, dx: number, dy: number): number {
+  const { fx, fy } = baseline(seat)
+  const a = Math.atan2(fx * dy - fy * dx, fx * dx + fy * dy)
+  return Math.max(-MAX_ANGLE, Math.min(MAX_ANGLE, a))
+}
+/** True when a coin sits where the striker would be placed. */
+export function strikerBlocked(coins: Coin[], seat: number, t: number): boolean {
+  const p = strikerAt(seat, t)
+  return coins.some((c) => !c.pocketed && Math.hypot(c.x - p.x, c.y - p.y) < COIN_R + STRIKER_R - 0.01)
+}
