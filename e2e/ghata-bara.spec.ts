@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { createRandom } from '../src/lib/rng'
-import { dice, rollTotal, newGame, type State } from '../src/games/ghata/rules'
+import { dice, rollTotal, newGame, innerKey, LAYOUTS, type State } from '../src/games/ghata/rules'
 import { expectRows, overflowsHorizontally, readTable } from './helpers'
 
 // Ghata Bara: crafted positions are put in through the saved-game slot, so the real UI is checked against exact rules.
@@ -139,33 +139,32 @@ test('a whole four-player game can be played to the end, and the result is saved
   expect(await page.evaluate((k) => localStorage.getItem(k), KEY)).toBeNull()
 })
 
-/** The 7x7 board with Violet's pawn 0 on the last square before its own start, ready to move. */
-function sevenAtLapEnd(credit: boolean, queue: number[]): State {
+/** The 7x7 board with Violet's pawn 0 on its turn square, two before its own start, ready to move. */
+function sevenAtTurn(credit: boolean, queue: number[]): State {
   const s = newGame(7)
   s.phase = 'move'
   s.queue = queue
-  Object.assign(s.pawns[0], { where: 'outer', at: 23, credit })
+  Object.assign(s.pawns[0], { where: 'outer', at: 22, credit })
   return s
 }
 
-test('7x7: a pawn with a capture comes back to its own start square, then steps straight in', async ({ page }) => {
-  await stage(page, sevenAtLapEnd(true, [1, 1]))
+test('7x7: a pawn with a capture turns inward from the square two before its start, following the arrows', async ({ page }) => {
+  await stage(page, sevenAtTurn(true, [1]))
   await page.goto('/play/ghata-bara')
-  await page.locator('[data-square="o23"]').click()
-  await expect(page.locator('[data-square="o0"]')).toHaveAttribute('data-target', '')
-  await page.locator('[data-square="o0"]').click() // the lap is complete
-  await expect(page.locator('[data-square="o0"] .gb-pawn')).toHaveCount(1)
-  await page.locator('[data-square="o0"]').click()
-  await expect(page.locator('[data-square="i0"]')).toHaveAttribute('data-target', '') // the square just inside the start
-  await page.locator('[data-square="i0"]').click()
-  await expect(page.locator('[data-square="i0"] .gb-pawn')).toHaveCount(1)
+  await page.locator('[data-square="o22"]').click()
+  const entry = `i${LAYOUTS[7].interiorCells.findIndex(([r, c]) => r === 1 && c === 5)}` // the middle ring's top-right corner for the top seat
+  expect(innerKey(0, 0, 7)).toBe(entry)
+  await expect(page.locator(`[data-square="${entry}"]`)).toHaveAttribute('data-target', '')
+  await expect(page.locator('[data-square="o23"]')).not.toHaveAttribute('data-target', '')
+  await page.locator(`[data-square="${entry}"]`).click()
+  await expect(page.locator(`[data-square="${entry}"] .gb-pawn`)).toHaveCount(1)
 })
 
 test('7x7: a pawn with no capture keeps circling the outer ring', async ({ page }) => {
-  await stage(page, sevenAtLapEnd(false, [2]))
+  await stage(page, sevenAtTurn(false, [2]))
   await page.goto('/play/ghata-bara')
-  await page.locator('[data-square="o23"]').click()
-  await expect(page.locator('[data-square="o1"]')).toHaveAttribute('data-target', '') // past its start, round again
+  await page.locator('[data-square="o22"]').click()
+  await expect(page.locator('[data-square="o0"]')).toHaveAttribute('data-target', '') // past the turn square, onto its start
   await expect(page.locator('[data-target]')).toHaveCount(1)
 })
 

@@ -33,8 +33,8 @@ export type Layout = {
   outerLen: number
   /** Steps along a seat's interior path (the squares it walks after leaving the outer ring), before Home. */
   interiorLen: number
-  /** A pawn must finish a whole lap and stand on its own start square again before it can turn inward (7x7). */
-  fullLap: boolean
+  /** The outer step (counted from the seat's start square) after which a pawn with capture credit leaves the outer ring. */
+  turnAt: number
   outerCells: readonly Cell[]
   /** Interior squares by id, e.g. `i3`. */
   interiorCells: readonly Cell[]
@@ -83,7 +83,7 @@ const LAYOUT5: Layout = {
   size: 5,
   outerLen: 16,
   interiorLen: 8,
-  fullLap: false,
+  turnAt: 15, // the last outer square: the step after it would be the start square again
   outerCells: OUTER_CELLS_5(),
   interiorCells: INNER_CELLS_5(),
   centre: [2, 2],
@@ -91,6 +91,17 @@ const LAYOUT5: Layout = {
   safe: ['o0', 'o4', 'o8', 'o12', 'c'],
   interiorId: (seat, at) => ([0, 6, 4, 2][seat] + at) % 8,
 }
+
+/**
+ * The interior route of the seat that starts at the bottom middle, read from the owner's arrows (row, column):
+ * up the left side of the middle ring, along its top, down its right side, back along its bottom to the square beside where it began,
+ * then up into the inner ring's bottom-left corner, up, across, down and back along the inner ring's bottom, and finally up into Home.
+ * The other seats walk the same route turned a quarter turn each.
+ */
+const BOTTOM_PATH: readonly Cell[] = [
+  [5, 1], [4, 1], [3, 1], [2, 1], [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [2, 5], [3, 5], [4, 5], [5, 5], [5, 4], [5, 3], [5, 2],
+  [4, 2], [3, 2], [2, 2], [2, 3], [2, 4], [3, 4], [4, 4], [4, 3],
+]
 
 function layout7(): Layout {
   const outerCells = ringOuter(7)
@@ -104,13 +115,13 @@ function layout7(): Layout {
     size: 7,
     outerLen: 24,
     interiorLen: 24,
-    fullLap: true,
+    turnAt: 22, // the square two before the start: the cloth's arrows turn inward there, not at the start square
     outerCells,
     interiorCells,
     centre: [3, 3],
     start: [0, 6, 12, 18],
     safe,
-    interiorId: (seat, at) => idOf.get(rotate(interiorCells[at], 7, seat).join(','))!,
+    interiorId: (seat, at) => idOf.get(rotate(BOTTOM_PATH[at], 7, (seat + 2) % 4).join(','))!,
   }
 }
 
@@ -250,14 +261,9 @@ type Place = { where: 'outer' | 'inner' | 'home'; at: number }
 
 function nextStep(where: 'outer' | 'inner', at: number, credit: boolean, l: Layout): Place {
   if (where === 'outer') {
-    if (!l.fullLap) {
-      if (at + 1 < l.outerLen) return { where: 'outer', at: at + 1 }
-      return credit ? { where: 'inner', at: 0 } : { where: 'outer', at: 0 } // §8: no credit, keep circulating
-    }
-    // Whole-lap boards: a pawn with credit comes back round to its own start square (at === outerLen) and only then turns inward.
-    if (at === l.outerLen) return credit ? { where: 'inner', at: 0 } : { where: 'outer', at: 1 }
-    if (at + 1 < l.outerLen) return { where: 'outer', at: at + 1 }
-    return credit ? { where: 'outer', at: l.outerLen } : { where: 'outer', at: 0 }
+    // A pawn with capture credit turns inward at its turn square; without credit it keeps circulating the outer ring (§8).
+    if (credit && at === l.turnAt) return { where: 'inner', at: 0 }
+    return { where: 'outer', at: (at + 1) % l.outerLen }
   }
   return at + 1 < l.interiorLen ? { where: 'inner', at: at + 1 } : { where: 'home', at: 0 }
 }

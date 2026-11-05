@@ -57,15 +57,17 @@ Built from the owner's photo of the cloth and a drawing of the directions. Squar
 
 **Directions:** outer ring counterclockwise; middle and inner rings clockwise.
 
-**Turning inward (the owner's words):** a pawn enters the interior strictly from its own start square after completing a full counterclockwise loop, stepping straight forward into the adjacent square. A pawn with no capture keeps looping the outer ring and cannot enter the middle or inner ring until it makes a capture.
+**Turning inward (the owner's arrows, bottom seat as the example):** a pawn walks the outer ring counterclockwise from its start square. Two squares before its own start (22 steps, the square after the bottom-left corner for the bottom seat) it turns up into the middle ring, if it has capture credit. A pawn with no capture goes past that square and its start, and circles again.
 
-**Path of one pawn:** 24 steps round the outer ring back onto its own start square, then 24 interior squares (the whole 16-square middle ring clockwise, then the 8-square inner ring clockwise, from the corner of the inner ring), then exactly one more step into Home.
+**Interior route (bottom seat):** up the left side of the middle ring, along its top, down its right side and back along its bottom, stopping at the square beside where it began (16 squares). Then up into the inner ring's bottom-left corner, up its left side, along its top, down its right side and back along its bottom (8 squares), and finally up into Home. Every seat walks the same route turned a quarter turn.
+
+**Path of one pawn:** 22 steps round the outer ring to the turn square, then 24 interior squares (the whole middle ring, then the whole inner ring, both clockwise), then exactly one more step into Home.
 
 ### Choices made for the 7x7 (please confirm or correct)
 
 1. **"Inner ring" means the whole interior** (middle and inner rings): capture credit is needed to enter the interior, and Jugas form and move anywhere in it.
-2. **The middle ring is walked in full** before stepping into the inner ring, at the square next to where the pawn entered (the inner ring starts at its corner beside the middle ring's last square).
-3. **A pawn that earns credit part-way round** still finishes the lap to its start square before turning in; an uncredited pawn passing its start square goes round again.
-4. **The diagonal arrows in the drawing** (near the four X squares inside the corners) were not used as turn-in points, following the owner's written answer that pawns enter only from their own start.
+2. **The middle ring is walked in full** before stepping into the inner ring, which it enters at the corner beside the middle ring's last square.
+3. **A pawn that earns credit part-way round** turns in at its turn square when it next reaches it; an uncredited pawn passing the turn square goes round again.
+4. **Superseded:** an earlier version turned pawns in from their own start square. The owner's arrow drawing replaced that (the 5x5 board is unchanged).
 5. **Yards** are shown as dots in the player panel, not drawn as trays beside the board.
 6. Everything else is as for the 5x5 (dice, bonus rolls, bust, chunks, captures, Jugas, pins, rescues, bonuses, exact Home).
