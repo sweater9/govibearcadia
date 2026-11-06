@@ -13,7 +13,7 @@ async function giveXp(page: Page, wins: number) {
   await expect(page.getByText(`Imported ${wins} new runs`)).toBeVisible()
 }
 
-test('a new player has Neon, with the other themes locked and labelled', async ({ page }) => {
+test('a new player has the default theme, with the other themes locked and labelled', async ({ page }) => {
   await page.goto('/passport')
   expect(await theme(page)).toBe('neon')
   await expect(page.locator('[data-theme-option="neon"]')).toHaveAttribute('aria-checked', 'true')
@@ -31,9 +31,9 @@ test('themes unlock with level, apply instantly and survive a reload', async ({ 
 
   await page.locator('[data-theme-option="ember"]').click()
   expect(await theme(page)).toBe('ember')
-  expect(await primary(page)).toBe('#FF8A65') // the accent changes...
+  expect(await primary(page)).toBe('#C2410C') // the accent changes...
   expect(await filter(page)).toBe('none') // ...and the page is never colour-shifted, so the palette and its contrast stay as designed
-  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(11, 13, 20)')
+  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(250, 243, 232)')
   await expect(page.locator('[data-theme-option="ember"]')).toHaveAttribute('aria-checked', 'true')
 
   await page.reload()
@@ -46,7 +46,7 @@ test('themes unlock with level, apply instantly and survive a reload', async ({ 
   await page.locator('[data-theme-option="neon"]').click()
   expect(await theme(page)).toBe('neon')
   expect(await filter(page)).toBe('none')
-  expect(await primary(page)).toBe('#3DD9F5')
+  expect(await primary(page)).toBe('#A94A24')
 })
 
 test('a locked theme smuggled into storage is ignored', async ({ page }) => {

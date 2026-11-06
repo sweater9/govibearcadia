@@ -7,7 +7,7 @@
 @font-face{font-family:"Inter";font-weight:500;font-style:normal;font-display:swap;src:url(./assets/fonts/inter-latin-500-normal.woff2) format("woff2")}
 @font-face{font-family:"Inter";font-weight:600;font-style:normal;font-display:swap;src:url(./assets/fonts/inter-latin-600-normal.woff2) format("woff2")}
 @font-face{font-family:"JetBrains Mono";font-weight:500;font-style:normal;font-display:swap;src:url(./assets/fonts/jetbrains-mono-latin-500-normal.woff2) format("woff2")}
-:root{--bg:#faf3e8;--surface:#fffaf1;--surface-inset:#f3e8d6;--border:#e2d2b8;--text:#3b2a1e;--text-muted:#7a6552;--primary:#b4542c;--primary-hover:#9a4521;--on-primary:#fff8ee;--accent:#b8780f;--on-accent:#fff8ee;--success:#3f9b6b;--font-display:"Space Grotesk",Inter,system-ui,sans-serif;--font-text:Inter,system-ui,sans-serif;--font-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;font-family:var(--font-text);background:var(--bg);color:var(--text)}
+:root{--bg:#faf3e8;--surface:#fffaf1;--surface-inset:#f3e8d6;--border:#e2d2b8;--text:#3b2a1e;--text-muted:#7a6552;--primary:#A94A24;--primary-hover:#8F3E1E;--on-primary:#FFF8EE;--accent:#b8780f;--on-accent:#fff8ee;--success:#3f9b6b;--font-display:"Space Grotesk",Inter,system-ui,sans-serif;--font-text:Inter,system-ui,sans-serif;--font-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;font-family:var(--font-text);background:var(--bg);color:var(--text)}
 body{background:var(--bg);color:var(--text);font-family:var(--font-text)}
 h1,h2,h3{font-family:var(--font-display);letter-spacing:-.02em}
 :focus-visible{outline:2px solid var(--primary);outline-offset:2px}
@@ -404,9 +404,9 @@ button.bs-cell:disabled{cursor:default}
 
 /* Redesign step 5: colour themes change the primary (accent) colour only. Background, surfaces, text and borders stay fixed, so contrast never drops:
    every primary is at least 8:1 on the page and 7:1 on cards, and its text colour at least 7:1 on it. */
-:root[data-theme=ocean]{--primary:#2f6f9f;--primary-hover:#245a82;--on-primary:#f4f9ff}
-:root[data-theme=forest]{--primary:#3f7d55;--primary-hover:#316844;--on-primary:#f3fbf5}
-:root[data-theme=ember]{--primary:#c2410c;--primary-hover:#a3360a;--on-primary:#fff5ee}
+:root[data-theme=ocean]{--primary:#2F6F9F;--primary-hover:#245A82;--on-primary:#F4F9FF}
+:root[data-theme=forest]{--primary:#2F6B45;--primary-hover:#255A39;--on-primary:#F3FBF5}
+:root[data-theme=ember]{--primary:#C2410C;--primary-hover:#A3360A;--on-primary:#FFF5EE}
 .pp-themes button{position:relative}
 .theme-swatch{width:16px;height:16px;border-radius:50%;background:var(--sw);margin-bottom:4px;display:block}
 .pp-themes [data-theme-option=neon]{--sw:#3DD9F5}.pp-themes [data-theme-option=ocean]{--sw:#6EA8FF}.pp-themes [data-theme-option=forest]{--sw:#5BD08A}.pp-themes [data-theme-option=ember]{--sw:#FF8A65}
@@ -467,7 +467,7 @@ button.mj-tile{cursor:pointer}
 .mj-result{position:absolute;z-index:6;left:8px;right:8px;top:90px;max-height:calc(100% - 100px);overflow:auto;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
 .mj-result h3{margin:0 0 6px;font-family:var(--font-display);font-size:18px}.mj-result ul{margin:0 0 6px;padding-left:18px;font-size:14px}
 .mj-wrap{position:relative}
-@media(max-width:700px){.mj-tile{width:calc((100vw - 64px)/9 - 3px);max-width:36px;height:42px}.mj-small{width:18px;height:25px}.mj-pool{height:72px}}
+@media(max-width:700px){.mj-tile{width:calc((100vw - 64px)/9 - 3px);max-width:36px;height:42px}.mj-small{width:18px;height:25px}.mj-pool{height:58px}}
 .mj-rules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 10px;width:min(100%,420px)}
 .mj-rules label{display:flex;flex-direction:column;gap:2px;font-size:12px;text-align:left}
 .mj-rules select{min-height:36px;font-size:14px;padding:4px 6px;border-radius:8px;background:var(--surface,#fff);color:inherit;border:1px solid currentColor}
