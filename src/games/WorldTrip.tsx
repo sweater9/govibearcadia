@@ -27,6 +27,7 @@ function Board({ state, selected, onSelect, status }: { state: State; selected: 
           aria-label={`Space ${i + 1}, ${space.name}${holding ? `, owned by ${playerName(holding.owner)}${holding.centre ? ' with a visitor centre' : ''}` : ''}${here.length ? `, ${here.map(playerName).join(' and ')} here` : ''}`}
           onClick={() => onSelect(i)}>
           {space.kind === 'city' ? <span className="wt-band" style={{ background: GROUP_COLOURS[space.group] }} /> : <span className="wt-band" style={{ background: 'transparent' }} />}
+          {space.kind === 'city' ? <LandmarkArt kind={space.landmark} decorative /> : null}
           <span className={space.kind === 'airport' || space.kind === 'service' || space.kind === 'card' || space.kind === 'fee' ? 'wt-icon' : 'wt-code'}>{code(space)}</span>
           {holding ? <span className="wt-owner" style={{ background: PLAYER_COLOURS[holding.owner] }}>{holding.centre ? '◆' : ''}{holding.owner + 1}</span> : <span className="wt-owner" />}
           {here.length ? <span className="wt-tokens">{here.map((pi) => <span key={pi} className="wt-token" style={{ background: PLAYER_COLOURS[pi], outline: pi === current ? '2px solid var(--text)' : 'none' }}>{pi + 1}</span>)}</span> : null}

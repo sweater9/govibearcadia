@@ -5,7 +5,7 @@ const INK = '#3b2a1e'
 const SKY = '#f3e1c3'
 const SEA = '#7fb3b0'
 
-export function LandmarkArt({ kind, city }: { kind: Landmark; city?: string }) {
+export function LandmarkArt({ kind, city, decorative = false }: { kind: Landmark; city?: string; decorative?: boolean }) {
   const body = (() => {
     switch (kind) {
       case 'mountains': // Vancouver: mountains behind a waterfront skyline
@@ -43,5 +43,5 @@ export function LandmarkArt({ kind, city }: { kind: Landmark; city?: string }) {
       default: return <rect x="20" y="10" width="40" height="30" fill="#a8946f" />
     }
   })()
-  return <svg className="wt-art" viewBox="0 0 80 48" role="img" aria-label={`${city ?? 'Landmark'} illustration`}><rect width="80" height="48" fill={SKY} />{body}</svg>
+  return <svg className={decorative ? 'wt-pic' : 'wt-art'} viewBox="0 0 80 48" {...(decorative ? { 'aria-hidden': true } : { role: 'img', 'aria-label': `${city ?? 'Landmark'} illustration` })}><rect width="80" height="48" fill={SKY} />{body}</svg>
 }
