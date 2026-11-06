@@ -1,0 +1,43 @@
+.bazaar { max-width: 720px; margin-inline: auto; }
+.bazaar-board {
+  display: grid;
+  grid-template: "a b c d e" "f . . . j" "k . . . o" "p . . . t" "u v w x y";
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+  width: min(100%, clamp(295px, calc((100svh - 280px) * 1.7), 650px));
+  height: clamp(195px, calc(100svh - 410px), 350px);
+  box-sizing: border-box;
+  gap: 3px;
+  margin: 8px auto;
+  padding: 5px;
+  border: 1px solid #956745;
+  border-radius: 12px;
+  background: radial-gradient(ellipse, #623821, #25152a);
+  list-style: none;
+}
+.bazaar-board li {
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  min-width: 0; text-align: center; padding: 1px; border-radius: 5px;
+  color: #fff3dc; background: #502c39; line-height: 1.08;
+  font-size: clamp(10px, 2.7vw, 14px); overflow-wrap: anywhere;
+}
+.bazaar-board li[data-kind="event"] { background: #274d52; }
+.bazaar-board li[data-kind="rest"], .bazaar-board li[data-kind="gate"] { background: #604019; }
+.bazaar-board small { font-size: .86em; }
+.bazaar-board span { color: #121c24; background: #b2f4e4; border-radius: 4px; padding-inline: 3px; }
+.bazaar-status { margin: 6px 0; text-align: center; font-size: .9rem; }
+.bazaar-actions, .bazaar-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.bazaar-controls { margin-block: 8px; }
+.bazaar-controls details { flex: 1 1 100%; }
+.bazaar summary { cursor: pointer; padding-block: 5px; }
+.bazaar label { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.bazaar select, .bazaar input {
+  background: #21172d; color: #fff; border: 1px solid #a68dbc;
+  border-radius: 6px; padding: 5px 6px; font: inherit;
+}
+.bazaar input { width: 5.5em; }
+.bazaar-balances, .bazaar-properties { list-style: none; margin: 8px 0; padding: 0; }
+.bazaar-balances { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 235px), 1fr)); gap: 4px 10px; font-size: .85rem; }
+.bazaar-properties li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-block: 6px; }
+.bazaar button:disabled { opacity: .55; cursor: default; }
+.bazaar :is(button, summary, input, select):focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }

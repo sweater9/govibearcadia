@@ -12,6 +12,7 @@ const grid = (cols: number, rows: number, x: number, y: number, s: number, gap: 
   Array.from({ length: cols * rows }, (_, i) => ({ x: x + (i % cols) * (s + gap), y: y + Math.floor(i / cols) * (s + gap), i }))
 
 const ART: Record<string, ReactNode> = {
+  bazaar: <><path d="M43 35 L53 17 H107 L117 35 Z" fill={H} /><path d="M43 35 H117 M48 36 V75 H112 V36 M76 75 V49 H100 V75 M56 49 H68 V62 H56 Z" {...stroke} /><path d="M66 17 L62 35 M94 17 L98 35" stroke={N} strokeWidth="3" /></>,
   'neon-merge': <>{grid(2, 2, 46, 12, 32, 4).map((t) => <rect key={t.i} x={t.x} y={t.y} width="32" height="32" rx="6" {...(t.i === 3 ? { fill: H } : { ...stroke })} />)}</>,
   'memory-grid': <>{grid(3, 2, 30, 14, 28, 8).map((t) => <rect key={t.i} x={t.x} y={t.y} width="28" height="28" rx="6" {...(t.i === 1 ? { fill: H } : t.i === 4 ? { fill: 'currentColor' } : { ...stroke })} />)}</>,
   'pulse-tap': <><circle cx="80" cy="45" r="36" {...stroke} /><circle cx="80" cy="45" r="22" {...stroke} /><circle cx="80" cy="45" r="8" fill={H} /></>,

@@ -24,6 +24,7 @@ const PLAY_AREA = {
   carve: '.cv',
   'ghata-bara': '.gb-board',
   pallanguzhi: '.pg-table',
+  bazaar: '.bazaar-board',
 } as const
 
 type Box = { top: number; bottom: number }

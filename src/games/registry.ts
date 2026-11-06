@@ -266,6 +266,19 @@ export const registry: GameEntry[] = [
   },
   {
     meta: {
+      id: 'bazaar',
+      title: 'Bazaar',
+      description: 'Trade market stalls, collect rent, and build the biggest fortune in twelve rounds.',
+      category: 'Strategy',
+      original: true,
+      accent: 'from-amber-500 to-rose-600',
+      glyph: '▤',
+      estimated: '20–35 min',
+    },
+    Component: lazy(() => import('./Bazaar').then((m) => ({ default: m.Bazaar }))),
+  },
+  {
+    meta: {
       id: 'pallanguzhi',
       title: 'Pallanguzhi',
       description: 'The traditional seed-sowing game of Karnataka (Ali Guli Mane): relay sowing, Saada captures and piggy pits.',
