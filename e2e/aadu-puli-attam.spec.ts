@@ -22,6 +22,6 @@ test('computer responds offline and undo returns both turns', async ({ page }) =
   await page.clock.runFor(420)
   await expect(page.locator('.ap-status')).toHaveText('Your turn')
   await page.getByRole('button', { name: 'Undo' }).click()
-  await expect(page.locator('.ap-options')).toContainText('Captured 0/5')
+  await expect(page.locator('.ap-options').first()).toContainText('Captured 0/5')
   await expect(page.getByRole('button', { name: 'Empty point 2', exact: true })).toBeVisible()
 })
