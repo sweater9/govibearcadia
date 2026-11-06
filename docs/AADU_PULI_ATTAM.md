@@ -11,3 +11,7 @@ Research references:
 - D’Source, IDC School of Design, IIT Bombay, “Indian Games: Adu Puli Attam” (23 intersections, setup, phases, single capture, five-goat and immobilization goals): https://www.dsource.in/resource/indian-games/board-games/adu-puli-attam
 - Indian Heritage Centre, Singapore, printable “Aadu Puli Aatam” guide (3/15 pieces, adjacent line movement, single jump, trapped-tiger goal): https://www.indianheritage.gov.sg/-/media/aadu-puli-aatam---printable.pdf
 - Durham University, “Aadu Puli Attam” activity sheet (fixed tiger start, goat placement phase, single captures): https://durham.ac.uk/things-to-do/media/things-to-do/learn/online-resources/primary-school-resources/ancient-games/Aadu-Puli-Attam-Game.pdf
+
+## Choosing the rules
+
+A collapsed **Rules** panel on the game screen offers a **Standard rules** preset (5 captures, tiger capture optional, goats first) and the documented family variants as choices: 6 captures to win, mandatory tiger capture, and tigers moving first. A change starts a new game, the last choice is remembered (`govibearcadia.aadu-puli-attam.rules`), and a saved match keeps its own rules. Older saves without rules load as standard. Still not offered: tiger placement, multi-jumps and repetition draws.

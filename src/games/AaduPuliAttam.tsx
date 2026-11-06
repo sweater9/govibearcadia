@@ -4,8 +4,8 @@ import { createRandom } from '../lib/rng'
 import type { GameProps } from '../types'
 import { chooseMove } from './aadupuli/ai'
 import { AaduPuliBoard } from './aadupuli/Board'
-import { applyMove, legalMoves, movesFrom, newGame, scoreFor, type Side, type State } from './aadupuli/rules'
-import { clearSaved, loadSaved, save, type Mode } from './aadupuli/save'
+import { applyMove, DEFAULT_CONFIG, isStandard, legalMoves, movesFrom, newGame, scoreFor, type Config, type Side, type State } from './aadupuli/rules'
+import { clearSaved, loadRules, loadSaved, save, saveRules, type Mode } from './aadupuli/save'
 
 const THINK_MS = 420
 
@@ -13,7 +13,7 @@ export function AaduPuliAttam({ onFinish, seed }: GameProps) {
   const restored = useRef(loadSaved())
   const [mode, setMode] = useState<Mode>(() => restored.current?.mode ?? 'computer')
   const [human, setHuman] = useState<Side>(() => restored.current?.human ?? 'goats')
-  const [game, setGame] = useState<State>(() => restored.current?.state ?? newGame())
+  const [game, setGame] = useState<State>(() => restored.current?.state ?? newGame(seed === undefined ? loadRules() : DEFAULT_CONFIG))
   const [history, setHistory] = useState<State[]>(() => restored.current?.history ?? [])
   const [selected, setSelected] = useState<number | null>(null)
   const startedAt = useRef(Date.now())
@@ -53,8 +53,9 @@ export function AaduPuliAttam({ onFinish, seed }: GameProps) {
     else setSelected(null)
   }
 
-  const restart = (nextMode = mode, nextHuman = human) => {
-    clearSaved(); setMode(nextMode); setHuman(nextHuman); setGame(newGame()); setHistory([]); setSelected(null); startedAt.current = Date.now()
+  const restart = (nextMode = mode, nextHuman = human, config: Config = game.config) => {
+    if (seed === undefined) saveRules(config)
+    clearSaved(); setMode(nextMode); setHuman(nextHuman); setGame(newGame(config)); setHistory([]); setSelected(null); startedAt.current = Date.now()
   }
   const undo = () => {
     if (!history.length || computerTurn || game.winner) return
@@ -76,10 +77,20 @@ export function AaduPuliAttam({ onFinish, seed }: GameProps) {
     <div className="ap-options" aria-label="Game options">
       <label>Mode <select aria-label="Mode" value={mode} onChange={(e) => restart(e.target.value as Mode, human)}><option value="computer">Vs computer</option><option value="local">Two players</option></select></label>
       {mode === 'computer' ? <label>Play as <select aria-label="Play as" value={human} onChange={(e) => restart(mode, e.target.value as Side)}><option value="goats">Goats</option><option value="tigers">Tigers</option></select></label> : null}
-      <span>Captured <b>{game.goatsCaptured}/5</b></span>
+      <span>Captured <b>{game.goatsCaptured}/{game.config.capturesToWin}</b></span>
     </div>
+    <details className="ap-rules">
+      <summary>Rules: {isStandard(game.config) ? 'standard' : 'custom'}</summary>
+      <div className="ap-options">
+        <label>Captures to win <select aria-label="Captures to win" value={game.config.capturesToWin} onChange={(e) => restart(mode, human, { ...game.config, capturesToWin: Number(e.target.value) as 5 | 6 })}><option value={5}>5 goats</option><option value={6}>6 goats</option></select></label>
+        <label>Tiger capture <select aria-label="Tiger capture" value={game.config.mustCapture ? 'must' : 'may'} onChange={(e) => restart(mode, human, { ...game.config, mustCapture: e.target.value === 'must' })}><option value="may">Optional</option><option value="must">Mandatory</option></select></label>
+        <label>Moves first <select aria-label="Moves first" value={game.config.first} onChange={(e) => restart(mode, human, { ...game.config, first: e.target.value as Side })}><option value="goats">Goats</option><option value="tigers">Tigers</option></select></label>
+        <button type="button" disabled={isStandard(game.config)} onClick={() => restart(mode, human, DEFAULT_CONFIG)}>Standard rules</button>
+      </div>
+      <p className="game-help">Changing a rule starts a new game.</p>
+    </details>
     <AaduPuliBoard cells={game.cells} selected={selected} moves={selectedMoves} disabled={locked} onPoint={point} />
-    <p className="game-help">Goats place all 15 before moving. Tigers step along a line or jump one goat. Tigers win after 5 captures; goats win by trapping all 3 tigers.</p>
+    <p className="game-help">Goats place all 15 before moving. Tigers step along a line or jump one goat. Tigers win after {game.config.capturesToWin} captures{game.config.mustCapture ? ' (a tiger that can capture must)' : ''}; goats win by trapping all 3 tigers.</p>
     {game.winner ? <div className="game-over"><h3>{status}</h3><p>{game.moves} turns · {game.goatsCaptured} goats captured</p><button className="primary-btn" onClick={() => restart()}>Play again</button></div> : null}
   </div>
 }

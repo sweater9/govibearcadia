@@ -1,6 +1,23 @@
 export type Side = 'goats' | 'tigers'
 export type Piece = 'G' | 'T' | null
 export type Winner = Side | null
+/** Rule choices. The defaults are the common Tamil/South Indian rules (see docs/AADU_PULI_ATTAM.md). */
+export type Config = {
+  /** Goats the tigers must capture to win: 5 (standard) or 6 (some families). */
+  capturesToWin: 5 | 6
+  /** When a tiger can capture it must (a common house rule); standard play lets it choose. */
+  mustCapture: boolean
+  /** Who moves first: goats (standard) or tigers. */
+  first: Side
+}
+export const DEFAULT_CONFIG: Config = { capturesToWin: 5, mustCapture: false, first: 'goats' }
+export const isConfig = (c: unknown): c is Config => {
+  const v = c as Config
+  return !!v && (v.capturesToWin === 5 || v.capturesToWin === 6) && typeof v.mustCapture === 'boolean' && (v.first === 'goats' || v.first === 'tigers')
+}
+export const normaliseConfig = (c: unknown): Config => (isConfig(c) ? { capturesToWin: c.capturesToWin, mustCapture: c.mustCapture, first: c.first } : DEFAULT_CONFIG)
+export const isStandard = (c: Config) => c.capturesToWin === 5 && !c.mustCapture && c.first === 'goats'
+
 export type Move = { from: number | null; to: number; captured: number | null }
 
 export type State = {
@@ -10,11 +27,11 @@ export type State = {
   goatsCaptured: number
   moves: number
   winner: Winner
+  config: Config
 }
 
 export const POINTS = 23
 export const GOATS = 15
-export const CAPTURES_TO_WIN = 5
 export const TIGER_START = [0, 3, 4] as const
 
 /**
@@ -52,10 +69,10 @@ export const JUMPS: readonly (readonly [number, number, number])[] = LINES.flatM
   return triples
 })
 
-export function newGame(): State {
+export function newGame(config: Config = DEFAULT_CONFIG): State {
   const cells = Array<Piece>(POINTS).fill(null)
   for (const p of TIGER_START) cells[p] = 'T'
-  return { cells, turn: 'goats', goatsPlaced: 0, goatsCaptured: 0, moves: 0, winner: null }
+  return { cells, turn: config.first, goatsPlaced: 0, goatsCaptured: 0, moves: 0, winner: null, config }
 }
 
 export function legalMoves(s: State): Move[] {
@@ -71,6 +88,10 @@ export function legalMoves(s: State): Move[] {
     if (mine === 'T') for (const [a, over, to] of JUMPS) {
       if (a === from && s.cells[over] === 'G' && s.cells[to] === null) out.push({ from, to, captured: over })
     }
+  }
+  if (mine === 'T' && s.config.mustCapture) {
+    const captures = out.filter((m) => m.captured !== null)
+    if (captures.length) return captures
   }
   return out
 }
@@ -91,8 +112,9 @@ export function applyMove(s: State, candidate: Move): State {
     goatsCaptured: s.goatsCaptured + (move.captured === null ? 0 : 1),
     moves: s.moves + 1,
     winner: null,
+    config: s.config,
   }
-  if (next.goatsCaptured >= CAPTURES_TO_WIN) return { ...next, winner: 'tigers' }
+  if (next.goatsCaptured >= s.config.capturesToWin) return { ...next, winner: 'tigers' }
   // Goats win only when every tiger lacks both a step and a capture.
   const tigerProbe = { ...next, turn: 'tigers' as const }
   if (legalMoves(tigerProbe).length === 0) return { ...next, winner: 'goats' }
@@ -104,7 +126,7 @@ export function isState(value: unknown): value is State {
   return !!s && Array.isArray(s.cells) && s.cells.length === POINTS && s.cells.every((p) => p === null || p === 'G' || p === 'T') &&
     (s.turn === 'goats' || s.turn === 'tigers') && Number.isInteger(s.goatsPlaced) && s.goatsPlaced >= 0 && s.goatsPlaced <= GOATS &&
     Number.isInteger(s.goatsCaptured) && s.goatsCaptured >= 0 && s.goatsCaptured <= GOATS && Number.isInteger(s.moves) &&
-    (s.winner === null || s.winner === 'goats' || s.winner === 'tigers') && s.cells.filter((p) => p === 'T').length === 3
+    (s.winner === null || s.winner === 'goats' || s.winner === 'tigers') && isConfig(s.config) && s.cells.filter((p) => p === 'T').length === 3
 }
 
 export const scoreFor = (s: State, human: Side) => s.winner === human ? Math.max(500, 1600 - s.moves * 5) : 0
