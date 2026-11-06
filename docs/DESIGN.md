@@ -1,6 +1,6 @@
 # DESIGN.md: GoVibeArcadia
 
-Direction: midnight arcade, editorial. Near-black blue ground, one electric cyan for actions, one warm amber used sparingly, a muted color per game category, and a grotesque display face with no gradient text. Dark only. Source of truth for the canvas "GoVibeArcadia Redesign".
+Direction: warm and soft (replaced the earlier midnight/neon look). Cream ground (`--bg #faf3e8`), brown ink (`--text #3b2a1e`), one terracotta for actions (`--primary #b4542c`), a darker amber used sparingly, sage for success, no glows or neon, and a grotesque display face with no gradient text. Light page chrome; game boards that need contrast (snake, pong, bricks, board games) use a warm dark brown surface. Theme choices (ocean, forest, ember) keep working with darker primaries. Source of truth for the canvas "GoVibeArcadia Redesign".
 
 Note: not based on real-site references. Choices follow the brief and what exists on the live site.
 

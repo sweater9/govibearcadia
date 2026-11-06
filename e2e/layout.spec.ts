@@ -23,6 +23,7 @@ const PLAY_AREA = {
   twofold: '.tf',
   carve: '.cv',
   'ghata-bara': '.gb-board',
+  'aadu-puli-attam': '.ap-board',
   pallanguzhi: '.pg-table',
   carrom: '.cm-setup',
   'taiwanese-mahjong': '.mj-setup',
