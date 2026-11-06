@@ -288,6 +288,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./Carrom').then((m) => ({ default: m.Carrom }))),
   },
+  {
+    meta: {
+      id: 'taiwanese-mahjong',
+      title: 'Taiwanese Mahjong',
+      description: '16-tile Mahjong with flowers and tai scoring, against three computers.',
+      category: 'Strategy',
+      accent: 'from-emerald-500 to-teal-600',
+      glyph: '🀄',
+      estimated: '20–45 min',
+    },
+    Component: lazy(() => import('./Mahjong').then((m) => ({ default: m.Mahjong }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)

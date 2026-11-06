@@ -25,6 +25,7 @@ const PLAY_AREA = {
   'ghata-bara': '.gb-board',
   pallanguzhi: '.pg-table',
   carrom: '.cm-setup',
+  'taiwanese-mahjong': '.mj-setup',
 } as const
 
 type Box = { top: number; bottom: number }
