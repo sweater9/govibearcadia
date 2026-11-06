@@ -467,4 +467,4 @@ button.mj-tile{cursor:pointer}
 .mj-result{position:absolute;z-index:6;left:8px;right:8px;top:90px;max-height:calc(100% - 100px);overflow:auto;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
 .mj-result h3{margin:0 0 6px;font-family:var(--font-display);font-size:18px}.mj-result ul{margin:0 0 6px;padding-left:18px;font-size:14px}
 .mj-wrap{position:relative}
-@media(max-width:700px){.mj-tile{width:calc((100vw - 64px)/9 - 3px);max-width:36px;height:42px}.mj-small{width:18px;height:25px}.mj-pool{height:92px}}
+@media(max-width:700px){.mj-tile{width:calc((100vw - 64px)/9 - 3px);max-width:36px;height:42px}.mj-small{width:18px;height:25px}.mj-pool{height:72px}}
