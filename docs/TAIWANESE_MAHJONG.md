@@ -10,6 +10,10 @@ Rules for Taiwanese (16-tile) Mahjong differ between tables, and no single sourc
 - **Computers** (`ai.ts`): Easy, Medium and Hard. They choose discards by shanten and tiles that improve the hand, claim only what moves the hand forward, and always win when they can.
 - **Screen** (`Mahjong.tsx`): tap a tile to pick it, tap again to discard; buttons for Win, Pung, Kong, Chow and Pass; a Scoring panel; saved between moves and resumable.
 
+## Choosing the rules
+
+The setup screen offers a **Standard rules** preset (the defaults below) and these choices, remembered in this browser (`govibearcadia.mahjong.rules`): length (single hand, East round, East and South), stakes (30+10, 50+20, 100+20 per tai), dealer bonus (1 + 2 per kept deal, 1 flat, none), wind pungs (seat and round wind only, or any wind pung), and a minimum tai to win (none, 1, 3). A saved game keeps the rules it started with. Logic: `src/games/mahjong/config.ts` and `Config` in `rules.ts`.
+
 ## Rules chosen
 | Topic | Choice |
 |---|---|
