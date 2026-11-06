@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createRandom } from '../lib/rng'
 import type { GameProps } from '../types'
 import { chooseClaim, chooseTurnAction, LEVELS, type Level } from './mahjong/ai'
-import { act, kongChoices, newMatch, selfDrawScore, startNextHand, windOf, type Decision, type Event, type State } from './mahjong/rules'
+import { describeConfig, isStandard, loadRules, normaliseConfig, OPTIONS, saveRules, STAKES } from './mahjong/config'
+import { DEFAULT_CONFIG, act, kongChoices, newMatch, selfDrawScore, startNextHand, windOf, type Config, type Decision, type Event, type State } from './mahjong/rules'
 import { clearSaved, loadSaved, save, type Saved } from './mahjong/save'
 import { isDragon, isFlower, isHonour, rankOf, suitOf, tileName, tileShort } from './mahjong/tiles'
 
@@ -36,7 +37,8 @@ function describe(e: Event): string {
 export function Mahjong({ onFinish, seed }: GameProps) {
   const [resume] = useState<Saved | null>(() => (seed === undefined ? loadSaved() : null))
   const [level, setLevel] = useState<Level>('medium')
-  const [east, setEast] = useState(true)
+  const [rules, setRules] = useState<Config>(() => (seed === undefined ? loadRules() : DEFAULT_CONFIG))
+  const setRule = (patch: Partial<Config>) => setRules((r) => normaliseConfig({ ...r, ...patch }))
   const [started, setStarted] = useState(false)
   const [rulesOpen, setRulesOpen] = useState(false)
   const [state, setState] = useState<State | null>(null)
@@ -127,12 +129,16 @@ export function Mahjong({ onFinish, seed }: GameProps) {
             <button key={l} type="button" className={`secondary-btn${level === l ? ' mj-on' : ''}`} aria-pressed={level === l} onClick={() => setLevel(l)}>{l[0].toUpperCase() + l.slice(1)}</button>
           ))}
         </div>
-        <div className="mj-row" role="group" aria-label="Length">
-          <button type="button" className={`secondary-btn${east ? ' mj-on' : ''}`} aria-pressed={east} onClick={() => setEast(true)}>East round (4 deals)</button>
-          <button type="button" className={`secondary-btn${!east ? ' mj-on' : ''}`} aria-pressed={!east} onClick={() => setEast(false)}>Single hand</button>
+        <div className="mj-rules" role="group" aria-label="Rules">
+          <label>Length<select value={rules.match} onChange={(e) => setRule({ match: e.target.value as Config['match'] })}>{OPTIONS.match.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></label>
+          <label>Stakes<select value={`${rules.base}-${rules.unit}`} onChange={(e) => { const s = STAKES.find((x) => x.id === e.target.value); if (s) setRule({ base: s.base, unit: s.unit }) }}>{STAKES.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}</select></label>
+          <label>Dealer bonus<select value={rules.dealerBonus} onChange={(e) => setRule({ dealerBonus: e.target.value as Config['dealerBonus'] })}>{OPTIONS.dealerBonus.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></label>
+          <label>Wind pungs<select value={rules.windPungs} onChange={(e) => setRule({ windPungs: e.target.value as Config['windPungs'] })}>{OPTIONS.windPungs.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></label>
+          <label>To win<select value={String(rules.minTai)} onChange={(e) => setRule({ minTai: Number(e.target.value) })}>{OPTIONS.minTai.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></label>
+          <button type="button" className="secondary-btn" disabled={isStandard(rules)} onClick={() => setRules(DEFAULT_CONFIG)}>Standard rules</button>
         </div>
         <div className="mj-row">
-          <button type="button" className="primary-btn" onClick={() => begin(newMatch(createRandom(`${base.current}-1`), { match: east ? 'east' : 'single' }))}>Start</button>
+          <button type="button" className="primary-btn" onClick={() => { begin(newMatch(createRandom(`${base.current}-1`), rules)); if (seed === undefined) saveRules(rules) }}>Start</button>
           {resume && <button type="button" className="secondary-btn" onClick={() => begin(resume.state, resume)}>Resume saved game</button>}
         </div>
       </div>
@@ -231,8 +237,9 @@ export function Mahjong({ onFinish, seed }: GameProps) {
       {rulesOpen && (
         <div className="mj-result" role="dialog" aria-label="Scoring">
           <h3>Scoring (tai)</h3>
-          <p className="mj-note">A win pays {state.config.base} + {state.config.unit} × tai. Winning on a discard: the discarder pays. Self-draw: all three pay. The dealer adds 1 tai, plus 2 for each hand they have kept the deal, to every payment they make or receive.</p>
-          <p className="mj-note">Self-draw 1 · concealed hand 1 · concealed self-draw 3 (in all) · win after a kong 1 · dragon pung 1 · seat wind 1 · round wind 1 · seat flower 1 each · all chows 2 · melded hand 2 · three concealed pungs 2 · four 5 · five 8 · all pungs 4 · little three dragons 4 · big three dragons 8 · half flush 4 · full flush 8 · all honours 8 · little four winds 8 · big four winds 16 · all eight flowers 8.</p>
+          <p className="mj-note">A win pays {state.config.base} + {state.config.unit} × tai. Winning on a discard: the discarder pays. Self-draw: all three pay. {state.config.dealerBonus === 'none' ? 'There is no dealer bonus.' : state.config.dealerBonus === 'flat' ? 'The dealer adds 1 tai to every payment they make or receive.' : 'The dealer adds 1 tai, plus 2 for each hand they have kept the deal, to every payment they make or receive.'}{state.config.minTai ? ` A hand needs at least ${state.config.minTai} tai to win.` : ''}</p>
+          <p className="mj-note">Rules this game: {describeConfig(state.config)}{isStandard(state.config) ? ' (standard)' : ' (custom)'}.</p>
+          <p className="mj-note">Self-draw 1 · concealed hand 1 · concealed self-draw 3 (in all) · win after a kong 1 · dragon pung 1 · seat wind 1 · round wind 1{state.config.windPungs === 'all' ? ' · other wind pung 1' : ''} · seat flower 1 each · all chows 2 · melded hand 2 · three concealed pungs 2 · four 5 · five 8 · all pungs 4 · little three dragons 4 · big three dragons 8 · half flush 4 · full flush 8 · all honours 8 · little four winds 8 · big four winds 16 · all eight flowers 8.</p>
           <button type="button" className="secondary-btn" onClick={() => setRulesOpen(false)}>Close</button>
         </div>
       )}

@@ -1,5 +1,5 @@
 import type { Random } from '../../lib/rng'
-import { ROUND_WIND, kongChoices, selfDrawScore, windOf, type Action, type Decision, type State } from './rules'
+import { roundWindOf, kongChoices, selfDrawScore, windOf, type Action, type Decision, type State } from './rules'
 import { WIND_BASE, counts, isDragon, isHonour, isSuited, rankOf, shanten, suitOf } from './tiles'
 
 export type Level = 'easy' | 'medium' | 'hard'
@@ -64,7 +64,7 @@ export function chooseTurnAction(s: State, seat: number, level: Level, random: R
   return { type: 'discard', tile: chooseDiscard(s, seat, level, random) }
 }
 
-const valuablePung = (s: State, seat: number, t: number) => isDragon(t) || t === WIND_BASE + windOf(s, seat) || t === WIND_BASE + ROUND_WIND
+const valuablePung = (s: State, seat: number, t: number) => isDragon(t) || t === WIND_BASE + windOf(s, seat) || t === WIND_BASE + roundWindOf(s)
 
 /** Win whenever possible; otherwise claim only what moves the hand forward. */
 export function chooseClaim(s: State, seat: number, level: Level, random: Random): Decision {

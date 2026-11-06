@@ -468,3 +468,7 @@ button.mj-tile{cursor:pointer}
 .mj-result h3{margin:0 0 6px;font-family:var(--font-display);font-size:18px}.mj-result ul{margin:0 0 6px;padding-left:18px;font-size:14px}
 .mj-wrap{position:relative}
 @media(max-width:700px){.mj-tile{width:calc((100vw - 64px)/9 - 3px);max-width:36px;height:42px}.mj-small{width:18px;height:25px}.mj-pool{height:72px}}
+.mj-rules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 10px;width:min(100%,420px)}
+.mj-rules label{display:flex;flex-direction:column;gap:2px;font-size:12px;text-align:left}
+.mj-rules select{min-height:36px;font-size:14px;padding:4px 6px;border-radius:8px;background:var(--surface,#fff);color:inherit;border:1px solid currentColor}
+.mj-rules .secondary-btn{align-self:end}

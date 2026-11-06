@@ -12,6 +12,8 @@ export type WinContext = {
   /** 0 East, 1 South, 2 West, 3 North. */
   seatWind: number
   roundWind: number
+  /** 'all' scores every wind pung 1 tai; default is seat and round wind only. */
+  windPungs?: 'seat-round' | 'all'
 }
 export type Item = { name: string; tai: number }
 export type Score = { tai: number; items: Item[] }
@@ -61,6 +63,7 @@ function scoreSplit(ctx: WinContext, groups: Group[], pair: number): Score {
     for (const g of pungs) {
       if (g.tile === WIND_BASE + ctx.seatWind) add('Seat wind', 1)
       if (g.tile === WIND_BASE + ctx.roundWind) add('Round wind', 1)
+      else if (ctx.windPungs === 'all' && isWind(g.tile) && g.tile !== WIND_BASE + ctx.seatWind) add('Wind pung', 1)
     }
   }
 

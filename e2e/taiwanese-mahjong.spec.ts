@@ -3,7 +3,7 @@ import { expectRows, readTable } from './helpers'
 
 async function begin(page: Page) {
   await page.goto('/play/taiwanese-mahjong')
-  await page.getByRole('button', { name: 'Single hand' }).click()
+  await page.getByLabel('Length').selectOption('single')
   await page.getByRole('button', { name: 'Start' }).click()
   await expect(page.getByTestId('mj-hand')).toBeVisible()
 }

@@ -8,7 +8,7 @@ import { newMatch } from './mahjong/rules'
 beforeEach(() => localStorage.clear())
 
 const startSingle = () => {
-  fireEvent.click(screen.getByRole('button', { name: 'Single hand' }))
+  fireEvent.change(screen.getByLabelText('Length'), { target: { value: 'single' } })
   fireEvent.click(screen.getByRole('button', { name: 'Start' }))
 }
 
@@ -59,5 +59,25 @@ describe('Taiwanese Mahjong', () => {
     startSingle()
     fireEvent.click(screen.getByRole('button', { name: 'Scoring' }))
     expect(screen.getByRole('dialog', { name: 'Scoring' })).toHaveTextContent(/all pungs 4/i)
+  })
+})
+
+describe('rule choices', () => {
+  it('starts on the standard rules and Standard rules restores them', () => {
+    render(<Mahjong onFinish={() => {}} />)
+    const std = screen.getByRole('button', { name: 'Standard rules' })
+    expect(std).toBeDisabled()
+    fireEvent.change(screen.getByLabelText('To win'), { target: { value: '3' } })
+    expect(std).toBeEnabled()
+    fireEvent.click(std)
+    expect(screen.getByLabelText('To win')).toHaveValue('0')
+  })
+  it('remembers the last chosen rules', () => {
+    const { unmount } = render(<Mahjong onFinish={() => {}} />)
+    fireEvent.change(screen.getByLabelText('Dealer bonus'), { target: { value: 'none' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+    unmount()
+    render(<Mahjong onFinish={() => {}} />)
+    expect(screen.getByLabelText('Dealer bonus')).toHaveValue('none')
   })
 })

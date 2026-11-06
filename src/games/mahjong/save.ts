@@ -1,4 +1,5 @@
 import { LEVELS, type Level } from './ai'
+import { normaliseConfig } from './config'
 import { LIVE_RESERVE, type State } from './rules'
 
 export type Saved = { v: 1; level: Level; startedAt: number; state: State; seed: string }
@@ -14,6 +15,7 @@ export function loadSaved(): Saved | null {
     if (!Array.isArray(x.wall) || x.wall.length !== 144 || !Array.isArray(x.seats) || x.seats.length !== 4) return null
     if (!['discard', 'claim', 'hand-over'].includes(x.phase) || !(x.next >= 0 && x.next <= 144 - LIVE_RESERVE) || !(x.turn >= 0 && x.turn < 4)) return null
     if (!x.seats.every((p) => Array.isArray(p.hand) && Array.isArray(p.melds) && Array.isArray(p.flowers) && Array.isArray(p.discards))) return null
+    x.config = normaliseConfig(x.config)
     return s
   } catch {
     return null

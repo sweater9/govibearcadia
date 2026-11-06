@@ -7,15 +7,22 @@ import { scoreWin, type Item, type Meld, type Score, type WinContext } from './s
 import { FLOWER_BASE, FLOWERS, TYPES, counts, isFlower, isSuited, rankOf } from './tiles'
 
 export type Config = {
-  /** 'single' plays one hand; 'east' plays the East round: every seat deals once (more if the dealer keeps winning or draws). */
-  match: 'single' | 'east'
+  /** 'single' plays one hand; 'east' plays the East round (every seat deals once, more if the dealer keeps the deal); 'east-south' plays two rounds. */
+  match: 'single' | 'east' | 'east-south'
+  /** Dealer bonus per payment: 'streak' = 1 + 2 per kept deal (standard), 'flat' = 1, 'none' = 0. */
+  dealerBonus: 'streak' | 'flat' | 'none'
+  /** Which wind pungs score: the player's seat wind and the round wind (standard), or any wind pung. */
+  windPungs: 'seat-round' | 'all'
+  /** Fewest tai a hand needs before it may win. */
+  minTai: number
   /** A win pays `base + unit * tai`. */
   base: number
   unit: number
   /** Points each player starts with. */
   start: number
 }
-export const DEFAULT_CONFIG: Config = { match: 'east', base: 30, unit: 10, start: 1000 }
+export const DEFAULT_CONFIG: Config = { match: 'east', dealerBonus: 'streak', windPungs: 'seat-round', minTai: 0, base: 30, unit: 10, start: 1000 }
+export const matchRounds = (c: Config) => (c.match === 'east-south' ? 2 : 1)
 
 export const SEATS = 4
 export const LIVE_RESERVE = 16 // the last 16 tiles of the wall are never drawn from the front
@@ -63,9 +70,10 @@ export type State = {
 }
 
 export const windOf = (s: State, seat: number) => (seat - s.dealer + SEATS) % SEATS
-export const ROUND_WIND = 0
+/** 0 East, 1 South: the round wind advances after each full circle of deals. */
+export const roundWindOf = (s: State) => Math.floor(s.dealerTurns / SEATS) % SEATS
 export const liveLeft = (s: State) => s.wall.length - s.back - s.next - LIVE_RESERVE
-const dealerTai = (s: State) => 1 + 2 * s.lian
+const dealerTai = (s: State) => (s.config.dealerBonus === 'none' ? 0 : s.config.dealerBonus === 'flat' ? 1 : 1 + 2 * s.lian)
 
 export function buildWall(): number[] {
   const wall: number[] = []
@@ -151,13 +159,14 @@ function drawFor(s: State, seat: number, fromBack: boolean) {
 
 function ctxFor(s: State, seat: number, concealed: readonly number[], winTile: number, selfDraw: boolean): WinContext {
   const p = s.seats[seat]
-  return { concealed, melds: p.melds, flowers: p.flowers, selfDraw, winTile, afterKong: s.afterKong, seatWind: windOf(s, seat), roundWind: ROUND_WIND }
+  return { concealed, melds: p.melds, flowers: p.flowers, selfDraw, winTile, afterKong: s.afterKong, seatWind: windOf(s, seat), roundWind: roundWindOf(s), windPungs: s.config.windPungs }
 }
 
 /** The score if the player to move has won with the tile they just drew, else null. */
 export function selfDrawScore(s: State, seat = s.turn): Score | null {
   if (s.phase !== 'discard' || s.drawn === null || seat !== s.turn) return null
-  return scoreWin(ctxFor(s, seat, counts(s.seats[seat].hand), s.drawn, true))
+  const sc = scoreWin(ctxFor(s, seat, counts(s.seats[seat].hand), s.drawn, true))
+  return sc && sc.tai >= s.config.minTai ? sc : null
 }
 
 /** What each other seat may do with the discard. */
@@ -166,7 +175,8 @@ export function optionsFor(s: State, seat: number, tile: number, from: number): 
   const c = counts(p.hand)
   const withTile = [...c]
   withTile[tile]++
-  const win = scoreWin(ctxFor(s, seat, withTile, tile, false)) !== null
+  const sc = scoreWin(ctxFor(s, seat, withTile, tile, false))
+  const win = sc !== null && sc.tai >= s.config.minTai
   const chows: number[] = []
   if (seat === (from + 1) % SEATS && isSuited(tile)) {
     for (let low = tile - 2; low <= tile; low++) {
@@ -350,7 +360,7 @@ function finishHand(s: State, winner: number) {
     s.lian = 0
     s.dealerTurns++
   }
-  s.phase = s.config.match === 'single' || s.dealerTurns >= SEATS ? 'over' : 'hand-over'
+  s.phase = s.config.match === 'single' || s.dealerTurns >= SEATS * matchRounds(s.config) ? 'over' : 'hand-over'
 }
 
 export function startNextHand(prev: State, random: Random): State {

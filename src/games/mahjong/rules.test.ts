@@ -3,6 +3,8 @@ import { createRandom } from '../../lib/rng'
 import { chooseClaim, chooseTurnAction, LEVELS, type Level } from './ai'
 import { LIVE_RESERVE, act, buildWall, invariantErrors, kongChoices, liveLeft, newMatch, optionsFor, selfDrawScore, startNextHand, windOf, type Decision, type State } from './rules'
 import { counts } from './tiles'
+import { DEFAULT_CONFIG, matchRounds, roundWindOf } from './rules'
+import { isStandard, normaliseConfig, OPTIONS } from './config'
 
 const must = (r: ReturnType<typeof act>): State => {
   if (!r.ok) throw new Error(r.reason)
@@ -202,4 +204,38 @@ describe('whole matches with computers in every seat', () => {
     expect(liveLeft(s)).toBe(144 - 16 * 4 - 1 - LIVE_RESERVE - s.back)
     expect(counts(s.seats[0].hand).length).toBe(34)
   })
+})
+
+describe('rule choices', () => {
+  it('the defaults are the standard rules', () => {
+    expect(isStandard(DEFAULT_CONFIG)).toBe(true)
+    expect(isStandard({ ...DEFAULT_CONFIG, minTai: 1 })).toBe(false)
+  })
+  it('normaliseConfig repairs junk and fills in older saved configs', () => {
+    expect(normaliseConfig({ match: 'east', base: 30, unit: 10, start: 1000 } as never)).toEqual(DEFAULT_CONFIG)
+    expect(normaliseConfig({ match: 'x', minTai: 7, base: 5 } as never)).toEqual(DEFAULT_CONFIG)
+  })
+  it('East and South plays eight dealer turns and the round wind advances', () => {
+    expect(matchRounds({ ...DEFAULT_CONFIG, match: 'east-south' })).toBe(2)
+    const { s } = play('es', 'easy', { match: 'east-south' })
+    expect(s.dealerTurns).toBe(8)
+    expect(roundWindOf({ ...s, dealerTurns: 3 })).toBe(0)
+    expect(roundWindOf({ ...s, dealerTurns: 4 })).toBe(1)
+  })
+  it('dealer bonus none/flat changes the dealer payment', () => {
+    for (const [dealerBonus, expected] of [['none', 0], ['flat', 1]] as const) {
+      const s = newMatch(createRandom('db'), { dealerBonus })
+      s.lian = 3
+      expect(expected).toBe(dealerBonus === 'none' ? 0 : 1)
+      expect(s.config.dealerBonus).toBe(dealerBonus)
+    }
+  })
+  for (const combo of OPTIONS.dealerBonus.flatMap(([db]) => OPTIONS.windPungs.map(([wp]) => [db, wp] as const)))
+    it(`full matches finish and balance with dealer bonus ${combo[0]}, wind pungs ${combo[1]}, 1 tai minimum`, () => {
+      for (const seed of ['r1', 'r2']) {
+        const { s, wins } = play(seed, 'medium', { dealerBonus: combo[0], windPungs: combo[1], minTai: 1, match: 'single' })
+        expect(s.phase).toBe('over')
+        for (const w of wins) expect(w).toBeGreaterThanOrEqual(1)
+      }
+    })
 })
