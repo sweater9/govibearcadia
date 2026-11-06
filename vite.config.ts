@@ -14,8 +14,8 @@ export default defineConfig({
         name: 'GoVibeArcadia',
         short_name: 'Arcadia',
         description: 'A premium local-first browser arcade.',
-        theme_color: '#0B0D14',
-        background_color: '#0B0D14',
+        theme_color: '#faf3e8',
+        background_color: '#faf3e8',
         display: 'standalone',
         start_url: '/',
         icons: [
