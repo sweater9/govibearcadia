@@ -4,7 +4,7 @@ export type ThemeId = 'neon' | 'ocean' | 'forest' | 'ember'
 export type Theme = { id: ThemeId; name: string; level: number; blurb: string }
 
 export const THEMES: readonly Theme[] = [
-  { id: 'neon', name: 'Neon', level: 1, blurb: 'Cyan, the arcade’s own' },
+  { id: 'neon', name: 'Terracotta', level: 1, blurb: 'Warm clay, the arcade’s own' },
   { id: 'ocean', name: 'Ocean', level: 2, blurb: 'A cool blue accent' },
   { id: 'forest', name: 'Forest', level: 3, blurb: 'A fresh green accent' },
   { id: 'ember', name: 'Ember', level: 5, blurb: 'A warm coral accent' },
