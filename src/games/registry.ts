@@ -266,6 +266,18 @@ export const registry: GameEntry[] = [
   },
   {
     meta: {
+      id: 'aadu-puli-attam',
+      title: 'Aadu Puli Attam',
+      description: 'The traditional Tamil hunt game: three tigers face a united herd of fifteen goats.',
+      category: 'Strategy',
+      accent: 'from-amber-500 to-rose-600',
+      glyph: '🐯',
+      estimated: '10–20 min',
+    },
+    Component: lazy(() => import('./AaduPuliAttam').then((m) => ({ default: m.AaduPuliAttam }))),
+  },
+  {
+    meta: {
       id: 'pallanguzhi',
       title: 'Pallanguzhi',
       description: 'The traditional seed-sowing game of Karnataka (Ali Guli Mane): relay sowing, Saada captures and piggy pits.',
