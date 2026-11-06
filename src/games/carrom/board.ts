@@ -116,7 +116,7 @@ export function mountBoard(parent: HTMLElement, handlers: BoardHandlers): BoardA
       const p = strikerAt(this.seat, this.aim.t)
       const d = aimDir(this.seat, this.aim.angle)
       const len = 90 + this.aim.power * 330
-      g.lineStyle(3, 0xffb547, 0.95)
+      g.lineStyle(3, 0x1a1008, 0.95)
       for (let k = 0; k < len; k += 26) g.lineBetween(p.x + d.x * (STRIKER_R + k), p.y + d.y * (STRIKER_R + k), p.x + d.x * (STRIKER_R + Math.min(k + 14, len)), p.y + d.y * (STRIKER_R + Math.min(k + 14, len)))
     }
     down(p: Phaser.Input.Pointer) {

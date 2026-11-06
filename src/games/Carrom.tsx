@@ -248,10 +248,10 @@ export function Carrom({ onFinish, seed }: GameProps) {
         </div>
       )}
       <div className="cm-row">
+        {state.phase !== 'over' && <button type="button" className="secondary-btn" disabled={busy} onClick={finishNow}>Finish match</button>}
         {state.phase === 'aim' && <button type="button" className="primary-btn" disabled={!myTurnHuman || blocked} onClick={strike}>Strike</button>}
         {state.phase === 'board-over' && <button type="button" className="primary-btn" onClick={() => setState((s) => nextBoard(s))}>Next board</button>}
         {state.phase === 'over' && <button type="button" className="primary-btn" onClick={() => { setStarted(false); setState(newMatch()) }}>New match</button>}
-        {state.phase !== 'over' && <button type="button" className="secondary-btn" disabled={busy} onClick={finishNow}>Finish match</button>}
       </div>
     </div>
   )
