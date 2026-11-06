@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { createRandom } from '../src/lib/rng'
-import { dice, rollTotal, newGame, innerKey, LAYOUTS, type State } from '../src/games/ghata/rules'
+import { dice, rollTotal, newGame, innerKey, outerKey, LAYOUTS, type State } from '../src/games/ghata/rules'
 import { expectRows, overflowsHorizontally, readTable } from './helpers'
 
 // Ghata Bara: crafted positions are put in through the saved-game slot, so the real UI is checked against exact rules.
@@ -11,7 +11,11 @@ const T0 = new Date('2026-10-28T10:00:00Z')
 async function stage(page: Page, state: State, humans = 1) {
   await page.addInitScript(([key, value]) => localStorage.setItem(key, value), [KEY, JSON.stringify({ v: 1, seed: 'e2e', draws: 0, humans, state })])
 }
-/** Violet has a Juga (pawns 0 and 1) on i2 and Cyan's pawn 6 on i3, with a 2 to move. */
+/** Violet (player 1, bottom) has a Juga (pawns 0 and 1) on JUGA_SQ and Cyan's pawn 6 on ENEMY_SQ, one Juga step on, with a 2 to move. */
+const JUGA_SQ = innerKey(0, 1)
+const ENEMY_SQ = innerKey(0, 2)
+/** Cyan's own step count to a square. */
+const cyanAt = (sq: string) => Array.from({ length: 8 }, (_, a) => a).find((a) => innerKey(1, a) === sq)!
 function jugaNextToEnemy(pinned: boolean): State {
   const s = newGame()
   s.phase = 'move'
@@ -20,8 +24,7 @@ function jugaNextToEnemy(pinned: boolean): State {
   s.nextJuga = 2
   for (const id of [0, 1]) Object.assign(s.pawns[id], { where: 'juga', at: 1, credit: true })
   s.jugas.push({ id: 1, seat: 0, at: 1, pawns: [0, 1], pinned: pinned ? 6 : null })
-  // Cyan enters the inner ring at i7, so i3 is 4 steps in, and i2 is 3.
-  Object.assign(s.pawns[6], { where: 'inner', at: pinned ? 3 : 4, credit: true, pinnedBy: pinned ? 1 : null })
+  Object.assign(s.pawns[6], { where: 'inner', at: cyanAt(pinned ? JUGA_SQ : ENEMY_SQ), credit: true, pinnedBy: pinned ? 1 : null })
   return s
 }
 
@@ -56,10 +59,10 @@ test('a Juga landing on a lone enemy pawn pins it, using the mouse', async ({ pa
   await stage(page, jugaNextToEnemy(false))
   await page.goto('/play/ghata-bara')
   await expect(page.locator('.gb-juga')).toHaveCount(1)
-  await page.locator('[data-square="i2"]').click()
-  await expect(page.locator('[data-square="i3"]')).toHaveAttribute('data-target', '')
-  await expect(page.locator('[data-square="i3"] .gb-badge')).toHaveText('2')
-  await page.locator('[data-square="i3"]').click()
+  await page.locator(`[data-square="${JUGA_SQ}"]`).click()
+  await expect(page.locator(`[data-square="${ENEMY_SQ}"]`)).toHaveAttribute('data-target', '')
+  await expect(page.locator(`[data-square="${ENEMY_SQ}"] .gb-badge`)).toHaveText('2')
+  await page.locator(`[data-square="${ENEMY_SQ}"]`).click()
   await expect(page.locator('.gb-pawn[data-pinned]')).toHaveCount(1)
   await expect(page.getByRole('status')).toContainText('Violet pinned a pawn')
   await expect(page.locator('.gb-juga[data-holding]')).toHaveCount(1)
@@ -70,9 +73,9 @@ test('leaving a pin captures the pawn, and the capture earns one bonus roll, wit
   await stage(page, s)
   await page.goto('/play/ghata-bara')
   await expect(page.locator('.gb-pawn[data-pinned]')).toHaveCount(1)
-  await page.locator('[data-square="i2"]').focus()
+  await page.locator(`[data-square="${JUGA_SQ}"]`).focus()
   await page.keyboard.press('Enter')
-  await page.locator('[data-square="i3"]').focus()
+  await page.locator(`[data-square="${ENEMY_SQ}"]`).focus()
   await page.keyboard.press('Enter')
   await expect(page.getByRole('status')).toContainText('Violet captured 1 pawn')
   await expect(page.getByRole('status')).toContainText('capture bonus roll')
@@ -139,6 +142,8 @@ test('a whole four-player game can be played to the end, and the result is saved
   expect(await page.evaluate((k) => localStorage.getItem(k), KEY)).toBeNull()
 })
 
+const START7 = outerKey(0, 0, 7)
+const TURN7 = outerKey(0, 22, 7)
 /** The 7x7 board with Violet's pawn 0 on its turn square, two before its own start, ready to move. */
 function sevenAtTurn(credit: boolean, queue: number[]): State {
   const s = newGame(7)
@@ -151,11 +156,11 @@ function sevenAtTurn(credit: boolean, queue: number[]): State {
 test('7x7: a pawn with a capture turns inward from the square two before its start, following the arrows', async ({ page }) => {
   await stage(page, sevenAtTurn(true, [1]))
   await page.goto('/play/ghata-bara')
-  await page.locator('[data-square="o22"]').click()
-  const entry = `i${LAYOUTS[7].interiorCells.findIndex(([r, c]) => r === 1 && c === 5)}` // the middle ring's top-right corner for the top seat
+  await page.locator(`[data-square="${TURN7}"]`).click()
+  const entry = `i${LAYOUTS[7].interiorCells.findIndex(([r, c]) => r === 5 && c === 1)}` // the middle ring's bottom-left corner for the bottom seat
   expect(innerKey(0, 0, 7)).toBe(entry)
   await expect(page.locator(`[data-square="${entry}"]`)).toHaveAttribute('data-target', '')
-  await expect(page.locator('[data-square="o23"]')).not.toHaveAttribute('data-target', '')
+  await expect(page.locator(`[data-square="${outerKey(0, 23, 7)}"]`)).not.toHaveAttribute('data-target', '')
   await page.locator(`[data-square="${entry}"]`).click()
   await expect(page.locator(`[data-square="${entry}"] .gb-pawn`)).toHaveCount(1)
 })
@@ -163,8 +168,8 @@ test('7x7: a pawn with a capture turns inward from the square two before its sta
 test('7x7: a pawn with no capture keeps circling the outer ring', async ({ page }) => {
   await stage(page, sevenAtTurn(false, [2]))
   await page.goto('/play/ghata-bara')
-  await page.locator('[data-square="o22"]').click()
-  await expect(page.locator('[data-square="o0"]')).toHaveAttribute('data-target', '') // past the turn square, onto its start
+  await page.locator(`[data-square="${TURN7}"]`).click()
+  await expect(page.locator(`[data-square="${START7}"]`)).toHaveAttribute('data-target', '') // past the turn square, onto its start
   await expect(page.locator('[data-target]')).toHaveCount(1)
 })
 

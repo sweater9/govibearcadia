@@ -2,10 +2,10 @@ import type { Seat } from './rules'
 
 /** Players are told apart by name and shape as well as colour. */
 export const SEAT_INFO: readonly { name: string; side: string; glyph: string; color: string }[] = [
-  { name: 'Violet', side: 'top', glyph: '●', color: '#a78bfa' },
-  { name: 'Cyan', side: 'left', glyph: '■', color: '#22d3ee' },
-  { name: 'Amber', side: 'bottom', glyph: '▲', color: '#fbbf24' },
-  { name: 'Rose', side: 'right', glyph: '◆', color: '#fb7185' },
+  { name: 'Violet', side: 'bottom', glyph: '●', color: '#a78bfa' },
+  { name: 'Cyan', side: 'right', glyph: '■', color: '#22d3ee' },
+  { name: 'Amber', side: 'top', glyph: '▲', color: '#fbbf24' },
+  { name: 'Rose', side: 'left', glyph: '◆', color: '#fb7185' },
 ]
 
 /** Which seats people sit in; the computer plays the rest. Two players sit opposite each other. */

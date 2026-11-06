@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { GhataBara } from './GhataBara'
-import { newGame, type State } from './ghata/rules'
+import { innerKey, newGame, type State } from './ghata/rules'
 
 const KEY = 'govibearcadia.ghata'
 const store = (state: State, humans = 1) => localStorage.setItem(KEY, JSON.stringify({ v: 1, seed: 'unit', draws: 0, humans, state }))
@@ -45,7 +45,7 @@ describe('GhataBara', () => {
         <GhataBara onFinish={onFinish} />
       </StrictMode>,
     )
-    fireEvent.click(container.querySelector('[data-square="i6"]')!) // pick the pawn
+    fireEvent.click(container.querySelector(`[data-square="${innerKey(0, 5)}"]`)!) // pick the pawn
     fireEvent.click(container.querySelector('[data-square="c"]')!) // move Home
     expect(screen.getByRole('status')).toHaveTextContent('Violet wins!')
     expect(onFinish).toHaveBeenCalledTimes(1)
@@ -58,7 +58,7 @@ describe('GhataBara', () => {
     const { container } = render(<GhataBara onFinish={vi.fn()} />)
     const home = container.querySelector<HTMLButtonElement>('[data-square="c"]')!
     expect(home).toBeDisabled()
-    fireEvent.click(container.querySelector('[data-square="i6"]')!)
+    fireEvent.click(container.querySelector(`[data-square="${innerKey(0, 5)}"]`)!)
     expect(home).toBeEnabled()
     expect(home).toHaveTextContent('3')
     fireEvent.keyDown(window, { key: 'Escape' })

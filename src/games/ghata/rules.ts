@@ -39,7 +39,7 @@ export type Layout = {
   /** Interior squares by id, e.g. `i3`. */
   interiorCells: readonly Cell[]
   centre: Cell
-  /** Index in `outerCells` of each seat's start square: top, left, bottom, right. */
+  /** Index in `outerCells` of each seat's start square: bottom (player 1), right, top, left. */
   start: readonly number[]
   safe: readonly string[]
   /** The square id a seat stands on after `at` steps along its interior path. */
@@ -91,16 +91,16 @@ const LAYOUT5: Layout = {
   outerCells: OUTER_CELLS_5(),
   interiorCells: INNER_CELLS_5(),
   centre: [2, 2],
-  start: [0, 4, 8, 12],
+  start: [8, 12, 0, 4],
   safe: ['o0', 'o4', 'o8', 'o12', 'c'],
-  interiorId: (seat, at) => INNER5_ID.get(rotate(BOTTOM_PATH_5[at], 5, (seat + 2) % 4).join(','))!,
+  interiorId: (seat, at) => INNER5_ID.get(rotate(BOTTOM_PATH_5[at], 5, seat).join(','))!,
 }
 
 /**
  * The interior route of the seat that starts at the bottom middle, read from the owner's arrows (row, column):
  * up the left side of the middle ring, along its top, down its right side, back along its bottom to the square beside where it began,
  * then up into the inner ring's bottom-left corner, up, across, down and back along the inner ring's bottom, and finally up into Home.
- * The other seats walk the same route turned a quarter turn each.
+ * Seat 0 (player 1) walks it as drawn; seats 1 to 3 walk the same route turned a quarter turn each (right, top, left).
  */
 const BOTTOM_PATH: readonly Cell[] = [
   [5, 1], [4, 1], [3, 1], [2, 1], [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [2, 5], [3, 5], [4, 5], [5, 5], [5, 4], [5, 3], [5, 2],
@@ -123,9 +123,9 @@ function layout7(): Layout {
     outerCells,
     interiorCells,
     centre: [3, 3],
-    start: [0, 6, 12, 18],
+    start: [12, 18, 0, 6],
     safe,
-    interiorId: (seat, at) => idOf.get(rotate(BOTTOM_PATH[at], 7, (seat + 2) % 4).join(','))!,
+    interiorId: (seat, at) => idOf.get(rotate(BOTTOM_PATH[at], 7, seat).join(','))!,
   }
 }
 

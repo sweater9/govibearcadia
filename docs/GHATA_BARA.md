@@ -8,13 +8,13 @@ A faithful, local-first adaptation of the traditional four-player board game. Pu
 
 The 5x5 game for four seats, as specified: 25 squares (16 outer counterclockwise, 8 inner clockwise, Home in the centre; pawns turn in from the square before their own start), five safe squares, six pawns each, two long dice (1, 2, 3 and a blank; a blank counts 0 beside a numbered face and two blanks make 12, so results are 1 to 6 or 12), Chowka and Baara bonus rolls, the three-strike bust, whole indivisible movement chunks with free allocation and combination, mandatory use (no pass while a chunk has a legal use), outer-ring captures (one or two pawns), capture credit before entering the inner ring, automatic Juga formation, half-speed Juga movement, blockades, pinning with delayed capture, rescue, Juga-versus-Juga capture, Twin-Capture, chain pin-and-capture, exactly one capture bonus per allocation sequence, chained bonus sequences, capture checkpoints, exact Home entry and immediate victory.
 
-Seats are Violet (top), Cyan (left), Amber (bottom), Rose (right). One to four people can play; the computer plays the other seats. A game in progress is saved in this browser only.
+Seats are Violet (player 1, bottom), Cyan (right), Amber (top), Rose (left); play goes counterclockwise from the bottom. One to four people can play; the computer plays the other seats. A game in progress is saved in this browser only.
 
 ## Not built
 
 - The 10x10 variant (the plan says to start with 5x5; its rules are still unconfirmed).
 - Online play, spectators, tournaments.
-- Choosing which seats are people (two players sit opposite each other; three sit top, left and bottom).
+- Choosing which seats are people (two players sit opposite each other; three sit bottom, right and top).
 
 A game is long: computer-only games take about 900 to 1,600 actions. That is the traditional pace of the game; a "short game" option could be added if wanted.
 
@@ -53,7 +53,7 @@ Built from the owner's photo of the cloth and a drawing of the directions. Squar
 
 **Safe squares (13, as on the cloth):** the four corners, the four middles of the edges (these are also the starts), the centre (Home), and the four squares diagonally inside the corners.
 
-**Starts:** each player starts on the X at the middle of their own edge (top, left, bottom, right); waiting pawns sit in the Home Yard (shown in the player panel).
+**Starts:** each player starts on the X at the middle of their own edge (bottom for player 1, then right, top, left); waiting pawns sit in the Home Yard (shown in the player panel).
 
 **Directions:** outer ring counterclockwise; middle and inner rings clockwise.
 
