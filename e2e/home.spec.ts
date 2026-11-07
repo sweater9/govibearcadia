@@ -33,7 +33,7 @@ test('category filters come from the registry and combine with search', async ({
 
   await filters.filter({ hasText: 'Focus' }).click()
   await expect(page.locator('article.game-card')).toHaveCount(1)
-  await expect(page.getByRole('heading', { name: 'Memory Grid' })).toBeVisible()
+  await expect(page.locator('article.game-card').getByRole('heading', { name: 'Memory Grid' })).toBeVisible()
 
   await page.getByLabel('Search games').fill('merge') // no Focus game matches
   await expect(page.locator('article.game-card')).toHaveCount(0)
