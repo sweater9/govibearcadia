@@ -312,6 +312,19 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./Mahjong').then((m) => ({ default: m.Mahjong }))),
   },
+  {
+    meta: {
+      id: 'world-trip',
+      title: 'World Trip',
+      description: 'Claim city stops, collect visitor fees and make deals on one device for 2 to 4 players.',
+      category: 'Strategy',
+      original: true,
+      accent: 'from-sky-500 to-amber-500',
+      glyph: '✈',
+      estimated: '25–45 min',
+    },
+    Component: lazy(() => import('./WorldTrip').then((m) => ({ default: m.WorldTrip }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)

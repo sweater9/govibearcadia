@@ -1,0 +1,27 @@
+# World Trip
+
+An original offline property-trading game for 2 to 4 players on one device. Its turn flow, seeded dice, trade offers and replay save started from an earlier prototype (Bazaar), which has since been removed.
+
+## Board
+
+40 spaces on an 11x11 outline, clockwise from the bottom-right corner: bottom edge right to left (1 to 10), left edge bottom to top (11 to 20), top edge left to right (21 to 30), right edge top to bottom (31 to 40). Data and layout: `src/games/worldtrip/board.ts`.
+
+22 cities, 4 airports, 2 travel services (Rail Pass, Ferry Pass), 6 Travel Card spaces, 2 fee spaces (Ticket Fee 100, Luggage Fee 80) and 4 corners. Cities form 8 colour groups of 2 or 3 along each edge (2+3, 3+3, 3+3, 2+3). Each city has an original landmark illustration (`Landmark.tsx`); Copenhagen is a Nyhavn-style waterfront and Vancouver a mountain-backed waterfront skyline.
+
+## Rules
+
+- Everyone starts on the Departure Gate with 1500 credits and takes 12 turns (12, 20 or 30 selectable). Highest net worth wins; ties share the win.
+- Roll two dice, move clockwise. Passing or landing on the Departure Gate pays a 150 credit travel allowance. The other corners are free stops.
+- Claim an unowned city, airport or service when you land (or pass). Landing on another player's stop pays its visitor fee. Cities: a tenth of the price. Airports 50, services 35.
+- Owning every city in a colour group lets you build a visitor centre on each (50, 100, 150 or 200 credits by group), which doubles that city's fee. Not on airports or services.
+- Travel Cards (10, seeded) have immediate effects. A player short of credits pays what they have and stays in the match.
+- One offer to sell a stop per turn; the buyer accepts or declines on the same device.
+- Net worth = credits + printed price of owned stops + printed cost of visitor centres.
+
+## Engine, save and tests
+
+Pure rules in `rules.ts` (no React), seeded dice (`seed:turn`). The save (`govibearcadia.world-trip.v1`) stores the seed, settings and action list and replays them on load, so a damaged save is rejected. Tests: `rules.test.ts` (40-space count, order, clockwise cell layout, wraparound and lap bonus, group eligibility, trade transfer, replay reload, whole matches at 12/20/30 turns), `WorldTrip.test.tsx`, `e2e/world-trip.spec.ts`.
+
+## Not final
+
+The allowance, prices, fees and centre costs are starting values and have not been playtested on the larger board. At about 7 spaces per roll a player lands on roughly 12 of the 40 spaces in 12 turns, so complete groups are rare: that is why 20 and 30 turns are offered.

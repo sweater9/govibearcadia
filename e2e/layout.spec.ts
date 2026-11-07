@@ -27,6 +27,7 @@ const PLAY_AREA = {
   pallanguzhi: '.pg-table',
   carrom: '.cm-setup',
   'taiwanese-mahjong': '.mj-setup',
+  'world-trip': '.wt-board',
 } as const
 
 type Box = { top: number; bottom: number }
