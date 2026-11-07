@@ -1,6 +1,6 @@
 # World Trip
 
-An original offline property-trading game for 2 to 4 players on one device. Built from the Bazaar prototype (PR 39), which is left unchanged.
+An original offline property-trading game for 2 to 4 players on one device. Its turn flow, seeded dice, trade offers and replay save started from an earlier prototype (Bazaar), which has since been removed.
 
 ## Board
 
