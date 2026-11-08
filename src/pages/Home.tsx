@@ -5,10 +5,12 @@ import { GameCard } from '../components/GameCard'
 import { categories, games } from '../data/games'
 import { db, toggleFavorite } from '../lib/db'
 import { dailyChallenge, today } from '../lib/passport'
+import { usePageMeta } from '../lib/pageMeta'
 import { recommend } from '../lib/recommend'
 import type { GameId, GameProgress, PlayRecord } from '../types'
 
 export function Home() {
+  usePageMeta(null, null, '/')
   const [favorites, setFavorites] = useState<GameId[]>([])
   const [progress, setProgress] = useState<GameProgress[]>([])
   const [history, setHistory] = useState<PlayRecord[] | null>(null)
@@ -44,7 +46,7 @@ export function Home() {
         <div className="hero-copy">
           <p className="trust">No tracking, no account, works offline once loaded, progress stays on your device.</p>
           <h1>Step into your next obsession.</h1>
-          <p className="lead">{games.length} free games for quick escapes and long streaks. Just play.</p>
+          <p className="lead">{games.length} free games for quick escapes and long streaks. No ads, no sign-up. Play alone, or with friends on one device.</p>
           <div className="hero-actions">
             <Link className="primary-btn" to={`/play/${recent?.id ?? games[0].id}`}>
               {recent ? 'Continue playing' : 'Start playing'} <ArrowRight size={20} strokeWidth={1.5} />

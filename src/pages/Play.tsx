@@ -8,6 +8,7 @@ import { db, recordPlay, toggleFavorite } from '../lib/db'
 import { ShareButton } from '../components/ShareButton'
 import { challengePath, parseChallenge, randomSeed, shareChallenge, verdict, verdictText } from '../lib/challenge'
 import { getNick } from '../lib/online'
+import { usePageMeta } from '../lib/pageMeta'
 import { dailyChallenge, shareDaily, today } from '../lib/passport'
 import type { GameResult } from '../types'
 
@@ -24,6 +25,7 @@ export function Play() {
   const challenge = dailyChallenge(today(), games.filter((g) => g.daily).map((g) => g.id))
   const daily = params.get('daily') === challenge.day && id === challenge.gameId && seed === challenge.seed ? challenge.day : undefined
   const gameId = entry?.meta.id
+  usePageMeta(entry ? `${entry.meta.title}: play free online · GoVibeArcadia` : null, entry ? `${entry.meta.description} Free to play in your browser: no ads, no sign-up, works offline.` : null, `/play/${id ?? ''}`)
   const [favorite, setFavorite] = useState(false)
   const [dailyWin, setDailyWin] = useState<GameResult | null>(null)
   const [lastRun, setLastRun] = useState<{ score: number; won: boolean } | null>(null)
