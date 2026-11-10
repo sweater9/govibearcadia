@@ -78,7 +78,7 @@ export function NeonMerge({ onFinish, seed }: GameProps) {
       <div className="merge-board">
         {game.board.flatMap((row, y) =>
           row.map((value, x) => (
-            <div className={`merge-tile ${tileClass(value)}`} key={`${y}-${x}`}>
+            <div className={`merge-tile ${tileClass(value)}`} key={`${y}-${x}-${value}`}>
               {value || ''}
             </div>
           )),

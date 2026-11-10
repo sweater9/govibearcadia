@@ -494,3 +494,27 @@ button.mj-tile{cursor:pointer}
 
 .pulse-start p{color:#f3e8d6b0}.pulse-field:after{background:linear-gradient(#ffffff0a 1px,transparent 1px),linear-gradient(90deg,#ffffff0a 1px,transparent 1px);background-size:32px 32px}
 .card-meta .label,[data-category] .eyebrow{color:color-mix(in srgb,var(--cat) 45%,#3b2a1e)!important}
+
+/* Game polish (stage 2): short, purely visual animations. All are switched off for reduced-motion. */
+.play-head-tools{display:flex;gap:8px}
+@keyframes tile-pop{0%{transform:scale(.6);opacity:.4}60%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+@keyframes piece-drop{from{transform:translateY(var(--from,-300%))}60%{transform:translateY(0)}75%{transform:translateY(-8%)}to{transform:translateY(0)}}
+@keyframes mark-in{from{transform:scale(.3) rotate(-12deg);opacity:0}to{transform:none;opacity:1}}
+@keyframes cell-open{from{transform:scale(.85)}to{transform:none}}
+@keyframes win-glow{50%{box-shadow:0 0 0 4px #e9b97aaa,0 0 18px #e9b97a}}
+@keyframes boom{0%{transform:scale(1)}30%{transform:scale(1.25)}100%{transform:scale(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}
+.merge-tile:not(.tile-empty){animation:tile-pop .16s ease-out}
+.memory-grid button.matched{animation:win-glow .7s ease 1}
+.c4-cell[data-p="1"],.c4-cell[data-p="2"]{animation:piece-drop .42s cubic-bezier(.3,.7,.4,1)}
+.c4-cell[data-r="0"]{--from:-130%}.c4-cell[data-r="1"]{--from:-260%}.c4-cell[data-r="2"]{--from:-390%}.c4-cell[data-r="3"]{--from:-520%}.c4-cell[data-r="4"]{--from:-650%}.c4-cell[data-r="5"]{--from:-780%}
+.c4-cell[data-win="true"]{animation:win-glow .9s ease 3}
+.ttt-cell[data-p]{animation:mark-in .18s ease-out}
+.ttt-cell[data-win="true"]{animation:win-glow .9s ease 3}
+.ck-piece{animation:mark-in .2s ease-out;transition:transform .15s}
+.ck-sq[data-dark]:hover:not(:disabled) .ck-piece{transform:scale(1.06)}
+.mine-cell.open{animation:cell-open .12s ease-out}
+.mine-cell.boom{animation:boom .4s ease-out}
+.game-over{animation:rise .3s ease-out}
+.game-over h3,.win-message{animation:rise .4s ease-out .1s both}
+@media(prefers-reduced-motion:reduce){.merge-tile,.memory-grid button.matched,.c4-cell,.ttt-cell,.ck-piece,.mine-cell,.game-over,.game-over h3,.win-message{animation:none!important}}

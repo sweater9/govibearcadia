@@ -65,7 +65,7 @@ export function MemoryGrid({ onFinish, seed }: GameProps) {
           return (
             <button
               key={card.id}
-              className={shown ? 'flipped' : ''}
+              className={`${shown ? 'flipped' : ''} ${matched.includes(i) ? 'matched' : ''}`}
               onClick={() => flip(i)}
               aria-label={shown ? card.symbol : 'Hidden card'}
             >
