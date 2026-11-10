@@ -496,7 +496,7 @@ button.mj-tile{cursor:pointer}
 .card-meta .label,[data-category] .eyebrow{color:color-mix(in srgb,var(--cat) 45%,#3b2a1e)!important}
 
 /* Home refresh (stage 1): collage hero, livelier cards. Motion is skipped for reduced-motion. */
-.hero{position:relative}
+.hero{position:relative;overflow-x:clip}
 .hero::before{content:"";position:absolute;z-index:-1;inset:-40px -10% auto auto;width:640px;height:520px;background:radial-gradient(closest-side,#e9b97a55,transparent 70%);pointer-events:none}
 .hero-art{display:none}
 @media(min-width:960px){
