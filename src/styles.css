@@ -585,3 +585,10 @@ html.screen-locked .nav,html.screen-locked footer,html.screen-locked .play-head,
 html.screen-locked .play-page.locked{position:fixed;inset:0;max-width:none;margin:0;padding:max(44px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom));display:flex;flex-direction:column;background:#faf3e8;touch-action:pan-x pan-y;user-select:none;-webkit-user-select:none;overflow:hidden}
 html.screen-locked .play-page.locked .game-shell{flex:1;min-height:0;margin:0;padding:8px;display:flex;flex-direction:column;justify-content:safe center;overflow:auto;overscroll-behavior:contain;box-shadow:none}
 html.screen-locked .play-page.locked button,html.screen-locked .play-page.locked [role=button]{touch-action:manipulation}
+/* Install prompt */
+.install-slot{max-width:1160px;margin:0 auto;padding:0 max(5vw,20px)}
+.install-card{display:flex;align-items:center;gap:14px;margin:8px 0 18px;padding:12px 14px;border-radius:18px;background:linear-gradient(135deg,#fffaf1,#f6e3c4);border:1px solid #e0c694;box-shadow:0 6px 18px #3b2a1e14}
+.install-card>div{flex:1;min-width:0}.install-card strong{font-family:var(--font-display)}
+.install-card p{margin:2px 0 0;font-size:.9rem;color:#6b5646}.install-card p svg{vertical-align:-2px}
+.install-card .primary-btn{display:inline-flex;gap:6px;align-items:center;white-space:nowrap}
+@media(max-width:520px){.install-card{flex-wrap:wrap}.install-card .primary-btn{order:3;width:100%;justify-content:center}.install-card .icon-btn{margin-left:auto}}

@@ -1,4 +1,5 @@
 import React from 'react'
+import { watchInstall } from './lib/install'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { registerSW } from 'virtual:pwa-register'
@@ -10,4 +11,5 @@ import { applyTheme, storedTheme } from './lib/themes'
 applyTheme(storedTheme() ?? 'neon', false)
 
 registerSW({ immediate: true })
+watchInstall()
 ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><BrowserRouter><App /></BrowserRouter></React.StrictMode>)
