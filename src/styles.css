@@ -534,3 +534,17 @@ button.mj-tile{cursor:pointer}
 .gf-board,.vl-board,.tf-board{transition:box-shadow .3s}
 .win-message{border-radius:14px}
 @media(prefers-reduced-motion:reduce){.wordle-tile,.csort-ball,.bs-cell,.sdk-grid [data-conflict]{animation:none!important;transition:none!important}}
+
+/* Game polish (stage 2, traditional games). Uses the `scale` property so existing transforms are untouched. */
+@keyframes grow-in{from{scale:.4;opacity:0}to{scale:1;opacity:1}}
+@keyframes hop{40%{translate:0 -6px}}
+.ap-point span{animation:grow-in .2s ease-out}
+.gb-pawn{animation:grow-in .2s ease-out}
+.gb-sq[data-movable]{animation:win-glow 1s ease 2}
+.pg-seeds i{animation:grow-in .25s ease-out}
+.pg-pit:hover:not(:disabled){translate:0 -2px}
+.mj-hand .mj-tile,.mj-pool .mj-tile,.mj-melds .mj-tile{animation:grow-in .18s ease-out;transition:translate .12s}
+.mj-hand button.mj-tile:hover{translate:0 -4px}
+.wt-token{animation:hop .35s ease-out}
+.wt-die{animation:grow-in .2s ease-out}
+@media(prefers-reduced-motion:reduce){.ap-point span,.gb-pawn,.gb-sq,.pg-seeds i,.mj-tile,.wt-token,.wt-die{animation:none!important;transition:none!important}}
