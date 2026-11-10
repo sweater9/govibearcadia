@@ -39,8 +39,5 @@
 @media(max-width:420px){.wt-setup{grid-template-columns:1fr 1fr}.wt-setup .primary-btn,.wt-setup .secondary-btn{grid-column:1/-1}}
 /* Phones: let the board use the full screen width (it is 11 spaces across), limited only by the height cap. */
 @media(max-width:560px){
-  .wt-board{width:min(calc(100vw - 8px),calc(100svh - 372px),620px);margin-inline:calc(50% - min(calc(100vw - 8px),calc(100svh - 372px),620px)/2);padding:2px;gap:1px}
-  .wt-code{font-size:clamp(7px,2.4vw,11px)}
-  .wt-icon{font-size:clamp(8px,2.6vw,13px)}
-  .wt-token{width:clamp(9px,2.8vw,15px);height:clamp(9px,2.8vw,15px);font-size:clamp(6px,1.8vw,9px)}
+  .wt-board{width:min(calc(100vw - 8px),calc(100svh - 372px),620px);margin-inline:calc(50% - min(calc(100vw - 8px),calc(100svh - 372px),620px)/2)}
 }
