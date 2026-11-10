@@ -1,10 +1,11 @@
-import { ArrowLeft, Heart } from 'lucide-react'
+import { ArrowLeft, Heart, Lock, Unlock } from 'lucide-react'
 import { Suspense, useCallback, useEffect, useState } from 'react'
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { GameBoundary } from '../components/GameBoundary'
 import { getGame } from '../games/registry'
 import { games } from '../data/games'
 import { db, recordPlay, toggleFavorite } from '../lib/db'
+import { lockScreen, unlockScreen } from '../lib/screenLock'
 import { ShareButton } from '../components/ShareButton'
 import { challengePath, parseChallenge, randomSeed, shareChallenge, verdict, verdictText } from '../lib/challenge'
 import { getNick } from '../lib/online'
@@ -25,10 +26,25 @@ export function Play() {
   const daily = params.get('daily') === challenge.day && id === challenge.gameId && seed === challenge.seed ? challenge.day : undefined
   const gameId = entry?.meta.id
   const [favorite, setFavorite] = useState(false)
+  const [locked, setLocked] = useState(false)
   const [dailyWin, setDailyWin] = useState<GameResult | null>(null)
   const [lastRun, setLastRun] = useState<{ score: number; won: boolean } | null>(null)
 
   useEffect(() => setLastRun(null), [seed, gameId])
+
+  // The lock never outlives the game page, and leaving full screen by the browser's own gesture unlocks too.
+  useEffect(() => {
+    if (!locked) return
+    void lockScreen()
+    const onFs = () => {
+      if (!document.fullscreenElement) setLocked(false)
+    }
+    document.addEventListener('fullscreenchange', onFs)
+    return () => {
+      document.removeEventListener('fullscreenchange', onFs)
+      void unlockScreen()
+    }
+  }, [locked])
 
   useEffect(() => {
     if (gameId) void db.favorites.get(gameId).then(Boolean).then(setFavorite)
@@ -47,12 +63,15 @@ export function Play() {
   const { meta, Component: Game } = entry
 
   return (
-    <main className="play-page">
+    <main className={`play-page${locked ? ' locked' : ''}`}>
       <div className="play-head">
         <Link to="/" className="back">
           <ArrowLeft />
           Back to arcade
         </Link>
+        <button className="icon-btn lock-btn" aria-label="Fit to screen and lock" onClick={() => setLocked(true)}>
+          <Lock />
+        </button>
         <button
           className="icon-btn"
           aria-label="Toggle favorite"
@@ -75,6 +94,11 @@ export function Play() {
           <p>{meta.description}</p>
         )}
       </div>
+      {locked ? (
+        <button className="unlock-btn" aria-label="Unlock screen" onClick={() => setLocked(false)}>
+          <Unlock size={16} /> Unlock
+        </button>
+      ) : null}
       <section className="game-shell">
         <GameBoundary key={meta.id}>
           <Suspense fallback={<p className="game-help">Loading {meta.title}…</p>}>
