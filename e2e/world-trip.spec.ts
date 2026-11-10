@@ -8,7 +8,7 @@ test('plays a complete match offline, resumes after a reload and records the res
   await context.setOffline(true)
   await page.goto('/play/world-trip?seed=trip-test')
   await expect(page.getByRole('list', { name: 'Board in travel order' }).getByRole('button')).toHaveCount(40)
-  await page.getByLabel('Computer players').selectOption('0')
+  await page.getByLabel('Computers').selectOption('0')
   await page.getByRole('button', { name: 'Start match' }).click()
   for (let turn = 0; turn < 24; turn++) {
     await page.getByRole('button', { name: 'Roll dice' }).click()
@@ -30,7 +30,7 @@ test('plays a complete match offline, resumes after a reload and records the res
 test('a buyer can accept a saved offer for a stop', async ({ page }) => {
   const seed = Array.from({ length: 60 }, (_, i) => `deal-${i}`).find((s) => applyAction(newGame(2, s), { type: 'roll' }).phase === 'buy')!
   await page.goto(`/play/world-trip?seed=${seed}`)
-  await page.getByLabel('Computer players').selectOption('0')
+  await page.getByLabel('Computers').selectOption('0')
   await page.getByRole('button', { name: 'Start match' }).click()
   await page.getByRole('button', { name: 'Roll dice' }).click()
   await page.getByRole('button', { name: /^Claim / }).click()
@@ -47,7 +47,7 @@ test('a buyer can accept a saved offer for a stop', async ({ page }) => {
 test('the board and the action buttons are on screen at phone size', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 667 })
   await page.goto('/play/world-trip?seed=fit')
-  await page.getByLabel('Computer players').selectOption('0')
+  await page.getByLabel('Computers').selectOption('0')
   await page.getByRole('button', { name: 'Start match' }).click()
   for (const sel of ['.wt-board', '.wt-actions button']) {
     const box = (await page.locator(sel).first().boundingBox())!

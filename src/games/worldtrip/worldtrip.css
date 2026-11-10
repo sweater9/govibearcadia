@@ -36,7 +36,7 @@
 .wt-setup{display:grid;grid-template-columns:repeat(3,1fr) auto;align-items:end;gap:8px;margin-bottom:4px}
 .wt-setup label{display:flex;flex-direction:column;gap:2px;font-size:.75rem}
 .wt-setup button{min-height:40px}
-@media(max-width:420px){.wt-setup{grid-template-columns:1fr 1fr}.wt-setup .primary-btn,.wt-setup .secondary-btn{grid-column:1/-1}}
+@media(max-width:420px){.wt-setup{grid-template-columns:repeat(3,1fr)}.wt-setup .primary-btn,.wt-setup .secondary-btn{grid-column:1/-1}}
 
 /* Look: a travel-table board with raised tiles, a compass centre, pip dice and tidy cards. Layout sizes above are unchanged. */
 .wt-board{background:linear-gradient(145deg,#e7cfa6,#d8b988);border:0;border-radius:18px;padding:5px;gap:2px;box-shadow:0 18px 40px #3b2a1e2e,inset 0 0 0 2px #fffaf155,0 0 0 4px #b98c55}
