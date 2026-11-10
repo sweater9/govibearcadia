@@ -37,3 +37,7 @@
 .wt-setup label{display:flex;flex-direction:column;gap:2px;font-size:.75rem}
 .wt-setup button{min-height:40px}
 @media(max-width:420px){.wt-setup{grid-template-columns:1fr 1fr}.wt-setup .primary-btn,.wt-setup .secondary-btn{grid-column:1/-1}}
+/* Phones: let the board use the full screen width (it is 11 spaces across), limited only by the height cap. */
+@media(max-width:560px){
+  .wt-board{width:min(calc(100vw - 8px),calc(100svh - 372px),620px);margin-inline:calc(50% - min(calc(100vw - 8px),calc(100svh - 372px),620px)/2)}
+}
