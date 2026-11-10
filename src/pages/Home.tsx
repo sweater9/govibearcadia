@@ -6,7 +6,15 @@ import { categories, games } from '../data/games'
 import { db, toggleFavorite } from '../lib/db'
 import { dailyChallenge, today } from '../lib/passport'
 import { recommend } from '../lib/recommend'
+import { Thumbnail } from '../components/Thumbnail'
 import type { GameId, GameProgress, PlayRecord } from '../types'
+
+const HERO_TILES = [
+  { id: 'neon-merge', cat: '#8FA8FF', bg: '#3d2a1e' },
+  { id: 'connect-four', cat: '#6FD3E8', bg: '#3c291e' },
+  { id: 'pulse-tap', cat: '#d4707c', bg: '#2B1620' },
+  { id: 'neon-snake', cat: '#C9A6FF', bg: '#3c2a1e' },
+] as const
 
 export function Home() {
   const [favorites, setFavorites] = useState<GameId[]>([])
@@ -53,6 +61,13 @@ export function Home() {
               Explore the arcade
             </a>
           </div>
+        </div>
+        <div className="hero-art" aria-hidden="true">
+          {HERO_TILES.map((t, i) => (
+            <div key={t.id} className={`hero-tile hero-tile-${i}`} style={{ '--cat': t.cat, '--cat-bg': t.bg } as React.CSSProperties}>
+              <Thumbnail id={t.id} />
+            </div>
+          ))}
         </div>
       </section>
       <div className="today">
