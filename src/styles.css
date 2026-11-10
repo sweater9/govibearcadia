@@ -525,3 +525,54 @@ button.mj-tile{cursor:pointer}
 .home-daily,.continue{border-radius:20px}
 .home-daily.daily-card{background:linear-gradient(135deg,var(--surface),#f6e3c4);border-color:#e0c694}
 @media(prefers-reduced-motion:reduce){.game-card{animation:none}.game-card:hover,.game-card:focus-within{transform:none}.thumb-art,.hero-tile{transition:none}.game-card:hover .thumb-art,.game-card:focus-within .thumb-art{transform:none}}
+/* Game polish (stage 2): short, purely visual animations. All are switched off for reduced-motion. */
+.play-head-tools{display:flex;gap:8px}
+@keyframes tile-pop{0%{transform:scale(.6);opacity:.4}60%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+@keyframes piece-drop{from{transform:translateY(var(--from,-300%))}60%{transform:translateY(0)}75%{transform:translateY(-8%)}to{transform:translateY(0)}}
+@keyframes mark-in{from{transform:scale(.3) rotate(-12deg);opacity:0}to{transform:none;opacity:1}}
+@keyframes cell-open{from{transform:scale(.85)}to{transform:none}}
+@keyframes win-glow{50%{box-shadow:0 0 0 4px #e9b97aaa,0 0 18px #e9b97a}}
+@keyframes boom{0%{transform:scale(1)}30%{transform:scale(1.25)}100%{transform:scale(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}
+.merge-tile:not(.tile-empty){animation:tile-pop .16s ease-out}
+.memory-grid button.matched{animation:win-glow .7s ease 1}
+.c4-cell[data-p="1"],.c4-cell[data-p="2"]{animation:piece-drop .42s cubic-bezier(.3,.7,.4,1)}
+.c4-cell[data-r="0"]{--from:-130%}.c4-cell[data-r="1"]{--from:-260%}.c4-cell[data-r="2"]{--from:-390%}.c4-cell[data-r="3"]{--from:-520%}.c4-cell[data-r="4"]{--from:-650%}.c4-cell[data-r="5"]{--from:-780%}
+.c4-cell[data-win="true"]{animation:win-glow .9s ease 3}
+.ttt-cell[data-p]{animation:mark-in .18s ease-out}
+.ttt-cell[data-win="true"]{animation:win-glow .9s ease 3}
+.ck-piece{animation:mark-in .2s ease-out;transition:transform .15s}
+.ck-sq[data-dark]:hover:not(:disabled) .ck-piece{transform:scale(1.06)}
+.mine-cell.open{animation:cell-open .12s ease-out}
+.mine-cell.boom{animation:boom .4s ease-out}
+.game-over{animation:rise .3s ease-out}
+.game-over h3,.win-message{animation:rise .4s ease-out .1s both}
+@media(prefers-reduced-motion:reduce){.merge-tile,.memory-grid button.matched,.c4-cell,.ttt-cell,.ck-piece,.mine-cell,.game-over,.game-over h3,.win-message{animation:none!important}}
+
+/* Game polish (stage 2, second batch): puzzle and board games. Off for reduced-motion. */
+@keyframes tile-flip{0%{transform:rotateX(0)}50%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}
+@keyframes splash{0%{transform:scale(.4);opacity:.3}60%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
+@keyframes shake{20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+.wordle-tile[data-state=correct],.wordle-tile[data-state=present],.wordle-tile[data-state=absent]{animation:tile-flip .45s ease both}
+.wordle-tile[data-c="1"]{animation-delay:.08s}.wordle-tile[data-c="2"]{animation-delay:.16s}.wordle-tile[data-c="3"]{animation-delay:.24s}.wordle-tile[data-c="4"]{animation-delay:.32s}
+.wordle-tile[data-state=typed]{animation:splash .12s ease-out}
+.csort-ball{animation:splash .2s ease-out;transition:transform .15s}
+.csort-tube:hover:not(:disabled) .csort-ball:last-child{transform:translateY(-6px)}
+.bs-cell[data-state=hit],.bs-cell[data-state=sunk]{animation:splash .3s ease-out}
+.bs-cell[data-state=miss]{animation:splash .2s ease-out}
+.sdk-grid [data-conflict]{animation:shake .25s ease-out}
+.gf-board,.vl-board,.tf-board{transition:box-shadow .3s}
+.win-message{border-radius:14px}
+@media(prefers-reduced-motion:reduce){.wordle-tile,.csort-ball,.bs-cell,.sdk-grid [data-conflict]{animation:none!important;transition:none!important}}
+
+/* Game polish (stage 2, traditional games). Uses the `scale` property so existing transforms are untouched. */
+@keyframes grow-in{from{scale:.4;opacity:0}to{scale:1;opacity:1}}
+@keyframes hop{40%{translate:0 -6px}}
+.ap-point span{animation:grow-in .2s ease-out}
+.gb-pawn{animation:grow-in .2s ease-out}
+.gb-sq[data-movable]{animation:win-glow 1s ease 2}
+.mj-hand .mj-tile,.mj-pool .mj-tile,.mj-melds .mj-tile{animation:grow-in .18s ease-out;transition:translate .12s}
+.mj-hand button.mj-tile:hover{translate:0 -4px}
+.wt-token{animation:hop .35s ease-out}
+.wt-die{animation:grow-in .2s ease-out}
+@media(prefers-reduced-motion:reduce){.ap-point span,.gb-pawn,.gb-sq,.pg-seeds i,.mj-tile,.wt-token,.wt-die{animation:none!important;transition:none!important}}

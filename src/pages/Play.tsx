@@ -1,10 +1,12 @@
 import { ArrowLeft, Heart } from 'lucide-react'
-import { Suspense, useCallback, useEffect, useState } from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { GameBoundary } from '../components/GameBoundary'
 import { getGame } from '../games/registry'
 import { games } from '../data/games'
 import { db, recordPlay, toggleFavorite } from '../lib/db'
+import { SoundToggle } from '../components/SoundToggle'
+import { attachGameSound } from '../lib/sound'
 import { ShareButton } from '../components/ShareButton'
 import { challengePath, parseChallenge, randomSeed, shareChallenge, verdict, verdictText } from '../lib/challenge'
 import { getNick } from '../lib/online'
@@ -26,6 +28,7 @@ export function Play() {
   const daily = params.get('daily') === challenge.day && id === challenge.gameId && seed === challenge.seed ? challenge.day : undefined
   const gameId = entry?.meta.id
   usePageMeta(entry ? `${entry.meta.title}: play free online · GoVibeArcadia` : null, entry ? `${entry.meta.description} Free to play in your browser: no ads, no sign-up, works offline.` : null, `/play/${id ?? ''}`)
+  const shellRef = useRef<HTMLElement>(null)
   const [favorite, setFavorite] = useState(false)
   const [dailyWin, setDailyWin] = useState<GameResult | null>(null)
   const [lastRun, setLastRun] = useState<{ score: number; won: boolean } | null>(null)
@@ -35,6 +38,8 @@ export function Play() {
   useEffect(() => {
     if (gameId) void db.favorites.get(gameId).then(Boolean).then(setFavorite)
   }, [gameId])
+
+  useEffect(() => (shellRef.current ? attachGameSound(shellRef.current) : undefined), [gameId])
 
   const finish = useCallback(
     (result: GameResult) => {
@@ -55,6 +60,8 @@ export function Play() {
           <ArrowLeft />
           Back to arcade
         </Link>
+        <div className="play-head-tools">
+        <SoundToggle />
         <button
           className="icon-btn"
           aria-label="Toggle favorite"
@@ -65,6 +72,7 @@ export function Play() {
         >
           <Heart fill={favorite ? 'currentColor' : 'none'} />
         </button>
+        </div>
       </div>
       <div className="play-title">
         <p className="eyebrow">{daily ? `Daily challenge · ${meta.category}` : meta.category}</p>
@@ -77,7 +85,7 @@ export function Play() {
           <p>{meta.description}</p>
         )}
       </div>
-      <section className="game-shell">
+      <section className="game-shell" ref={shellRef}>
         <GameBoundary key={meta.id}>
           <Suspense fallback={<p className="game-help">Loading {meta.title}…</p>}>
             <Game key={seed ?? ''} onFinish={finish} seed={seed} />

@@ -15,6 +15,10 @@ const CODES: Record<string, string> = {
 }
 const code = (s: Space) => (s.kind === 'city' ? CODES[s.name] : s.kind === 'airport' ? '✈' : s.kind === 'service' ? '⇄' : s.kind === 'card' ? '?' : s.kind === 'fee' ? '$' : { 'Departure Gate': 'GATE', 'Hotel Stopover': 'STAY', 'World Festival': 'FEST', 'Scenic Stopover': 'VIEW' }[s.name] ?? '')
 
+function Die({ n }: { n: number }) {
+  return <span className="wt-die" data-n={n} aria-hidden="true">{Array.from({ length: n }, (_, i) => <i key={i} />)}</span>
+}
+
 function Board({ state, selected, onSelect, status }: { state: State; selected: number; onSelect: (i: number) => void; status: string }) {
   const current = activePlayer(state)
   return <ol className="wt-board" aria-label="Board in travel order">
@@ -36,8 +40,10 @@ function Board({ state, selected, onSelect, status }: { state: State; selected: 
     })}
     <li style={{ display: 'contents' }}>
       <div className="wt-centre" style={{ gridArea: `2 / 2 / ${GRID} / ${GRID}` }}>
-        {state.phase === 'done' ? <strong>Trip over</strong> : <strong>{playerName(current)}</strong>}
-        {state.dice && state.phase !== 'done' ? <div className="wt-dice" aria-label={`Rolled ${state.dice[0]} and ${state.dice[1]}`}><span className="wt-die">{state.dice[0]}</span><span className="wt-die">{state.dice[1]}</span></div> : null}
+        <svg className="wt-compass" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" strokeWidth="1.5" /><circle cx="50" cy="50" r="32" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="2 4" /><path d="M50 8 L56 50 L50 92 L44 50 Z M8 50 L50 44 L92 50 L50 56 Z" fill="currentColor" opacity=".55" /></svg>
+        <span className="wt-mark">World Trip</span>
+        {state.phase === 'done' ? <strong>Trip over</strong> : <strong className="wt-turn"><span className="wt-token" style={{ background: PLAYER_COLOURS[current] }}>{current + 1}</span>{playerName(current)}</strong>}
+        {state.dice && state.phase !== 'done' ? <div className="wt-dice" aria-label={`Rolled ${state.dice[0]} and ${state.dice[1]}`}><Die n={state.dice[0]} /><Die n={state.dice[1]} /></div> : null}
         <p role="status" className="wt-status">{status}</p>
       </div>
     </li>
@@ -47,8 +53,8 @@ function Board({ state, selected, onSelect, status }: { state: State; selected: 
 function StopCard({ state, index }: { state: State; index: number }) {
   const space = BOARD[index]
   const holding = state.holdings[index]
-  return <section className="wt-card" aria-label="Selected stop">
-    {space.kind === 'city' ? <LandmarkArt kind={space.landmark} city={space.name} /> : <div className="wt-art" aria-hidden="true" style={{ aspectRatio: '80/48', display: 'grid', placeItems: 'center', fontSize: '2rem' }}>{code(space)}</div>}
+  return <section className="wt-card" aria-label="Selected stop" style={{ '--group': space.kind === 'city' ? GROUP_COLOURS[space.group] : '#b8780f' } as React.CSSProperties}>
+    {space.kind === 'city' ? <LandmarkArt kind={space.landmark} city={space.name} /> : <div className="wt-art wt-art-tile" aria-hidden="true">{code(space)}</div>}
     <div>
       <h3>{space.name}</h3>
       <p>Space {index + 1} of {BOARD.length}{space.kind === 'city' ? ` · ${space.country}` : ''}</p>
@@ -159,9 +165,9 @@ export function WorldTrip({ onFinish, seed }: GameProps) {
         <StopCard state={view} index={viewIndex} />
         {state && state.phase === 'manage' ? <Manage key={state.turn} state={state} act={act} /> : null}
         {state ? <ul className="wt-balances" aria-label={state.phase === 'done' ? 'Final standings' : 'Player balances'}>
-          {(state.phase === 'done' ? ranking : [...ranking].sort((a, b) => a.index - b.index)).map(({ index, cash, worth }) => <li key={index}>
+          {(state.phase === 'done' ? ranking : [...ranking].sort((a, b) => a.index - b.index)).map(({ index, cash, worth }) => <li key={index} data-active={state.phase !== 'done' && index === current ? 'true' : undefined}>
             <span className="wt-token" style={{ background: PLAYER_COLOURS[index] }}>{index + 1}</span>
-            <span><strong>{playerName(index)}</strong> · {money(cash)} credits · {money(worth)} net worth{state.phase === 'done' ? ` · cities: ${state.collected[index].map((s) => BOARD[s].name).join(', ') || 'none'}` : ''}</span>
+            <span className="wt-bal"><strong>{playerName(index)}</strong><b>{money(worth)} net worth</b><small>{money(cash)} credits{state.phase === 'done' ? ` · cities: ${state.collected[index].map((s) => BOARD[s].name).join(', ') || 'none'}` : ''}</small></span>
           </li>)}
         </ul> : null}
         {state && state.phase !== 'done' && !confirmRestart ? <button className="secondary-btn" onClick={() => setConfirmRestart(true)}>New match</button> : null}
