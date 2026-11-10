@@ -494,3 +494,34 @@ button.mj-tile{cursor:pointer}
 
 .pulse-start p{color:#f3e8d6b0}.pulse-field:after{background:linear-gradient(#ffffff0a 1px,transparent 1px),linear-gradient(90deg,#ffffff0a 1px,transparent 1px);background-size:32px 32px}
 .card-meta .label,[data-category] .eyebrow{color:color-mix(in srgb,var(--cat) 45%,#3b2a1e)!important}
+
+/* Home refresh (stage 1): collage hero, livelier cards. Motion is skipped for reduced-motion. */
+.hero{position:relative;overflow-x:clip}
+.hero::before{content:"";position:absolute;z-index:-1;inset:-40px -10% auto auto;width:640px;height:520px;background:radial-gradient(closest-side,#e9b97a55,transparent 70%);pointer-events:none}
+.hero-art{display:none}
+@media(min-width:960px){
+  .hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);align-items:center;gap:32px}
+  .hero-art{display:block;position:relative;height:380px}
+  .hero-tile{position:absolute;width:56%;aspect-ratio:16/9;border-radius:16px;background:var(--cat-bg);color:var(--cat);overflow:hidden;border:1px solid #ffffff14;box-shadow:0 18px 40px #3b2a1e33,0 2px 6px #3b2a1e22;transition:transform .35s ease}
+  .hero-tile .thumb-art{width:100%;height:100%;display:block}
+  .hero-tile-0{left:2%;top:2%;transform:rotate(-6deg)}
+  .hero-tile-1{right:0;top:8%;transform:rotate(5deg)}
+  .hero-tile-2{left:8%;bottom:6%;transform:rotate(4deg)}
+  .hero-tile-3{right:4%;bottom:0;transform:rotate(-4deg)}
+  .hero-art:hover .hero-tile-0{transform:rotate(-8deg) translateY(-4px)}
+  .hero-art:hover .hero-tile-1{transform:rotate(7deg) translateY(-4px)}
+  .hero-art:hover .hero-tile-2{transform:rotate(6deg) translateY(4px)}
+  .hero-art:hover .hero-tile-3{transform:rotate(-6deg) translateY(4px)}
+}
+.game-card{border-radius:18px;padding:12px 12px 16px;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.game-card:hover,.game-card:focus-within{transform:translateY(-4px);box-shadow:0 14px 30px #3b2a1e22;border-color:color-mix(in srgb,var(--cat) 55%,#e2d2b8)}
+.thumb{border-radius:12px;background:linear-gradient(160deg,color-mix(in srgb,var(--cat) 14%,var(--cat-bg)),var(--cat-bg))}
+.thumb-art{transition:transform .35s ease}
+.game-card:hover .thumb-art,.game-card:focus-within .thumb-art{transform:scale(1.07)}
+.card-title h3{letter-spacing:-.01em}
+@keyframes card-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.game-card{animation:card-in .45s ease both}
+.game-card:nth-child(4n+2){animation-delay:.04s}.game-card:nth-child(4n+3){animation-delay:.08s}.game-card:nth-child(4n+4){animation-delay:.12s}
+.home-daily,.continue{border-radius:20px}
+.home-daily.daily-card{background:linear-gradient(135deg,var(--surface),#f6e3c4);border-color:#e0c694}
+@media(prefers-reduced-motion:reduce){.game-card{animation:none}.game-card:hover,.game-card:focus-within{transform:none}.thumb-art,.hero-tile{transition:none}.game-card:hover .thumb-art,.game-card:focus-within .thumb-art{transform:none}}
