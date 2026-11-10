@@ -494,3 +494,11 @@ button.mj-tile{cursor:pointer}
 
 .pulse-start p{color:#f3e8d6b0}.pulse-field:after{background:linear-gradient(#ffffff0a 1px,transparent 1px),linear-gradient(90deg,#ffffff0a 1px,transparent 1px);background-size:32px 32px}
 .card-meta .label,[data-category] .eyebrow{color:color-mix(in srgb,var(--cat) 45%,#3b2a1e)!important}
+
+/* Install prompt */
+.install-slot{max-width:1160px;margin:0 auto;padding:0 max(5vw,20px)}
+.install-card{display:flex;align-items:center;gap:14px;margin:8px 0 18px;padding:12px 14px;border-radius:18px;background:linear-gradient(135deg,#fffaf1,#f6e3c4);border:1px solid #e0c694;box-shadow:0 6px 18px #3b2a1e14}
+.install-card>div{flex:1;min-width:0}.install-card strong{font-family:var(--font-display)}
+.install-card p{margin:2px 0 0;font-size:.9rem;color:#6b5646}.install-card p svg{vertical-align:-2px}
+.install-card .primary-btn{display:inline-flex;gap:6px;align-items:center;white-space:nowrap}
+@media(max-width:520px){.install-card{flex-wrap:wrap}.install-card .primary-btn{order:3;width:100%;justify-content:center}.install-card .icon-btn{margin-left:auto}}

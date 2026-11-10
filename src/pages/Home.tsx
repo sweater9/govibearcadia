@@ -5,6 +5,7 @@ import { GameCard } from '../components/GameCard'
 import { categories, games } from '../data/games'
 import { db, toggleFavorite } from '../lib/db'
 import { dailyChallenge, today } from '../lib/passport'
+import { InstallPrompt } from '../components/InstallPrompt'
 import { recommend } from '../lib/recommend'
 import type { GameId, GameProgress, PlayRecord } from '../types'
 
@@ -55,6 +56,7 @@ export function Home() {
           </div>
         </div>
       </section>
+      <div className="install-slot"><InstallPrompt /></div>
       <div className="today">
         <section className="home-daily daily-card" aria-label="Daily challenge">
           <div>
