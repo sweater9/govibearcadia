@@ -8,6 +8,7 @@ describe('World Trip UI', () => {
   it('draws the 40 spaces and starts a match', () => {
     render(<WorldTrip onFinish={vi.fn()} seed="ui" />)
     expect(within(screen.getByRole('list', { name: 'Board in travel order' })).getAllByRole('button')).toHaveLength(40)
+    fireEvent.change(screen.getByLabelText('Computer players'), { target: { value: '0' } })
     fireEvent.click(screen.getByRole('button', { name: 'Start match' }))
     expect(screen.getByRole('button', { name: 'Roll dice' })).toBeVisible()
   })
@@ -20,6 +21,7 @@ describe('World Trip UI', () => {
     const finish = vi.fn()
     render(<StrictMode><WorldTrip onFinish={finish} seed="ui-full" /></StrictMode>)
     fireEvent.click(screen.getByLabelText('Players'))
+    fireEvent.change(screen.getByLabelText('Computer players'), { target: { value: '0' } })
     fireEvent.click(screen.getByRole('button', { name: 'Start match' }))
     for (let i = 0; i < 40 && !finish.mock.calls.length; i++) {
       const roll = screen.queryByRole('button', { name: 'Roll dice' })

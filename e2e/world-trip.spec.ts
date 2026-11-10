@@ -8,6 +8,7 @@ test('plays a complete match offline, resumes after a reload and records the res
   await context.setOffline(true)
   await page.goto('/play/world-trip?seed=trip-test')
   await expect(page.getByRole('list', { name: 'Board in travel order' }).getByRole('button')).toHaveCount(40)
+  await page.getByLabel('Computer players').selectOption('0')
   await page.getByRole('button', { name: 'Start match' }).click()
   for (let turn = 0; turn < 24; turn++) {
     await page.getByRole('button', { name: 'Roll dice' }).click()
@@ -29,6 +30,7 @@ test('plays a complete match offline, resumes after a reload and records the res
 test('a buyer can accept a saved offer for a stop', async ({ page }) => {
   const seed = Array.from({ length: 60 }, (_, i) => `deal-${i}`).find((s) => applyAction(newGame(2, s), { type: 'roll' }).phase === 'buy')!
   await page.goto(`/play/world-trip?seed=${seed}`)
+  await page.getByLabel('Computer players').selectOption('0')
   await page.getByRole('button', { name: 'Start match' }).click()
   await page.getByRole('button', { name: 'Roll dice' }).click()
   await page.getByRole('button', { name: /^Claim / }).click()
@@ -45,9 +47,27 @@ test('a buyer can accept a saved offer for a stop', async ({ page }) => {
 test('the board and the action buttons are on screen at phone size', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 667 })
   await page.goto('/play/world-trip?seed=fit')
+  await page.getByLabel('Computer players').selectOption('0')
   await page.getByRole('button', { name: 'Start match' }).click()
   for (const sel of ['.wt-board', '.wt-actions button']) {
     const box = (await page.locator(sel).first().boundingBox())!
     expect(box.y + box.height, `${sel} inside the viewport`).toBeLessThanOrEqual(667)
   }
+})
+
+test('a computer opponent takes its turns on its own and the match saves once', async ({ page }) => {
+  test.setTimeout(240_000)
+  await page.goto('/play/world-trip?seed=cpu-test')
+  await page.getByLabel('Turns each').selectOption('12')
+  await page.getByRole('button', { name: 'Start match' }).click() // default: you and one computer
+  for (let round = 0; round < 12; round++) {
+    await page.getByRole('button', { name: 'Roll dice' }).click()
+    const pass = page.getByRole('button', { name: 'Pass', exact: true })
+    if (await pass.isVisible()) await pass.click()
+    await page.getByRole('button', { name: 'End turn' }).click()
+    if (round < 11) await expect(page.getByRole('button', { name: 'Roll dice' })).toBeVisible({ timeout: 15_000 }) // the computer played in between
+  }
+  await expect(page.getByRole('list', { name: 'Final standings' })).toBeVisible({ timeout: 15_000 })
+  await expect(page.getByText('Computer 1').first()).toBeVisible()
+  await expectRows(page, 'history', 1)
 })

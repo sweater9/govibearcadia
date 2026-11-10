@@ -33,7 +33,7 @@
 @media(min-width:900px){.wt-layout{flex-direction:row;align-items:flex-start;justify-content:center}.wt-board{margin:0}.wt-side{max-width:340px}.wt-card{grid-template-columns:1fr}}
 @media(max-width:420px){.wt-card{grid-template-columns:96px 1fr}.wt-actions button{flex:1 1 40%}}
 .wt-actions button{white-space:nowrap}@media(max-width:420px){.wt-actions button{padding:8px 12px;flex:1 1 auto}}
-.wt-setup{display:grid;grid-template-columns:1fr 1fr auto;align-items:end;gap:8px;margin-bottom:4px}
+.wt-setup{display:grid;grid-template-columns:repeat(3,1fr) auto;align-items:end;gap:8px;margin-bottom:4px}
 .wt-setup label{display:flex;flex-direction:column;gap:2px;font-size:.75rem}
 .wt-setup button{min-height:40px}
 @media(max-width:420px){.wt-setup{grid-template-columns:1fr 1fr}.wt-setup .primary-btn,.wt-setup .secondary-btn{grid-column:1/-1}}
@@ -85,3 +85,4 @@
 @media(max-width:560px){
   .wt-board{width:min(calc(100vw - 8px),calc(100svh - 372px),620px);margin-inline:calc(50% - min(calc(100vw - 8px),calc(100svh - 372px),620px)/2)}
 }
+.wt-thinking{margin:0;padding:10px 18px;border-radius:999px;background:#fff3df;color:#A94A24;font-weight:700;animation:pulse 1.2s ease-in-out infinite}

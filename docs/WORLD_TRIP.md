@@ -25,3 +25,11 @@ Pure rules in `rules.ts` (no React), seeded dice (`seed:turn`). The save (`govib
 ## Not final
 
 The allowance, prices, fees and centre costs are starting values and have not been playtested on the larger board. At about 7 spaces per roll a player lands on roughly 12 of the 40 spaces in 12 turns, so complete groups are rare: that is why 20 and 30 turns are offered.
+
+## Computer players
+
+At setup, "Computer players" sets how many seats the computer plays (0 to one fewer than the player count; the default is one). Human seats come first, so with 3 players and 1 computer you are Player 1, Player 2 and Computer 1. A computer takes its turn on a short timer (about 0.8 s per action) so you can follow it.
+
+The computer (`worldtrip/bot.ts`) is deterministic and uses no randomness, so a saved match still replays exactly from its action list. It claims a stop while it keeps a 150 cr reserve (or when the stop completes a colour group), builds the best visitor centre it can afford above the reserve, and accepts an offer only at a fair price (up to 90% of the printed value, 140% if it completes a group, and never leaving less than 100 cr). It does not offer stops for sale. Tests play whole 2, 3 and 4 seat matches between computers and check every action is legal.
+
+Online rooms for World Trip are not built.

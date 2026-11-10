@@ -1,0 +1,40 @@
+import { describe, expect, it } from 'vitest'
+import { actor, chooseAction } from './bot'
+import { applyAction, newGame, standings, type State } from './rules'
+
+/** Plays a whole match where every seat is a computer. */
+function playOut(seed: string, players: number, turnsEach = 12) {
+  let s: State = newGame(players, seed, turnsEach)
+  let steps = 0
+  while (s.phase !== 'done') {
+    const next = applyAction(s, chooseAction(s))
+    expect(next).not.toBe(s) // the computer never picks an illegal action
+    s = next
+    if (++steps > 3000) throw new Error('match did not finish')
+  }
+  return s
+}
+
+describe('computer player', () => {
+  it('finishes whole matches with only legal actions, for 2, 3 and 4 seats', () => {
+    for (const n of [2, 3, 4]) for (const seed of ['a', 'b', 'c', 'd']) {
+      const s = playOut(`${seed}-${n}`, n)
+      expect(s.turn).toBe(12 * n)
+      expect(standings(s)[0].worth).toBeGreaterThan(0)
+    }
+  })
+  it('is deterministic, so a saved match replays the same', () => {
+    expect(playOut('same', 3)).toEqual(playOut('same', 3))
+  })
+  it('claims stops during a match', () => {
+    const s = playOut('claims', 2, 20)
+    expect(s.holdings.filter(Boolean).length).toBeGreaterThan(3)
+  })
+  it('answers an offer for the buyer seat, and declines a bad price', () => {
+    const s = newGame(2, 'offer')
+    const withOffer: State = { ...s, phase: 'manage', holdings: s.holdings.map((h, i) => (i === 1 ? { owner: 0, centre: false } : h)), offer: { space: 1, buyer: 1, price: 9999 } }
+    expect(actor(withOffer)).toBe(1)
+    expect(chooseAction(withOffer)).toEqual({ type: 'decline' })
+    expect(chooseAction({ ...withOffer, offer: { space: 1, buyer: 1, price: 1 } })).toEqual({ type: 'accept' })
+  })
+})

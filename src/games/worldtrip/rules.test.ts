@@ -164,9 +164,10 @@ describe('a whole match', () => {
     const ls = { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v), removeItem: (k: string) => void store.delete(k) }
     Object.defineProperty(globalThis, 'localStorage', { value: ls, configurable: true })
     const { s, actions } = play(12, 2)
-    saveMatch({ state: s, actions, startedAt: 5 })
+    saveMatch({ state: s, actions, startedAt: 5, computers: 1 })
     const back = loadMatch()
     expect(back?.state).toEqual(s)
+    expect(back?.computers).toBe(1)
     store.set('govibearcadia.world-trip.v1', '{"count":2}')
     expect(loadMatch()).toBeNull()
   })
