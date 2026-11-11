@@ -31,6 +31,7 @@ const PLAY_AREA = {
   ludo: '.ld-board',
   'indian-rummy': '.rm-hand',
   blackjack: '.bj-table',
+  poker: '.pk-table',
 } as const
 
 type Box = { top: number; bottom: number }
