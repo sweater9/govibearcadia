@@ -704,3 +704,13 @@ button.bs-cell:hover:not(:disabled),button.bs-cell:focus-visible{background:#3b8
 .info-page h2{font-size:22px;margin:32px 0 6px}
 .info-page p{color:var(--text-muted)}
 .info-page a:not(.primary-btn){color:var(--primary-hover);text-decoration:underline}
+
+/* Game effects (src/lib/effects.ts): finite, decorative, never block input */
+.fx-confetti{position:absolute;left:50%;top:38%;width:0;height:0;pointer-events:none;z-index:30}
+.fx-confetti i{position:absolute;width:8px;height:12px;border-radius:2px;opacity:0;animation:fx-burst 1.4s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes fx-burst{0%{opacity:1;transform:translate(0,0) rotate(0)}80%{opacity:1}100%{opacity:0;transform:translate(var(--x),var(--y)) rotate(var(--r))}}
+.fx-pop{position:absolute;transform:translateX(-50%);pointer-events:none;z-index:30;font-weight:800;color:var(--primary-hover);text-shadow:0 1px 6px #0006;animation:fx-rise .85s ease-out forwards}
+@keyframes fx-rise{0%{opacity:0;transform:translate(-50%,6px)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-34px)}}
+.fx-shake{animation:fx-shake .4s ease-in-out}
+@keyframes fx-shake{20%{transform:translateX(-6px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+@media(prefers-reduced-motion:reduce){.fx-confetti,.fx-pop{display:none}.fx-shake{animation:none}}

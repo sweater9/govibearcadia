@@ -7,6 +7,7 @@ import { games } from '../data/games'
 import { db, recordPlay, toggleFavorite } from '../lib/db'
 import { SoundToggle } from '../components/SoundToggle'
 import { attachGameSound } from '../lib/sound'
+import { attachGameEffects } from '../lib/effects'
 import { lockScreen, unlockScreen } from '../lib/screenLock'
 import { ShareButton } from '../components/ShareButton'
 import { challengePath, parseChallenge, randomSeed, shareChallenge, verdict, verdictText } from '../lib/challenge'
@@ -56,6 +57,7 @@ export function Play() {
   }, [gameId])
 
   useEffect(() => (shellRef.current ? attachGameSound(shellRef.current) : undefined), [gameId])
+  useEffect(() => (shellRef.current ? attachGameEffects(shellRef.current) : undefined), [gameId])
 
   const finish = useCallback(
     (result: GameResult) => {
