@@ -42,3 +42,40 @@
 .bj-hand{flex-basis:120px}
 }
 @media(prefers-reduced-motion:reduce){.bj-card{animation:none}}
+
+/* ---- visual polish ---- */
+.bj-table{background:radial-gradient(ellipse at 50% 25%,#3d9168 0%,#226a49 50%,#143f2c 100%);box-shadow:inset 0 0 0 4px #7a4f27,inset 0 0 0 6px #b98a52,inset 0 0 60px #0007,0 14px 34px #3b2a1e40;border-radius:26px;position:relative;overflow:hidden}
+.bj-table::before{content:"";position:absolute;inset:0;background:repeating-radial-gradient(circle at 50% 40%,#ffffff06 0 2px,transparent 2px 5px);pointer-events:none}
+.bj-table>*{position:relative}
+.bj-seat h3{text-shadow:0 1px 2px #0008}
+.bj-card{background:linear-gradient(165deg,#fff,#f1e9da);border:1px solid #cdbfa6;box-shadow:0 3px 6px #0008,inset 0 0 0 1px #fff;animation-delay:calc(var(--i,0) * 110ms)}
+.bj-card:not(.bj-hole)::after{content:attr(data-s);position:absolute;inset:0;display:grid;place-items:center;font-size:1.7rem;opacity:.92;padding-top:8px}
+.bj-card:not(.bj-hole)::before{content:attr(data-r);position:absolute;right:4px;bottom:2px;rotate:180deg;font-weight:700;font-size:.8rem}
+.bj-card[data-flip]{animation:bj-flip .45s ease-out both}
+@keyframes bj-flip{from{transform:rotateY(90deg) scale(.9);opacity:.2}to{transform:none;opacity:1}}
+.bj-hole{background:repeating-linear-gradient(45deg,#7a2f14,#7a2f14 4px,#9a4220 4px,#9a4220 8px)}
+.bj-empty{background:#0000001f;border:2px dashed #ffffff3d}
+.bj-hand{background:#00000026;border:1px solid #ffffff1f}
+.bj-hand[data-active]{border-color:#ffd68a;box-shadow:0 0 0 2px #ffd68a44,0 0 20px #ffd68a55}
+.bj-hand[data-result="win"],.bj-hand[data-result="blackjack"]{border-color:#9be7b5;box-shadow:0 0 18px #9be7b566}
+.bj-stake{display:flex;height:20px;margin:0 0 4px 4px}
+.bj-stake i,.bj-chip{background:radial-gradient(circle,var(--chip) 0 46%,transparent 47%),repeating-conic-gradient(#fff 0 18deg,var(--chip) 18deg 45deg)}
+.bj-stake i{width:20px;height:20px;border-radius:50%;margin-left:-6px;box-shadow:0 1px 2px #0009;translate:0 calc(var(--k) * -1px)}
+.bj-stake i[data-c="0"]{--chip:#c0392b}.bj-stake i[data-c="1"]{--chip:#2f6f9f}.bj-stake i[data-c="2"]{--chip:#222}
+.bj-chip{border:0;color:#fff;text-shadow:0 1px 2px #000;box-shadow:0 3px 0 #0006,0 4px 8px #0004;transition:translate .12s,box-shadow .12s;position:relative}
+.bj-chip::after{content:"";position:absolute;inset:9px;border-radius:50%;background:var(--chip);box-shadow:inset 0 0 0 2px #fffc;z-index:-1}
+.bj-chip{isolation:isolate}
+.bj-chip[data-v="10"]{--chip:#2f6f9f}.bj-chip[data-v="50"]{--chip:#3f9b6b}.bj-chip[data-v="100"]{--chip:#222}.bj-chip[data-v="500"]{--chip:#7a3fa0}
+.bj-chip:not(:disabled):active{translate:0 2px;box-shadow:0 1px 0 #0006}
+.bj-chip{background-color:transparent}
+.bj-status.win-message{color:#ffe08a;font-weight:700;animation:bj-glow 1.2s ease-in-out 3}
+@keyframes bj-glow{50%{text-shadow:0 0 14px #ffd68a}}
+.bj-actions .primary-btn{box-shadow:0 2px 0 #6c2c11}
+@media(min-width:900px) and (min-height:760px){
+.bj-table{padding:20px 26px;gap:12px;border-radius:40px}
+.bj-card,.bj-empty{width:68px;height:96px}.bj-cards{min-height:96px}
+.bj-card+.bj-card{margin-left:-18px}
+.bj-card b{font-size:1.3rem}.bj-card i{font-size:1.1rem}.bj-card:not(.bj-hole)::after{font-size:2.6rem;padding-top:14px}.bj-card:not(.bj-hole)::before{font-size:1rem}
+.bj-seat h3{font-size:1rem}.bj-status{font-size:1rem}
+}
+@media(prefers-reduced-motion:reduce){.bj-card[data-flip],.bj-status.win-message{animation:none}}

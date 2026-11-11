@@ -9,11 +9,11 @@ const SUIT_NAMES = ['spades', 'hearts', 'diamonds', 'clubs']
 const CHIPS = [10, 50, 100, 500]
 const HINT: Record<string, string> = { hit: 'Hit', stand: 'Stand', double: 'Double', split: 'Split' }
 
-function Face({ id, hidden }: { id?: number; hidden?: boolean }) {
+function Face({ id, hidden, i = 0, flip }: { id?: number; hidden?: boolean; i?: number; flip?: boolean }) {
   if (hidden || id === undefined) return <span className="bj-card bj-hole" aria-label="Face-down card" />
   const r = rankOf(id % 52)
   const s = suitOf(id)
-  return <span className="bj-card" data-red={s === 1 || s === 2 ? 'true' : undefined} aria-label={`${rankLabel(r)} of ${SUIT_NAMES[s]}`}><b>{rankLabel(r)}</b><i>{SUITS[s]}</i></span>
+  return <span className="bj-card" style={{ '--i': i } as React.CSSProperties} data-flip={flip ? 'true' : undefined} data-s={SUITS[s]} data-r={rankLabel(r)} data-red={s === 1 || s === 2 ? 'true' : undefined} aria-label={`${rankLabel(r)} of ${SUIT_NAMES[s]}`}><b>{rankLabel(r)}</b><i>{SUITS[s]}</i></span>
 }
 const total = (cards: number[]) => { const v = handValue(cards); return v.total > 21 ? `${v.total} bust` : isBlackjack(cards) ? 'Blackjack' : `${v.soft ? 'soft ' : ''}${v.total}` }
 const RESULT = { win: 'Win', lose: 'Lose', push: 'Push', blackjack: 'Blackjack!' } as const
@@ -88,14 +88,15 @@ export function Blackjack({ onFinish, seed }: GameProps) {
     <div className="bj-table">
       <section className="bj-seat" aria-label="Dealer">
         <h3>Dealer{state?.dealer.length ? <small>{showHole ? total(state.dealer) : `showing ${Math.min(10, rankOf(state.dealer[0] % 52))}`}</small> : null}</h3>
-        <div className="bj-cards">{state?.dealer.length ? state.dealer.map((id, i) => <Face key={i} id={id} hidden={!showHole && i === 1} />) : <span className="bj-empty" />}</div>
+        <div className="bj-cards">{state?.dealer.length ? state.dealer.map((id, i) => <Face key={`${i}-${showHole}`} id={id} i={i} flip={showHole && i === 1} hidden={!showHole && i === 1} />) : <span className="bj-empty" />}</div>
       </section>
       <p className={`bj-status${phase === 'over' ? (state!.chips > START_CHIPS ? ' win-message' : ' game-over') : phase === 'settled' && net > 0 ? ' win-message' : ''}`} role="status" aria-live="polite">{status}</p>
       <section className="bj-seat" aria-label="Your hands">
         <div className="bj-hands">
           {hands.length ? hands.map((h, i) => <div key={i} className="bj-hand" data-active={playing && i === state!.active ? 'true' : undefined} data-result={h.result}>
             <h3>{hands.length > 1 ? `Hand ${i + 1}` : 'You'}<small>{total(h.cards)} · bet {h.bet * (h.doubled ? 2 : 1)}{h.result ? ` · ${RESULT[h.result]}` : ''}</small></h3>
-            <div className="bj-cards">{h.cards.map((id, j) => <Face key={j} id={id} />)}</div>
+            <div className="bj-stake" aria-hidden="true">{Array.from({ length: Math.min(5, Math.ceil((h.bet * (h.doubled ? 2 : 1)) / 50)) }, (_, k) => <i key={k} data-c={k % 3} style={{ '--k': k } as React.CSSProperties} />)}</div>
+            <div className="bj-cards">{h.cards.map((id, j) => <Face key={j} id={id} i={j} />)}</div>
           </div>) : <div className="bj-hand"><h3>You</h3><div className="bj-cards"><span className="bj-empty" /></div></div>}
         </div>
       </section>
