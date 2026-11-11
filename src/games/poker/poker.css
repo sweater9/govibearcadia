@@ -1,0 +1,45 @@
+.pk{display:grid;gap:8px;justify-items:center;width:100%}
+.pk>*{width:100%;max-width:680px}
+.pk-setup{display:grid;grid-template-columns:1fr auto;align-items:end;gap:8px}
+.pk-setup label{display:grid;gap:4px;font-size:.85rem}.pk-setup select{width:100%}
+.pk-table{display:grid;gap:6px;padding:10px;border-radius:22px;background:radial-gradient(ellipse at 50% 40%,#2f7a56,#1a4f37);color:#fff;box-shadow:inset 0 0 0 3px #8f5a2a}
+.pk-seats{display:flex;gap:6px;flex-wrap:wrap;list-style:none;margin:0;padding:0;justify-content:center}
+.pk-seats li{display:grid;justify-items:center;gap:1px;padding:3px 8px;border-radius:10px;background:#00000033;font-size:.75rem;min-width:84px;border:2px solid transparent}
+.pk-seats li[data-turn]{border-color:#ffd68a}
+.pk-seats li[data-out]{opacity:.45}.pk-seats li[data-folded]{opacity:.65}
+.pk-name{font-weight:700;display:flex;gap:4px;align-items:center}
+.pk-chips{font-variant-numeric:tabular-nums;color:#ffe3a6}
+.pk-seats small{min-height:1em;font-size:.65rem;opacity:.9}
+.pk-hint{width:100%;background:none!important}
+.pk-dealer{font-style:normal;display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;background:#fff;color:#26201a;font-size:.6rem;font-weight:800}
+.pk-board{display:grid;gap:4px;justify-items:center}
+.pk-cards{display:flex;gap:4px}
+.pk-pot{margin:0;font-size:.8rem}
+.pk-card,.pk-slot{flex:none;width:38px;height:54px;border-radius:6px}
+.pk-card{background:#fffdf8;color:#26201a;box-shadow:0 2px 4px #0006;display:grid;align-content:start;justify-items:start;padding:3px 4px;line-height:1.05;animation:pk-deal .2s ease-out both}
+.pk-card b{font-size:.95rem}.pk-card i{font-style:normal;font-size:.85rem}
+.pk-card[data-red]{color:#b3261e}
+.pk-back{background:repeating-linear-gradient(45deg,#8f3c1a,#8f3c1a 5px,#a64a24 5px,#a64a24 10px);border:2px solid #fff}
+.pk-slot{border:2px dashed #ffffff44}
+.pk-mini{display:flex;gap:2px}.pk-mini .pk-card{width:24px;height:34px;padding:1px 3px}.pk-mini .pk-card b{font-size:.7rem}.pk-mini .pk-card i{font-size:.6rem}
+.pk-status{margin:0;text-align:center;font-size:.88rem;line-height:1.25;min-height:2.3em;display:grid;place-items:center}
+.pk-me{display:flex;justify-content:center;align-items:center;gap:12px;border-radius:12px;padding:4px;border:2px solid transparent}
+.pk-me[data-turn]{border-color:#ffd68a}
+.pk-mine{display:grid;gap:1px;font-size:.85rem}.pk-mine b{display:flex;gap:4px;align-items:center}.pk-mine span{color:#ffe3a6;font-variant-numeric:tabular-nums}.pk-mine small{min-height:1em;font-size:.7rem}
+.pk-actions{display:flex;gap:6px;justify-content:center}
+.pk-actions button{flex:1;max-width:190px;min-height:40px;padding:6px 10px}
+.pk-sizes{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center}
+.pk-sizes button{padding:4px 10px;min-height:32px;font-size:.8rem}
+.pk-sizes input{flex:1 1 120px;min-width:100px}
+.pk-how{font-size:.85rem}.pk-how p{margin:.4rem 0}
+@keyframes pk-deal{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+@media(max-width:420px){
+.pk{gap:6px}
+.pk-table{padding:8px;gap:4px;border-radius:18px}
+.pk-card,.pk-slot{width:34px;height:48px}
+.pk-seats{flex-wrap:nowrap;gap:4px}.pk-seats li{min-width:0;flex:1 1 0;padding:2px 2px;font-size:.65rem}.pk-seats .pk-name{font-size:.62rem}
+.pk-status{font-size:.8rem;min-height:2.2em}
+.pk-actions button{min-height:38px;padding:6px 6px;font-size:.85rem}
+.pk-sizes button{padding:2px 8px;min-height:30px}
+}
+@media(prefers-reduced-motion:reduce){.pk-card{animation:none}}
