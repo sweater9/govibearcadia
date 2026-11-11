@@ -35,6 +35,8 @@ export function mountBoard(parent: HTMLElement, handlers: BoardHandlers): BoardA
     strikerObj!: Phaser.GameObjects.Arc
     strikerBody: MatterJS.BodyType | null = null
     aimGfx!: Phaser.GameObjects.Graphics
+    decor!: Phaser.GameObjects.Graphics
+    shadows!: Phaser.GameObjects.Graphics
     seat = 0
     aim: Aim = { t: 0, angle: 0, power: 0.55 }
     canAim = false
@@ -67,20 +69,63 @@ export function mountBoard(parent: HTMLElement, handlers: BoardHandlers): BoardA
     }
     drawBoard() {
       const g = this.add.graphics()
-      g.fillStyle(0x5a3a1e).fillRect(0, 0, BOARD, BOARD)
-      g.fillStyle(0xe6c690).fillRect(8, 8, BOARD - 16, BOARD - 16)
-      g.lineStyle(2, 0x3a2412)
-      g.strokeCircle(CENTRE, CENTRE, 90).strokeCircle(CENTRE, CENTRE, 28)
+      // Wooden frame: banded shades with a bevel.
+      g.fillStyle(0x3d2410).fillRect(0, 0, BOARD, BOARD)
+      g.fillStyle(0x6b4423).fillRect(2, 2, BOARD - 4, BOARD - 4)
+      g.fillStyle(0x8a5a2e).fillRect(4, 4, BOARD - 8, BOARD - 8)
+      g.fillStyle(0x5a3a1e).fillRect(7, 7, BOARD - 14, BOARD - 14)
+      // Playing surface with faint grain stripes and a soft vignette.
+      g.fillStyle(0xe9cc98).fillRect(9, 9, BOARD - 18, BOARD - 18)
+      for (let y = 12; y < BOARD - 12; y += 14) g.fillStyle(0xdfbf86, 0.35).fillRect(9, y, BOARD - 18, 5)
+      for (let i = 0; i < 6; i++) g.lineStyle(14, 0x7a5126, 0.045 * (6 - i)).strokeRect(9 + i * 7, 9 + i * 7, BOARD - 18 - i * 14, BOARD - 18 - i * 14)
+      g.lineStyle(2, 0xb5844a).strokeRect(9, 9, BOARD - 18, BOARD - 18)
+      // Centre rosette.
+      g.lineStyle(2, 0x3a2412).strokeCircle(CENTRE, CENTRE, 90).strokeCircle(CENTRE, CENTRE, 28)
+      g.lineStyle(1.5, 0xb3402a, 0.8).strokeCircle(CENTRE, CENTRE, 76).strokeCircle(CENTRE, CENTRE, 40)
+      for (let k = 0; k < 8; k++) {
+        const t = (k * Math.PI) / 4
+        g.lineStyle(1.5, 0xb3402a, 0.7).lineBetween(CENTRE + Math.cos(t) * 40, CENTRE + Math.sin(t) * 40, CENTRE + Math.cos(t) * 76, CENTRE + Math.sin(t) * 76)
+      }
       for (let seat = 0; seat < 4; seat++) {
         const b = baseline(seat)
         const a = { x: b.x - b.dx * 270, y: b.y - b.dy * 270 }
         const z = { x: b.x + b.dx * 270, y: b.y + b.dy * 270 }
         g.lineStyle(2, 0x3a2412).lineBetween(a.x, a.y, z.x, z.y)
         g.lineStyle(2, 0x3a2412).lineBetween(a.x + b.fx * 28, a.y + b.fy * 28, z.x + b.fx * 28, z.y + b.fy * 28)
+        // Red end circles on each baseline.
+        for (const e of [a, z]) {
+          g.fillStyle(0xb3402a, 0.85).fillCircle(e.x + b.fx * 14, e.y + b.fy * 14, 11)
+          g.lineStyle(2, 0x3a2412).strokeCircle(e.x + b.fx * 14, e.y + b.fy * 14, 11)
+        }
       }
-      g.fillStyle(0x16110c)
-      for (const [x, y] of POCKETS) g.fillCircle(x, y, POCKET_R)
+      // Pockets: net rim, deep centre and a soft highlight.
+      for (const [x, y] of POCKETS) {
+        g.fillStyle(0x2a1a0d).fillCircle(x, y, POCKET_R + 5)
+        g.lineStyle(2, 0xb5844a).strokeCircle(x, y, POCKET_R + 5)
+        g.fillStyle(0x0c0806).fillCircle(x, y, POCKET_R)
+        g.fillStyle(0x000000, 0.5).fillCircle(x + 2, y + 2, POCKET_R * 0.7)
+        g.lineStyle(2, 0xffffff, 0.12).strokeCircle(x - 1, y - 1, POCKET_R - 3)
+      }
       g.setDepth(0)
+      this.decor = this.add.graphics().setDepth(6)
+      this.shadows = this.add.graphics().setDepth(1)
+      this.events.on(Phaser.Scenes.Events.POST_UPDATE, () => this.paintDecor())
+    }
+    paintDecor() {
+      const sh = this.shadows
+      const gl = this.decor
+      sh.clear()
+      gl.clear()
+      const draw = (o: Phaser.GameObjects.Arc) => {
+        if (!o.visible) return
+        const r = o.radius
+        sh.fillStyle(0x000000, 0.28).fillCircle(o.x + 2.5, o.y + 3.5, r)
+        gl.fillStyle(0xffffff, 0.16).fillCircle(o.x - r * 0.18, o.y - r * 0.2, r * 0.72)
+        gl.fillStyle(0xffffff, 0.42).fillCircle(o.x - r * 0.34, o.y - r * 0.38, r * 0.22)
+        gl.lineStyle(1.5, 0x000000, 0.18).strokeCircle(o.x, o.y, r * 0.62)
+      }
+      for (const e of this.coinObjs.values()) draw(e.obj)
+      draw(this.strikerObj)
     }
     wall(x: number, y: number, w: number, h: number) {
       this.matter.add.rectangle(x, y, w, h, { isStatic: true, restitution: 0.8, friction: 0 })
