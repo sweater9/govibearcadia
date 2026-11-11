@@ -121,7 +121,7 @@ export function Play() {
           </Suspense>
         </GameBoundary>
       </section>
-      {coinsWon > 0 ? <p className="coin-earned" role="status">+{coinsWon} coins earned</p> : null}
+      {coinsWon > 0 ? <p className="coin-earned" aria-live="polite">+{coinsWon} coins earned</p> : null}
       {meta.challenge && lastRun && seed ? (
         <div className="challenge-panel" aria-label="Challenge a friend">
           {incoming ? <p role="status">{verdictText(verdict(lastRun, { score: incoming.beat, won: incoming.won }), lastRun.score, incoming)}</p> : null}
