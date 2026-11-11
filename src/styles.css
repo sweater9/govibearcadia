@@ -697,3 +697,10 @@ button.bs-cell:hover:not(:disabled),button.bs-cell:focus-visible{background:#3b8
 .tf-cell.given{background:linear-gradient(180deg,#e9f5ea,#cfe6d3);box-shadow:0 2px 0 #9cc0a3,inset 0 1px 0 #fff}
 .tf-cell.s0{text-shadow:0 0 10px #ffc83d88}.tf-cell.s1{text-shadow:0 0 10px #ff8a5c66}
 .mj-pool{color:#e8f5ec}
+
+/* About, privacy and not-found pages */
+.info-page{max-width:720px;margin:0 auto;padding:64px 24px 96px;line-height:1.7}
+.info-page h1{font-size:clamp(32px,5vw,48px);letter-spacing:-.04em;margin:8px 0 16px}
+.info-page h2{font-size:22px;margin:32px 0 6px}
+.info-page p{color:var(--text-muted)}
+.info-page a:not(.primary-btn){color:var(--primary-hover);text-decoration:underline}

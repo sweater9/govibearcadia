@@ -1,14 +1,8 @@
 # GoVibeArcadia
 
-A premium, independent, local-first browser arcade. Phase 1 ships three complete games, a responsive discovery experience, favorites and play history in IndexedDB, and offline PWA support.
+A free, independent, local-first browser arcade: 29 games (puzzles, arcade, card and board games, with optional online rooms for some), no ads, no accounts, no trackers. Everything needed to play is bundled and works offline once loaded; progress stays in the browser.
 
-## Included games
-
-- **Neon Merge** — a keyboard- and touch-friendly 2048-style puzzle
-- **Memory Grid** — a compact matching challenge
-- **Pulse Tap** — a 30-second reaction game
-
-The collection is deliberately small and functional. New games are added with a single entry in `src/games/registry.ts` (each game is lazy-loaded) as the arcade grows toward 15 polished titles. See `CLAUDE.md` for the add-a-game checklist and `docs/ROADMAP.md` for the long-term plan.
+Games are registered in `src/games/registry.ts` and lazy-loaded. See `CLAUDE.md` for the working rules and the add-a-game checklist, `docs/ROADMAP.md` for the plan, and `docs/` for per-game notes. `/about` explains what is stored and what is sent.
 
 ## Local development
 
