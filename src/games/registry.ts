@@ -325,6 +325,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./WorldTrip').then((m) => ({ default: m.WorldTrip }))),
   },
+  {
+    meta: {
+      id: 'blackjack',
+      title: 'Blackjack',
+      description: 'Beat the dealer to 21 with play-money chips: hit, stand, double down and split. Chips have no real value.',
+      category: 'Strategy',
+      accent: 'from-emerald-700 to-teal-500',
+      glyph: '♠️',
+      estimated: '5–15 min',
+    },
+    Component: lazy(() => import('./Blackjack').then((m) => ({ default: m.Blackjack }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)

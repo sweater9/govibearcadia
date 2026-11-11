@@ -1,0 +1,44 @@
+.bj{display:grid;gap:8px;justify-items:center;width:100%}
+.bj>*{width:100%;max-width:640px}
+.bj-stats{display:flex;justify-content:space-between;gap:8px;font-size:.85rem}
+.bj-stats span{padding:3px 12px;border-radius:999px;background:#fff8ea;border:1px solid #e2cfa9}
+.bj-stats b{font-variant-numeric:tabular-nums}
+.bj-table{display:grid;gap:6px;padding:10px;border-radius:18px;background:radial-gradient(circle at 50% 20%,#2f7a56,#1b5238);color:#fff;box-shadow:inset 0 0 0 3px #8f5a2a}
+.bj-seat h3{margin:0 0 4px;font-size:.85rem;font-weight:700;display:flex;gap:8px;align-items:baseline}
+.bj-seat h3 small{font-weight:400;opacity:.9}
+.bj-status{margin:0;text-align:center;font-size:.9rem;line-height:1.3;min-height:2.4em;display:grid;place-items:center}
+.bj-hands{display:flex;gap:12px;flex-wrap:wrap}
+.bj-hand{flex:1 1 140px;padding:4px 6px;border-radius:10px;border:2px solid transparent}
+.bj-hand[data-active]{border-color:#ffd68a;background:#ffffff14}
+.bj-hand[data-result="win"],.bj-hand[data-result="blackjack"]{border-color:#9be7b5}
+.bj-hand[data-result="lose"]{opacity:.8}
+.bj-cards{display:flex;min-height:60px}
+.bj-card{position:relative;flex:none;width:42px;height:60px;border-radius:7px;background:#fffdf8;color:#26201a;box-shadow:0 2px 5px #0006;display:grid;align-content:start;justify-items:start;padding:3px 5px;line-height:1.05;animation:bj-deal .22s ease-out both}
+.bj-card+.bj-card{margin-left:-12px}
+.bj-card b{font-size:1rem}.bj-card i{font-style:normal;font-size:.9rem}
+.bj-card[data-red]{color:#b3261e}
+.bj-hole{background:repeating-linear-gradient(45deg,#8f3c1a,#8f3c1a 5px,#a64a24 5px,#a64a24 10px);border:2px solid #fff}
+.bj-empty{width:42px;height:60px;border-radius:7px;border:2px dashed #ffffff55}
+@keyframes bj-deal{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+.bj-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.bj-actions button{min-height:38px;padding:6px 14px}
+.bj-bet{display:grid;gap:6px;justify-items:center}
+.bj-chips{display:flex;gap:8px}
+.bj-chip{width:46px;height:46px;border-radius:50%;border:3px dashed #ffffffcc;color:#fff;font-weight:700;font-size:.85rem;cursor:pointer;box-shadow:0 2px 4px #0004;background:#8f3c1a}
+.bj-chip[data-v="10"]{background:#2f6f9f}.bj-chip[data-v="50"]{background:#3f9b6b}.bj-chip[data-v="100"]{background:#222}.bj-chip[data-v="500"]{background:#7a3fa0}
+.bj-chip:disabled{opacity:.4;cursor:default}
+.bj-bet-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+.bj-bet-row>span{padding:3px 12px;border-radius:999px;background:#fff8ea;border:1px solid #e2cfa9;font-size:.9rem}
+.bj-bet-row button{min-height:36px;padding:6px 12px}
+.bj-hint{margin:0;font-size:.85rem;text-align:center}
+.bj-how{font-size:.85rem}.bj-how p{margin:.4rem 0}
+@media(max-width:420px){
+.bj{gap:6px}
+.bj-card,.bj-empty{width:36px;height:52px}.bj-cards{min-height:52px}.bj-card b{font-size:.9rem}
+.bj-card+.bj-card{margin-left:-12px}
+.bj-table{padding:8px;gap:4px}.bj-status{font-size:.8rem;min-height:2.2em}
+.bj-chip{width:42px;height:42px}
+.bj-actions button{padding:6px 10px;min-height:36px}
+.bj-hand{flex-basis:120px}
+}
+@media(prefers-reduced-motion:reduce){.bj-card{animation:none}}
