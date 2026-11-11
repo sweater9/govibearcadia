@@ -325,6 +325,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./WorldTrip').then((m) => ({ default: m.WorldTrip }))),
   },
+  {
+    meta: {
+      id: 'ludo',
+      title: 'Ludo',
+      description: 'Race four tokens round the board, capture rivals and get home first. Play the computer or friends on one device.',
+      category: 'Strategy',
+      accent: 'from-rose-500 to-amber-500',
+      glyph: '🎲',
+      estimated: '15–30 min',
+    },
+    Component: lazy(() => import('./Ludo').then((m) => ({ default: m.Ludo }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)

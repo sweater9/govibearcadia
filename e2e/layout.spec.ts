@@ -28,6 +28,7 @@ const PLAY_AREA = {
   carrom: '.cm-setup',
   'taiwanese-mahjong': '.mj-setup',
   'world-trip': '.wt-board',
+  ludo: '.ld-board',
 } as const
 
 type Box = { top: number; bottom: number }
