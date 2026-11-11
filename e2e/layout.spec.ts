@@ -30,6 +30,7 @@ const PLAY_AREA = {
   'world-trip': '.wt-board',
   ludo: '.ld-board',
   'indian-rummy': '.rm-hand',
+  blackjack: '.bj-table',
 } as const
 
 type Box = { top: number; bottom: number }
