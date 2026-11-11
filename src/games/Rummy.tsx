@@ -22,7 +22,7 @@ const looseOrder = (ids: number[]) => [...ids].sort((a, b) => { const x = card(a
 function Face({ id, wild, selected, onClick, disabled, label }: { id: number; wild: number; selected?: boolean; onClick?: () => void; disabled?: boolean; label?: string }) {
   const c = card(id)
   const joker = c.printedJoker || c.rank === wild
-  return <button type="button" className="rm-card" data-card={id} data-red={c.suit === 1 || c.suit === 2 ? 'true' : undefined} data-joker={joker ? 'true' : undefined} data-selected={selected ? 'true' : undefined}
+  return <button type="button" className="rm-card" data-card={id} data-s={c.printedJoker ? '★' : SUITS[c.suit]} data-r={c.printedJoker ? '★' : rankLabel(c.rank)} data-red={c.suit === 1 || c.suit === 2 ? 'true' : undefined} data-joker={joker ? 'true' : undefined} data-selected={selected ? 'true' : undefined}
     aria-pressed={onClick ? !!selected : undefined} aria-label={label ?? (c.printedJoker ? 'Joker' : `${rankLabel(c.rank)} of ${SUIT_NAMES[c.suit]}${joker ? ', wild joker' : ''}`)} disabled={disabled || !onClick} onClick={onClick}>
     <b>{c.printedJoker ? '★' : rankLabel(c.rank)}</b><span>{c.printedJoker ? 'JOKER' : SUITS[c.suit]}</span>
   </button>
