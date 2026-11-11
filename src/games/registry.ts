@@ -337,6 +337,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./Ludo').then((m) => ({ default: m.Ludo }))),
   },
+  {
+    meta: {
+      id: 'indian-rummy',
+      title: 'Indian Rummy',
+      description: 'The 13-card classic: make a pure sequence, a second sequence and sets, then declare. Play one to three computers.',
+      category: 'Strategy',
+      accent: 'from-emerald-600 to-amber-500',
+      glyph: '🃏',
+      estimated: '10–20 min',
+    },
+    Component: lazy(() => import('./Rummy').then((m) => ({ default: m.Rummy }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)

@@ -29,6 +29,7 @@ const PLAY_AREA = {
   'taiwanese-mahjong': '.mj-setup',
   'world-trip': '.wt-board',
   ludo: '.ld-board',
+  'indian-rummy': '.rm-hand',
 } as const
 
 type Box = { top: number; bottom: number }
