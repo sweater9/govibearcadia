@@ -8,6 +8,7 @@ import { db, recordPlay, toggleFavorite } from '../lib/db'
 import { SoundToggle } from '../components/SoundToggle'
 import { attachGameSound } from '../lib/sound'
 import { attachGameEffects } from '../lib/effects'
+import { coinsFor } from '../lib/wallet'
 import { lockScreen, unlockScreen } from '../lib/screenLock'
 import { ShareButton } from '../components/ShareButton'
 import { challengePath, parseChallenge, randomSeed, shareChallenge, verdict, verdictText } from '../lib/challenge'
@@ -34,6 +35,7 @@ export function Play() {
   const [favorite, setFavorite] = useState(false)
   const [locked, setLocked] = useState(false)
   const [dailyWin, setDailyWin] = useState<GameResult | null>(null)
+  const [coinsWon, setCoinsWon] = useState(0)
   const [lastRun, setLastRun] = useState<{ score: number; won: boolean } | null>(null)
 
   useEffect(() => setLastRun(null), [seed, gameId])
@@ -64,6 +66,7 @@ export function Play() {
       if (gameId) void recordPlay(gameId, result, daily)
       if (daily && result.won) setDailyWin(result)
       setLastRun({ score: result.score, won: !!result.won })
+      setCoinsWon(coinsFor({ won: result.won, daily }))
     },
     [gameId, daily],
   )
@@ -118,6 +121,7 @@ export function Play() {
           </Suspense>
         </GameBoundary>
       </section>
+      {coinsWon > 0 ? <p className="coin-earned" role="status">+{coinsWon} coins earned</p> : null}
       {meta.challenge && lastRun && seed ? (
         <div className="challenge-panel" aria-label="Challenge a friend">
           {incoming ? <p role="status">{verdictText(verdict(lastRun, { score: incoming.beat, won: incoming.won }), lastRun.score, incoming)}</p> : null}

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { createRandom } from '../lib/rng'
+import { blackjackStake, saveBankroll } from '../lib/db'
 import type { GameProps } from '../types'
 import { MAX_BET, MIN_BET, START_CHIPS, SUITS, applyAction, basicStrategy, canDouble, canSplit, handValue, isBlackjack, maxBetFor, rankLabel, rankOf, suitOf, validBet, type Action, type Hand, type State, newGame } from './blackjack/rules'
 import { loadSession, saveSession, type Session } from './blackjack/save'
@@ -25,8 +26,10 @@ export function Blackjack({ onFinish, seed }: GameProps) {
   const latest = useRef<{ act: (a: Action) => void }>({ act: () => {} })
   const state: State | undefined = session?.state
 
-  function start() {
+  async function start() {
+    const stake = await blackjackStake().catch(() => START_CHIPS)
     const next: Session = { state: newGame(seed ?? String(createRandom()())), actions: [], startedAt: Date.now() }
+    next.state = newGame(next.state.seed, stake)
     saveSession(next)
     setSession(next)
     setBet(50)
@@ -41,9 +44,10 @@ export function Blackjack({ onFinish, seed }: GameProps) {
     setSession(updated)
     setHint('')
     if (next.phase === 'over') {
+      void saveBankroll(next.chips)
       onFinish({
         score: next.chips,
-        won: next.chips > START_CHIPS,
+        won: next.chips > next.startChips,
         durationMs: Math.max(0, Date.now() - session.startedAt),
         stats: { rounds: next.rounds, chips: next.chips, peak: next.peak, blackjacks: next.blackjacks },
       })
@@ -73,7 +77,7 @@ export function Blackjack({ onFinish, seed }: GameProps) {
   }, [])
 
   const net = state && phase !== 'play' && state.hands.length ? state.hands.reduce((sum, h) => sum + (h.payout ?? 0) - h.bet * (h.doubled ? 2 : 1), 0) : 0
-  const status = !state ? 'Beat the dealer to 21 without going over. You start with 1,000 play chips.'
+  const status = !state ? 'Beat the dealer to 21 without going over. Your bankroll carries over: cash out to keep your chips for next time.'
     : phase === 'over' ? `${state.message} You finish with ${state.chips} chips after ${state.rounds} hand${state.rounds === 1 ? '' : 's'}.`
       : playing ? (hands.length > 1 ? `Hand ${state.active + 1} of ${hands.length}: hit, stand, double or split.` : 'Hit, stand, double or split.')
         : phase === 'settled' ? `${state.message} Change your bet or deal again.` : 'Place your bet.'
@@ -84,13 +88,14 @@ export function Blackjack({ onFinish, seed }: GameProps) {
       <span>Chips <b>{chips}</b></span>
       <span>Hand <b>{state?.rounds !== undefined ? state.rounds + (playing ? 1 : 0) : 0}</b></span>
       <span>Best <b>{state?.peak ?? START_CHIPS}</b></span>
+      <span>Started with <b>{state?.startChips ?? START_CHIPS}</b></span>
     </div>
     <div className="bj-table">
       <section className="bj-seat" aria-label="Dealer">
         <h3>Dealer{state?.dealer.length ? <small>{showHole ? total(state.dealer) : `showing ${Math.min(10, rankOf(state.dealer[0] % 52))}`}</small> : null}</h3>
         <div className="bj-cards">{state?.dealer.length ? state.dealer.map((id, i) => <Face key={`${i}-${showHole}`} id={id} i={i} flip={showHole && i === 1} hidden={!showHole && i === 1} />) : <span className="bj-empty" />}</div>
       </section>
-      <p className={`bj-status${phase === 'over' ? (state!.chips > START_CHIPS ? ' win-message' : ' game-over') : phase === 'settled' && net > 0 ? ' win-message' : ''}`} role="status" aria-live="polite">{status}</p>
+      <p className={`bj-status${phase === 'over' ? (state!.chips > state!.startChips ? ' win-message' : ' game-over') : phase === 'settled' && net > 0 ? ' win-message' : ''}`} role="status" aria-live="polite">{status}</p>
       <section className="bj-seat" aria-label="Your hands">
         <div className="bj-hands">
           {hands.length ? hands.map((h, i) => <div key={i} className="bj-hand" data-active={playing && i === state!.active ? 'true' : undefined} data-result={h.result}>
@@ -115,11 +120,11 @@ export function Blackjack({ onFinish, seed }: GameProps) {
       <div className="bj-bet-row">
         <span>Bet <b>{state ? wager : 0}</b></span>
         <button className="secondary-btn" onClick={() => setBet(MIN_BET)} disabled={!state}>Clear</button>
-        {state ? <button className="primary-btn" onClick={() => act({ type: 'bet', amount: wager })} disabled={!validBet(wager, chips)}>Deal</button> : <button className="primary-btn" onClick={start}>Start session</button>}
+        {state ? <button className="primary-btn" onClick={() => act({ type: 'bet', amount: wager })} disabled={!validBet(wager, chips)}>Deal</button> : <button className="primary-btn" onClick={() => void start()}>Start session</button>}
         {state ? <button className="secondary-btn" onClick={() => act({ type: 'cashout' })}>Cash out</button> : null}
       </div>
     </div> : null}
-    {phase === 'over' ? <div className="bj-bet"><div className="bj-bet-row"><button className="primary-btn" onClick={start}>New session</button></div></div> : null}
+    {phase === 'over' ? <div className="bj-bet"><div className="bj-bet-row"><button className="primary-btn" onClick={() => void start()}>New session</button></div></div> : null}
     {hint ? <p className="bj-hint" aria-live="polite">{hint}</p> : null}
     <details className="bj-how"><summary>How to play</summary>
       <p>Get closer to 21 than the dealer without going over. Number cards count their value, J Q K are 10, an ace is 1 or 11. The dealer stands on every 17. Blackjack (an ace and a ten-card) pays 3 to 2; other wins pay 1 to 1; a tie is a push. You can double down on your first two cards (one card, double bet) and split a pair once (split aces get one card each). Bets are {MIN_BET} to {MAX_BET} play chips in steps of 5. Chips are not money and have no value: this is only for fun. Keys: H hit, S stand, D double, P split.</p>

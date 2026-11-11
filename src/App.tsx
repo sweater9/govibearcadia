@@ -9,9 +9,9 @@ import { RoomPage } from './pages/RoomPage'
 import { Play } from './pages/Play'
 import { About } from './pages/About'
 import { NotFound } from './pages/NotFound'
-import { db } from './lib/db'
+import { db, getWallet } from './lib/db'
 import { summarise, today } from './lib/passport'
 import { applyTheme, resolveTheme, storedTheme } from './lib/themes'
 export default function App(){
- useEffect(()=>{void db.history.toArray().then(h=>applyTheme(resolveTheme(storedTheme(),summarise(h,today()).level),false))},[])
+ useEffect(()=>{void Promise.all([db.history.toArray(),getWallet()]).then(([h,w])=>applyTheme(resolveTheme(storedTheme(),summarise(h,today()).level,w.owned),false))},[])
  return <Layout><Routes><Route path="/" element={<Home/>}/><Route path="/play/:id" element={<Play/>}/><Route path="/passport" element={<Passport/>}/><Route path="/online" element={<Online/>}/><Route path="/leaderboard" element={<Leaderboard/>}/><Route path="/room/:code" element={<RoomPage/>}/><Route path="/about" element={<About/>}/><Route path="*" element={<NotFound/>}/></Routes></Layout>}

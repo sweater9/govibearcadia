@@ -2,6 +2,7 @@
 import type { GameProgress, PlayRecord } from '../types'
 
 export type Favorite = { gameId: string; addedAt: string }
+export type WalletData = { owned: string[]; bankroll?: number }
 export type Backup = {
   app: 'govibearcadia'
   version: 1
@@ -9,6 +10,8 @@ export type Backup = {
   progress: GameProgress[]
   favorites: Favorite[]
   history: Omit<PlayRecord, 'id'>[]
+  /** Optional: backups made before the wallet existed have none. */
+  wallet?: WalletData
 }
 
 export const MAX_BACKUP_BYTES = 20 * 1024 * 1024
@@ -19,13 +22,14 @@ const str = (v: unknown): v is string => typeof v === 'string' && v.length > 0 &
 const num = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
 const isoish = (v: unknown): v is string => str(v) && !Number.isNaN(Date.parse(v))
 
-export function makeBackup(data: Pick<Backup, 'progress' | 'favorites' | 'history'>, now = new Date()): Backup {
+export function makeBackup(data: Pick<Backup, 'progress' | 'favorites' | 'history' | 'wallet'>, now = new Date()): Backup {
   return {
     app: 'govibearcadia',
     version: 1,
     exportedAt: now.toISOString(),
     progress: data.progress,
     favorites: data.favorites,
+    ...(data.wallet ? { wallet: data.wallet } : {}),
     history: data.history.map((r) => {
       const rest: Omit<PlayRecord, 'id'> & { id?: number } = { ...r }
       delete rest.id
@@ -74,6 +78,11 @@ export function parseBackup(text: string): ParseResult {
       ...(h.daily !== undefined ? { daily: h.daily as string } : {}),
     })
   }
+  if (raw.wallet !== undefined) {
+    const w = raw.wallet
+    if (!isObj(w) || !Array.isArray(w.owned) || w.owned.length > 100 || !w.owned.every(str) || (w.bankroll !== undefined && !(num(w.bankroll) && w.bankroll >= 0 && w.bankroll <= 1_000_000))) return { ok: false, error: 'The backup contains a damaged wallet.' }
+    out.wallet = { owned: [...new Set(w.owned as string[])], ...(w.bankroll !== undefined ? { bankroll: Math.floor(w.bankroll as number) } : {}) }
+  }
   return { ok: true, backup: out }
 }
 
@@ -81,8 +90,8 @@ export const historyKey = (r: Pick<PlayRecord, 'gameId' | 'playedAt' | 'score'>)
 
 /** Merges an imported backup into what is already stored. Nothing is ever lost or double counted. */
 export function mergeBackup(
-  current: Pick<Backup, 'progress' | 'favorites' | 'history'>,
-  incoming: Pick<Backup, 'progress' | 'favorites' | 'history'>,
+  current: Pick<Backup, 'progress' | 'favorites' | 'history' | 'wallet'>,
+  incoming: Pick<Backup, 'progress' | 'favorites' | 'history' | 'wallet'>,
 ) {
   const seen = new Set(current.history.map(historyKey))
   const newHistory = incoming.history.filter((r) => {
@@ -105,5 +114,8 @@ export function mergeBackup(
   const favorites = new Map(current.favorites.map((f) => [f.gameId, f]))
   for (const f of incoming.favorites) if (!favorites.has(f.gameId)) favorites.set(f.gameId, f)
 
-  return { progress: [...progress.values()], favorites: [...favorites.values()], newHistory }
+  const owned = [...new Set([...(current.wallet?.owned ?? []), ...(incoming.wallet?.owned ?? [])])]
+  const rolls = [current.wallet?.bankroll, incoming.wallet?.bankroll].filter((b): b is number => b !== undefined)
+  const wallet: WalletData = { owned, ...(rolls.length ? { bankroll: Math.max(...rolls) } : {}) }
+  return { progress: [...progress.values()], favorites: [...favorites.values()], newHistory, wallet }
 }

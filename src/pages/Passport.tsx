@@ -6,7 +6,7 @@ import { Avatar } from '../components/Avatar'
 import { ShareButton } from '../components/ShareButton'
 import { AVATARS, isUnlocked as avatarUnlocked, resolveAvatar, saveAvatar, storedAvatar, type AvatarId } from '../lib/avatars'
 import { parseBackup } from '../lib/backup'
-import { db, exportAll, importBackup } from '../lib/db'
+import { buyItem, db, exportAll, getWallet, importBackup } from '../lib/db'
 import { THEMES, applyTheme, isUnlocked, resolveTheme, storedTheme, type ThemeId } from '../lib/themes'
 import { ACHIEVEMENTS, dailyChallenge, levelFor, recordsByGame, sharePassport, summarise, today, weeklyGoals, WEEKLY_BONUS_XP } from '../lib/passport'
 import type { PlayRecord } from '../types'
@@ -20,6 +20,13 @@ export function Passport() {
   const [theme, setTheme] = useState<ThemeId>(() => storedTheme() ?? 'neon')
   const [avatarId, setAvatarId] = useState<AvatarId | null>(() => storedAvatar())
   const fileInput = useRef<HTMLInputElement>(null)
+  const [wallet, setWallet] = useState<{ coins: number; owned: string[] }>({ coins: 0, owned: [] })
+  useEffect(() => {
+    const load = () => void getWallet().then(setWallet)
+    load()
+    addEventListener('govibearcadia:wallet', load)
+    return () => removeEventListener('govibearcadia:wallet', load)
+  }, [])
   const load = () => db.history.toArray().then(setHistory)
   useEffect(() => {
     void load()
@@ -156,11 +163,12 @@ export function Passport() {
       </div>
       <p className="game-help">Avatars stay on this device. They are never sent to anyone.</p>
 
-      <h2>Themes</h2>
+      <h2 id="shop">Themes and shop</h2>
+      <p className="game-help">You have <b>{wallet.coins}</b> coins. Every game you play earns coins (5 per run, 20 for a win, 70 for a daily win). Coins are play money with no cash value.</p>
       <div className="pp-themes" role="radiogroup" aria-label="Theme">
         {THEMES.map((t) => {
-          const open = isUnlocked(t.id, lvl.level)
-          const active = resolveTheme(theme, lvl.level) === t.id
+          const open = isUnlocked(t.id, lvl.level, wallet.owned)
+          const active = resolveTheme(theme, lvl.level, wallet.owned) === t.id
           return (
             <button
               key={t.id}
@@ -176,10 +184,17 @@ export function Passport() {
             >
               <span className="theme-swatch" aria-hidden="true" />
               <strong>{t.name}</strong>
-              <small>{open ? t.blurb : `Unlocks at level ${t.level}`}</small>
+              <small>{open ? t.blurb : t.price !== undefined ? `${t.price} coins` : `Unlocks at level ${t.level}`}</small>
             </button>
           )
         })}
+      </div>
+      <div className="pp-shop" aria-label="Shop">
+        {THEMES.filter((t) => t.price !== undefined && !wallet.owned.includes(t.id)).map((t) => (
+          <button key={t.id} className="secondary-btn pp-buy" disabled={wallet.coins < t.price!} onClick={() => void buyItem(t.id).then((ok) => setMessage(ok ? `${t.name} theme bought. Pick it above.` : 'Not enough coins.'))}>
+            Buy {t.name} · {t.price} coins
+          </button>
+        ))}
       </div>
 
       <h2>Personal records</h2>

@@ -424,9 +424,13 @@ button.bs-cell:disabled{cursor:default}
 :root[data-theme=ocean]{--primary:#2F6F9F;--primary-hover:#245A82;--on-primary:#F4F9FF}
 :root[data-theme=forest]{--primary:#2F6B45;--primary-hover:#255A39;--on-primary:#F3FBF5}
 :root[data-theme=ember]{--primary:#C2410C;--primary-hover:#A3360A;--on-primary:#FFF5EE}
+:root[data-theme=slate]{--primary:#3F5468;--primary-hover:#2F4153;--on-primary:#F3F7FB}
+:root[data-theme=rose]{--primary:#A62456;--primary-hover:#8A1D47;--on-primary:#FFF3F7}
+:root[data-theme=royal]{--primary:#5B3FA0;--primary-hover:#47307F;--on-primary:#F7F3FF}
+:root[data-theme=gold]{--primary:#7D5A0C;--primary-hover:#654809;--on-primary:#FFF9E8}
 .pp-themes button{position:relative}
 .theme-swatch{width:16px;height:16px;border-radius:50%;background:var(--sw);margin-bottom:4px;display:block}
-.pp-themes [data-theme-option=neon]{--sw:#3DD9F5}.pp-themes [data-theme-option=ocean]{--sw:#6EA8FF}.pp-themes [data-theme-option=forest]{--sw:#5BD08A}.pp-themes [data-theme-option=ember]{--sw:#FF8A65}
+.pp-themes [data-theme-option=neon]{--sw:#3DD9F5}.pp-themes [data-theme-option=ocean]{--sw:#6EA8FF}.pp-themes [data-theme-option=forest]{--sw:#5BD08A}.pp-themes [data-theme-option=ember]{--sw:#FF8A65}.pp-themes [data-theme-option=slate]{--sw:#7C93A8}.pp-themes [data-theme-option=rose]{--sw:#E0527F}.pp-themes [data-theme-option=royal]{--sw:#9575E0}.pp-themes [data-theme-option=gold]{--sw:#D9A21B}
 .pp-themes button:disabled .theme-swatch{opacity:.5}
 
 /* Carrom */
@@ -714,3 +718,10 @@ button.bs-cell:hover:not(:disabled),button.bs-cell:focus-visible{background:#3b8
 .fx-shake{animation:fx-shake .4s ease-in-out}
 @keyframes fx-shake{20%{transform:translateX(-6px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
 @media(prefers-reduced-motion:reduce){.fx-confetti,.fx-pop{display:none}.fx-shake{animation:none}}
+
+/* Coin balance in the header and the shop */
+.coins{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;border:1px solid var(--border);padding:8px 12px;border-radius:99px;color:var(--text)}
+.coins i{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe27a,#d9a21b 60%,#a8780c);box-shadow:inset 0 0 0 2px #fff3b0aa}
+.pp-buy{margin-top:6px;font-size:12px;padding:6px 10px}
+.coin-earned{text-align:center;font-weight:700;color:var(--primary-hover);margin:12px 0 0}
+.pp-shop{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}

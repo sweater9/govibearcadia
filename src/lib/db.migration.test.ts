@@ -18,3 +18,20 @@ it('upgrades an existing v1 database to v2 without losing player data', async ()
   expect(await db.history.count()).toBe(1)
   expect(await db.progress.get('neon-merge')).toMatchObject({ highScore: 2048, plays: 8 })
 })
+
+it('v3 adds the wallet: buying spends earned coins and the Blackjack bankroll carries over', async () => {
+  const { db, recordPlay, getWallet, buyItem, saveBankroll, blackjackStake } = await import('./db')
+  await db.history.clear()
+  await db.wallet.clear()
+  expect(await buyItem('slate')).toBe(false) // nothing earned yet
+  for (let i = 0; i < 8; i++) await recordPlay('neon-merge', { score: 10, won: true }) // 8 x 20 = 160
+  expect((await getWallet()).coins).toBe(160)
+  expect(await buyItem('slate')).toBe(true)
+  expect(await buyItem('slate')).toBe(false) // already owned
+  expect(await getWallet()).toMatchObject({ coins: 10, owned: ['slate'] })
+  expect(await blackjackStake()).toBe(1000)
+  await saveBankroll(2750)
+  expect(await blackjackStake()).toBe(2750)
+  await saveBankroll(20)
+  expect(await blackjackStake()).toBe(1000) // restaked when broke
+})

@@ -1,19 +1,25 @@
 import Dexie, { type EntityTable } from 'dexie'
 import type { GameId, GameProgress, GameResult, PlayRecord } from '../types'
 import { makeBackup, mergeBackup, type Backup } from './backup'
+import { balance, canBuy, stakeFor } from './wallet'
 
 type Favorite = { gameId: GameId; addedAt: string }
+/** One row, id 'main': bought shop items and the carried-over Blackjack bankroll. Coins earned are derived from history. */
+type WalletRow = { id: 'main'; owned: string[]; bankroll?: number }
 
 class ArcadeDB extends Dexie {
   progress!: EntityTable<GameProgress, 'gameId'>
   favorites!: EntityTable<Favorite, 'gameId'>
   history!: EntityTable<PlayRecord, 'id'>
+  wallet!: EntityTable<WalletRow, 'id'>
 
   constructor() {
     super('govibearcadia')
     this.version(1).stores({ progress: 'gameId,lastPlayed', favorites: 'gameId,addedAt' })
     // v2 adds a per-run history log (foundation for stats, XP, streaks and achievements).
     this.version(2).stores({ history: '++id,gameId,playedAt' })
+    // v3 adds the wallet (shop purchases and the carried-over Blackjack bankroll).
+    this.version(3).stores({ wallet: 'id' })
   }
 }
 
@@ -39,6 +45,7 @@ export async function recordPlay(gameId: GameId, result: GameResult, daily?: str
       ...(daily ? { daily } : {}),
     })
   })
+  changed()
 }
 
 export async function toggleFavorite(gameId: GameId): Promise<void> {
@@ -49,18 +56,49 @@ export async function toggleFavorite(gameId: GameId): Promise<void> {
 
 /** Everything stored on this device, ready to be written to a backup file. */
 export async function exportAll(): Promise<Backup> {
-  const [progress, favorites, history] = await Promise.all([db.progress.toArray(), db.favorites.toArray(), db.history.toArray()])
-  return makeBackup({ progress, favorites, history })
+  const [progress, favorites, history, wallet] = await Promise.all([db.progress.toArray(), db.favorites.toArray(), db.history.toArray(), walletOf()])
+  return makeBackup({ progress, favorites, history, wallet: { owned: wallet.owned, ...(wallet.bankroll !== undefined ? { bankroll: wallet.bankroll } : {}) } })
 }
 
 /** Merges a validated backup into the database in one transaction. Returns how many new runs were added. */
 export async function importBackup(backup: Backup): Promise<number> {
-  return db.transaction('rw', db.progress, db.favorites, db.history, async () => {
-    const [progress, favorites, history] = await Promise.all([db.progress.toArray(), db.favorites.toArray(), db.history.toArray()])
-    const merged = mergeBackup({ progress, favorites, history }, backup)
+  const added = await db.transaction('rw', db.progress, db.favorites, db.history, db.wallet, async () => {
+    const [progress, favorites, history, w] = await Promise.all([db.progress.toArray(), db.favorites.toArray(), db.history.toArray(), walletOf()])
+    const merged = mergeBackup({ progress, favorites, history, wallet: { owned: w.owned, bankroll: w.bankroll } }, backup)
+    await db.wallet.put({ id: 'main', owned: merged.wallet.owned, ...(merged.wallet.bankroll !== undefined ? { bankroll: merged.wallet.bankroll } : {}) })
     await db.progress.bulkPut(merged.progress)
     await db.favorites.bulkPut(merged.favorites)
     await db.history.bulkAdd(merged.newHistory)
     return merged.newHistory.length
   })
+  changed()
+  return added
+}
+
+const walletOf = async (): Promise<WalletRow> => (await db.wallet.get('main')) ?? { id: 'main', owned: [] }
+const changed = () => { try { dispatchEvent(new Event('govibearcadia:wallet')) } catch { /* no window */ } }
+
+export async function getWallet(): Promise<{ coins: number; owned: string[]; bankroll: number | undefined }> {
+  const [w, history] = await Promise.all([walletOf(), db.history.toArray()])
+  return { coins: balance(history, w.owned), owned: w.owned, bankroll: w.bankroll }
+}
+
+/** Buys a shop item if it is affordable and not already owned. Returns whether it was bought. */
+export async function buyItem(id: string): Promise<boolean> {
+  const ok = await db.transaction('rw', db.wallet, db.history, async () => {
+    const w = await walletOf()
+    if (!canBuy(id, balance(await db.history.toArray(), w.owned), w.owned)) return false
+    await db.wallet.put({ ...w, owned: [...w.owned, id] })
+    return true
+  })
+  if (ok) changed()
+  return ok
+}
+
+/** The chips to start a Blackjack session with, from the saved bankroll. */
+export async function blackjackStake(): Promise<number> {
+  return stakeFor((await walletOf()).bankroll)
+}
+export async function saveBankroll(chips: number): Promise<void> {
+  await db.transaction('rw', db.wallet, async () => db.wallet.put({ ...(await walletOf()), bankroll: Math.max(0, Math.floor(chips)) }))
 }

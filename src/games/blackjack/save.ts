@@ -16,7 +16,9 @@ export function loadSession(seed?: string): Session | null {
     const data = JSON.parse(localStorage.getItem(KEY) ?? 'null')
     if (!data || typeof data.seed !== 'string' || (seed !== undefined && seed !== data.seed) || !Number.isSafeInteger(data.startedAt) || data.startedAt < 0 ||
       !Array.isArray(data.actions) || data.actions.length > 6000) return null
-    let state = newGame(data.seed)
+    const startChips = data.startChips === undefined ? 1000 : data.startChips
+    if (!Number.isSafeInteger(startChips) || startChips < 100 || startChips > 1_000_000) return null
+    let state = newGame(data.seed, startChips)
     for (const action of data.actions) {
       if (!isAction(action)) return null
       const next = applyAction(state, action)
@@ -31,7 +33,7 @@ export function loadSession(seed?: string): Session | null {
 
 export function saveSession({ state, actions, startedAt }: Session) {
   try {
-    localStorage.setItem(KEY, JSON.stringify({ seed: state.seed, actions, startedAt }))
+    localStorage.setItem(KEY, JSON.stringify({ seed: state.seed, startChips: state.startChips, actions, startedAt }))
   } catch {
     /* the session stays playable when storage is unavailable */
   }

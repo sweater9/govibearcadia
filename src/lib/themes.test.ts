@@ -3,8 +3,15 @@ import { THEMES, applyTheme, isThemeId, isUnlocked, resolveTheme, storedTheme } 
 
 describe('themes', () => {
   it('unlock at their level and the default is always available', () => {
-    expect(THEMES.map((t) => [t.id, t.level])).toEqual([['neon', 1], ['ocean', 2], ['forest', 3], ['ember', 5]])
-    expect([1, 2, 3, 4, 5].map((l) => THEMES.filter((t) => isUnlocked(t.id, l)).length)).toEqual([1, 2, 3, 3, 4])
+    const free = THEMES.filter((t) => t.price === undefined)
+    expect(free.map((t) => [t.id, t.level])).toEqual([['neon', 1], ['ocean', 2], ['forest', 3], ['ember', 5]])
+    expect([1, 2, 3, 4, 5].map((l) => free.filter((t) => isUnlocked(t.id, l)).length)).toEqual([1, 2, 3, 3, 4])
+  })
+  it('priced themes open only once bought, whatever the level', () => {
+    expect(isUnlocked('royal', 99)).toBe(false)
+    expect(isUnlocked('royal', 1, ['royal'])).toBe(true)
+    expect(resolveTheme('royal', 1, [])).toBe('neon')
+    expect(resolveTheme('royal', 1, ['royal'])).toBe('royal')
   })
 
   it('resolve falls back to the default for unknown or locked themes', () => {

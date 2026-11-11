@@ -27,6 +27,8 @@ export const isBust = (cards: number[]) => handValue(cards).total > 21
 export type Hand = { cards: number[]; bet: number; doubled: boolean; done: boolean; fromSplit: boolean; result?: 'win' | 'lose' | 'push' | 'blackjack'; payout?: number }
 export type State = {
   seed: string
+  /** Chips this session began with (the carried-over bankroll); a win is finishing above it. */
+  startChips: number
   shoeNo: number
   pos: number
   chips: number
@@ -48,7 +50,7 @@ export type Action =
   | { type: 'split' }
   | { type: 'cashout' }
 
-export const newGame = (seed: string): State => ({ seed, shoeNo: 0, pos: 0, chips: START_CHIPS, phase: 'bet', hands: [], active: 0, dealer: [], rounds: 0, blackjacks: 0, peak: START_CHIPS, lastBet: 50, message: 'Place your bet.' })
+export const newGame = (seed: string, startChips: number = START_CHIPS): State => ({ seed, startChips, shoeNo: 0, pos: 0, chips: startChips, phase: 'bet', hands: [], active: 0, dealer: [], rounds: 0, blackjacks: 0, peak: startChips, lastBet: 50, message: 'Place your bet.' })
 
 const shoeFor = (seed: string, no: number) => shuffle(Array.from({ length: DECKS * 52 }, (_, i) => i), createRandom(`${seed}:shoe${no}`))
 

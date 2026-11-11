@@ -35,7 +35,7 @@ export const GAMES = [
 type Row = Record<string, unknown>
 
 /** Reads every row of an IndexedDB table straight from the browser, bypassing the app's own code. */
-export async function readTable(page: Page, table: 'history' | 'progress' | 'favorites'): Promise<Row[]> {
+export async function readTable(page: Page, table: 'history' | 'progress' | 'favorites' | 'wallet'): Promise<Row[]> {
   return page.evaluate(
     (name) =>
       new Promise<Row[]>((resolve, reject) => {

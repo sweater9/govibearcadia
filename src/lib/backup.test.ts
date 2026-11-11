@@ -64,3 +64,19 @@ describe('merging', () => {
     expect(mergeBackup({ ...merged, history: [run, ...merged.newHistory] }, incoming).newHistory).toHaveLength(0)
   })
 })
+
+describe('wallet in backups', () => {
+  const base = { progress: [], favorites: [], history: [] }
+  it('round-trips, merges owned items and keeps the larger bankroll', () => {
+    const made = makeBackup({ ...base, wallet: { owned: ['rose'], bankroll: 1500 } })
+    const parsed = parseBackup(JSON.stringify(made))
+    expect(parsed.ok && parsed.backup.wallet).toEqual({ owned: ['rose'], bankroll: 1500 })
+    const merged = mergeBackup({ ...base, wallet: { owned: ['slate'], bankroll: 2000 } }, { ...base, wallet: { owned: ['rose', 'slate'], bankroll: 1500 } })
+    expect(merged.wallet).toEqual({ owned: ['slate', 'rose'], bankroll: 2000 })
+  })
+  it('old backups without a wallet still load, and a damaged wallet is rejected', () => {
+    expect(parseBackup(JSON.stringify(makeBackup(base))).ok).toBe(true)
+    const bad = { ...makeBackup(base), wallet: { owned: 'x' } }
+    expect(parseBackup(JSON.stringify(bad)).ok).toBe(false)
+  })
+})
