@@ -37,3 +37,23 @@
 .ld-chip{width:14px;height:14px;border-radius:50%;box-shadow:0 1px 3px #3b2a1e66}
 @media(max-width:420px){.ld-setup{grid-template-columns:1fr 1fr auto;gap:6px}.ld-setup .primary-btn,.ld-setup .secondary-btn{padding-inline:12px;white-space:nowrap}.ld-die{width:40px;height:40px;padding:6px}.ld-bar{gap:8px}.ld-players small{display:none}}
 @media(prefers-reduced-motion:reduce){.ld-die,.ld-token{animation:none!important;transition:none!important}}
+
+/* ---- visual polish ---- */
+.ld-board{background:linear-gradient(145deg,#f0dcb6,#d6b57f);box-shadow:inset 0 0 0 2px #fff6,0 16px 38px #3b2a1e40,0 0 0 5px #8a5a2b,0 0 0 7px #c79b62;border-radius:20px}
+.ld-grid{box-shadow:inset 0 0 0 2px #3b2a1e40,0 2px 8px #3b2a1e40;background:#fffaf1}
+.ld-c{border-color:#3b2a1e26}
+.ld-track{background:linear-gradient(180deg,#fffefb,#f8f0e0)}
+.ld-start::after{inset:22%;background:radial-gradient(circle,#fff,#fffaf1aa);box-shadow:0 0 0 2px #fff8}
+.ld-lane{background:linear-gradient(180deg,color-mix(in srgb,var(--seat) 88%,#fff),var(--seat))}
+.ld-yard{background:radial-gradient(circle at 50% 40%,color-mix(in srgb,var(--soft) 80%,#fff),var(--soft))}
+.ld-spot{background:radial-gradient(circle,#fffdf8,#f0e5cd);box-shadow:inset 0 2px 4px #3b2a1e33,0 0 0 1px #fff8}
+.ld-centre{box-shadow:inset 0 0 0 2px #fff8,inset 0 0 14px #0003}
+.ld-token{background:radial-gradient(circle at 36% 28%,#fffc 0 14%,color-mix(in srgb,var(--seat) 70%,#fff) 15% 35%,var(--seat) 60%,color-mix(in srgb,var(--seat) 70%,#000) 100%);box-shadow:0 3px 5px #3b2a1e88,0 0 0 2px #fffaf1cc,inset 0 -3px 4px #0004}
+.ld-token span{inset:30%;background:radial-gradient(circle at 40% 35%,#fffc,#fff3);box-shadow:inset 0 1px 2px #0003}
+.ld-token[data-movable]{animation:none;box-shadow:0 0 0 3px #fff,0 0 0 6px var(--seat),0 0 16px 6px color-mix(in srgb,var(--seat) 60%,transparent),0 4px 8px #3b2a1e88}
+.ld-die{background:linear-gradient(145deg,#fff,#ecdcbc);box-shadow:inset 0 0 0 1px #fff,0 4px 0 #bfa271,0 8px 14px #3b2a1e55}
+.ld-die i{background:radial-gradient(circle at 35% 30%,#6b4a33,#2b1d12)}
+.ld-players li{background:linear-gradient(180deg,#fffdf6,#f8eed8)}
+.ld-players li[data-active=true]{box-shadow:0 0 0 2px #A94A2455,0 4px 12px #A94A2433}
+.ld-status.win-message{font-weight:700;color:#8f3c1a}
+@media(min-width:900px) and (min-height:760px){.ld-status{font-size:1.05rem}.ld-die{width:56px;height:56px;padding:9px}}
