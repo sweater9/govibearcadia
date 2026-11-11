@@ -592,3 +592,108 @@ html.screen-locked .play-page.locked button,html.screen-locked .play-page.locked
 .install-card p{margin:2px 0 0;font-size:.9rem;color:#6b5646}.install-card p svg{vertical-align:-2px}
 .install-card .primary-btn{display:inline-flex;gap:6px;align-items:center;white-space:nowrap}
 @media(max-width:520px){.install-card{flex-wrap:wrap}.install-card .primary-btn{order:3;width:100%;justify-content:center}.install-card .icon-btn{margin-left:auto}}
+
+/* ---- arcade polish: neon night fields, glow, motion ---- */
+.snake-board,.pong-field,.brk-field,.sd-field,.pulse-field{background-color:#0f0b1c;background-image:radial-gradient(ellipse at 50% 0%,#3a2a6a 0%,#1a1230 55%,#0d0918 100%);border:1px solid #6f5aa855;box-shadow:inset 0 0 40px #000a,inset 0 0 0 1px #ffffff0d,0 12px 30px #1a123044}
+.snake-board{background-image:linear-gradient(#8f7bd01a 1px,transparent 1px),linear-gradient(90deg,#8f7bd01a 1px,transparent 1px),radial-gradient(ellipse at 50% 0%,#33265f 0%,#171028 60%,#0d0918 100%);background-size:5.5556% 5.5556%,5.5556% 5.5556%,100% 100%}
+.snake-seg{background:linear-gradient(135deg,#7ae0c2,#3f9bd9);box-shadow:0 0 10px #4fd1c566,inset 0 1px 0 #ffffff66}
+.snake-seg.head{background:linear-gradient(135deg,#ffd68a,#ff8a5c);box-shadow:0 0 14px #ffb06b99,inset 0 1px 0 #fff8}
+.snake-seg.head::before,.snake-seg.head::after{content:"";position:absolute;top:26%;width:18%;height:18%;border-radius:50%;background:#1a1230}
+.snake-seg.head::before{left:26%}.snake-seg.head::after{right:26%}
+.snake-food{background:radial-gradient(circle at 35% 30%,#fff 0 12%,#ff6f91 30%,#d6336c 100%);box-shadow:0 0 14px #ff6f91aa;animation:ap-glow 1.1s ease-in-out infinite}
+@keyframes ap-glow{50%{box-shadow:0 0 22px #ff6f91,0 0 4px #fff8}}
+.pong-field,.brk-field,.sd-field{color:#efeaff}
+.pong-net{border-top:2px dashed #b9a7ff44}
+.pong-field::before{content:"";position:absolute;left:50%;top:50%;width:26%;aspect-ratio:1;translate:-50% -50%;border-radius:50%;border:2px solid #b9a7ff26;pointer-events:none}
+.pong-paddle.you,.brk-paddle{background:linear-gradient(180deg,#a8ffe0,#2fbf9b);box-shadow:0 0 14px #4fe0b899,inset 0 1px 0 #fffa}
+.pong-paddle.ai{background:linear-gradient(180deg,#ffb3c0,#e0405f);box-shadow:0 0 14px #ff6f91aa,inset 0 1px 0 #fffa}
+.pong-ball,.brk-ball{background:radial-gradient(circle at 35% 30%,#fff,#e6e0ff 60%,#b9a7ff);box-shadow:0 0 12px 3px #d8ccff99,0 0 26px 8px #8f7bd055}
+.brk-brick{box-shadow:inset 0 1px 0 #ffffff88,inset 0 -2px 0 #0004,0 0 8px #0006;background-image:linear-gradient(180deg,#ffffff40,transparent 55%)}
+.brk-brick[data-r="0"]{background-color:#ef4b6c;box-shadow:inset 0 1px 0 #ffffff88,inset 0 -2px 0 #0004,0 0 10px #ef4b6c88}
+.brk-brick[data-r="1"]{background-color:#ff8f3f;box-shadow:inset 0 1px 0 #ffffff88,inset 0 -2px 0 #0004,0 0 10px #ff8f3f77}
+.brk-brick[data-r="2"]{background-color:#ffcc3d;box-shadow:inset 0 1px 0 #ffffff88,inset 0 -2px 0 #0004,0 0 10px #ffcc3d66}
+.brk-brick[data-r="3"]{background-color:#3fd08a;box-shadow:inset 0 1px 0 #ffffff88,inset 0 -2px 0 #0004,0 0 10px #3fd08a66}
+.brk-brick[data-r="4"]{background-color:#4fa8ff;box-shadow:inset 0 1px 0 #ffffff88,inset 0 -2px 0 #0004,0 0 10px #4fa8ff66}
+.sd-field{background-image:radial-gradient(circle,#fff 0 1px,transparent 1.5px),radial-gradient(circle,#cfc2ff 0 1px,transparent 1.5px),radial-gradient(ellipse at 50% 0%,#33265f 0%,#150f27 60%,#0b0714 100%);background-size:46px 46px,71px 71px,100% 100%;background-position:0 0,23px 31px,0 0;animation:sd-stars 14s linear infinite}
+@keyframes sd-stars{to{background-position:0 46px,23px 102px,0 0}}
+.sd-enemy{box-shadow:0 0 12px currentColor,inset 0 2px 0 #ffffff77,inset 0 -3px 0 #0004;color:#ef4b6c;background:linear-gradient(180deg,#ff7d95,#ef4b6c);animation:sd-bob 1.6s ease-in-out infinite}
+.sd-enemy[data-r="1"]{color:#ff8f3f;background:linear-gradient(180deg,#ffb36b,#ff8f3f)}
+.sd-enemy[data-r="2"]{color:#3fd08a;background:linear-gradient(180deg,#7be8b4,#3fd08a)}
+@keyframes sd-bob{50%{translate:0 3px}}
+.sd-ship{background:linear-gradient(180deg,#d8fff0,#4fe0b8 55%,#2f8fd9);box-shadow:none;filter:drop-shadow(0 0 8px #4fe0b8aa)}
+.sd-bullet{background:#ff6f91;box-shadow:0 0 10px #ff6f91,0 0 2px #fff}
+.sd-shot{background:linear-gradient(180deg,#fff,#7ae0ff);box-shadow:0 0 10px #7ae0ff,0 0 2px #fff}
+.pulse-field{background-image:linear-gradient(#8f7bd014 1px,transparent 1px),linear-gradient(90deg,#8f7bd014 1px,transparent 1px),radial-gradient(ellipse at 50% 0%,#3a2a6a 0%,#1a1230 55%,#0d0918 100%);background-size:32px 32px,32px 32px,100% 100%}
+.pulse-field:after{display:none}
+.target{border-color:#ff6f91;background:radial-gradient(circle,#ff6f9155,#ff6f9118);box-shadow:0 0 18px #ff6f91aa,inset 0 0 12px #ff6f9166}
+.target span{box-shadow:0 0 12px #fff}
+.pulse-start p{color:#d8ccffb0}.pulse-start h3{color:#fff}
+.snake-hint,.pong-hint,.brk-hint,.sd-hint{text-shadow:0 1px 3px #000a}
+@media(prefers-reduced-motion:reduce){.sd-field,.sd-enemy,.snake-food{animation:none}}
+
+/* ---- puzzle and board game polish: depth, gloss, glow ---- */
+.memory-grid button{background:linear-gradient(145deg,#fffaf0,#f0e2c8);box-shadow:0 3px 0 #d7c39d,0 6px 12px #3b2a1e22,inset 0 1px 0 #fff;border:1px solid #d9c6a0;color:#b4542c}
+.memory-grid button.flipped{background:linear-gradient(145deg,#7fb08c,#2a9db8);box-shadow:0 3px 0 #1d6f86,0 8px 16px #2a9db855;border-color:#1d6f86}
+.merge-board{background:linear-gradient(145deg,#d9c19a,#c9ab7c);box-shadow:inset 0 2px 8px #3b2a1e55,0 8px 22px #3b2a1e2e,0 0 0 3px #8a5a2b}
+.merge-tile.tile-empty{background:#3b2a1e24;box-shadow:inset 0 2px 4px #3b2a1e55}
+.merge-tile:not(.tile-empty){background-image:linear-gradient(180deg,#ffffff38,transparent 55%);box-shadow:0 3px 0 #0003,0 6px 12px #3b2a1e44,inset 0 1px 0 #ffffff66;text-shadow:0 1px 2px #0005}
+.mines-grid{padding:8px;border-radius:14px;background:linear-gradient(145deg,#d4bd96,#c4a678);box-shadow:inset 0 2px 6px #3b2a1e44,0 8px 22px #3b2a1e2a,0 0 0 3px #8a5a2b}
+.mine-cell.hidden{background:linear-gradient(180deg,#f7ead0,#dcc59b);box-shadow:inset 0 1px 0 #fff,0 2px 0 #b79e72;border-color:#bfa77a}
+.mine-cell.open{background:#fff8ea;box-shadow:inset 0 2px 4px #3b2a1e33}
+.ttt-board{padding:10px;border-radius:18px;background:linear-gradient(145deg,#d4bd96,#c4a678);box-shadow:inset 0 2px 6px #3b2a1e44,0 0 0 3px #8a5a2b,0 8px 22px #3b2a1e2a}
+.ttt-cell{background:linear-gradient(180deg,#fffdf6,#f4e9d2);box-shadow:0 3px 0 #b79e72,inset 0 1px 0 #fff;text-shadow:0 0 14px currentColor}
+.c4-board{background:linear-gradient(160deg,#3d63c9,#27449a);box-shadow:inset 0 2px 0 #ffffff44,inset 0 -4px 10px #0004,0 12px 28px #1b2f6a55,0 0 0 4px #1b2f6a}
+.c4-cell{background:radial-gradient(circle at 50% 40%,#1c2a55,#0f1838);box-shadow:inset 0 4px 8px #000b,0 1px 0 #ffffff33}
+.c4-cell[data-p="1"]{background:radial-gradient(circle at 36% 30%,#ff9a9a,#ef3b3b 55%,#b01c1c);box-shadow:inset 0 -4px 8px #0006,0 0 0 2px #7a1010}
+.c4-cell[data-p="2"]{background:radial-gradient(circle at 36% 30%,#fff0a8,#ffc83d 55%,#d99a0b);box-shadow:inset 0 -4px 8px #0005,0 0 0 2px #9a6a08}
+.c4-cell[data-win=true]{outline:3px solid #fff;outline-offset:-3px;box-shadow:0 0 18px #fff9}
+.csort-tube{background:linear-gradient(90deg,#ffffff55,#ffffff12 40%,#ffffff33);border-color:#3b2a1e33;box-shadow:inset 0 0 8px #3b2a1e18}
+.csort-ball{background-image:radial-gradient(circle at 35% 30%,#ffffffaa,transparent 45%);box-shadow:inset 0 -3px 5px #0003,0 2px 3px #3b2a1e44}
+.csort-tube[data-selected=true]{box-shadow:0 0 0 2px #b4542c,0 10px 16px #3b2a1e33}
+.gf-board{background:#0f0b1c;padding:4px;border-radius:12px;box-shadow:inset 0 0 30px #000b,0 12px 28px #1a123044,0 0 0 3px #6f5aa8;box-sizing:content-box}
+.gf-cell{background:#171028}
+.gf-cell.wall{background:linear-gradient(145deg,#6a5aa8,#3d3070);box-shadow:inset 0 1px 0 #ffffff55,inset 0 -2px 0 #0004}
+.gf-cell.spike{background:#ef4b6c22;color:#ff6f91;text-shadow:0 0 8px #ff6f91}
+.gf-cell.exit{background:#3fd08a22;color:#6cf0b0;text-shadow:0 0 10px #3fd08a}
+.gf-player{background:radial-gradient(circle at 35% 30%,#fff,#ffb06b 40%,#ff6a3d);box-shadow:0 0 14px #ff8a5ccc}
+.gf-player.dead{background:radial-gradient(circle at 35% 30%,#fff,#ef4b6c);box-shadow:0 0 14px #ef4b6c}
+.cv-cell{background:linear-gradient(180deg,#fffdf6,#f1e5cb);box-shadow:0 2px 0 #cdb58a,inset 0 1px 0 #fff;border-color:#d6c196}
+.cv-cell.in{background:linear-gradient(180deg,#e9f5ea,#cfe6d3);border-color:#6f9a7a;box-shadow:0 2px 0 #9cc0a3,inset 0 1px 0 #fff}
+
+/* ---- polish for the remaining older games ---- */
+.bs-board{background:#0b2a45;border:3px solid #28506f;border-radius:12px;box-shadow:inset 0 0 0 1px #ffffff22,0 10px 26px #0b2a4544;gap:0}
+.bs-cell{background:linear-gradient(160deg,#1f5f93,#14416a);box-shadow:inset 0 0 0 1px #ffffff14}
+.bs-cell:nth-child(odd){background:linear-gradient(160deg,#235f94,#174673)}
+button.bs-cell:hover:not(:disabled),button.bs-cell:focus-visible{background:#3b8bd6;box-shadow:inset 0 0 0 2px #cfe6ff}
+.bs-cell[data-ship]{background:linear-gradient(180deg,#a9b6c6,#6b7a8d);box-shadow:inset 0 1px 0 #ffffff88,inset 0 -2px 0 #0004}
+.bs-cell[data-reveal]{background:linear-gradient(180deg,#8d9bad,#586577);box-shadow:inset 0 0 0 2px #cfd8e3}
+.bs-cell[data-state=miss]::after{background:none;border:2px solid #e6f2ff;inset:30%;box-shadow:0 0 6px #cfe6ff88}
+.bs-cell[data-state=hit]{background:radial-gradient(circle at 50% 55%,#ffb347 0 18%,#e5382b 45%,#8f1d14);box-shadow:inset 0 0 8px #0006,0 0 8px #ff5a3d99}
+.bs-cell[data-state=sunk]{background:linear-gradient(180deg,#5a1a14,#2c0d0a);box-shadow:inset 0 0 0 1px #ff5a3d66}
+.bs-tabs button{box-shadow:0 2px 0 #cdb58a;background:linear-gradient(180deg,#fffdf6,#f4e9d2)}
+.ck-board{box-shadow:0 0 0 4px #8a5a2b,0 0 0 6px #c79b62,0 12px 26px #3b2a1e44;border-radius:8px}
+.ck-sq{background:linear-gradient(145deg,#f6e6c4,#e6cf9f)}
+.ck-sq[data-dark]{background:linear-gradient(145deg,#5a3a24,#3a2314);box-shadow:inset 0 0 12px #0006}
+.ck-sq[data-dark]:hover:not(:disabled),.ck-sq[data-dark]:focus-visible{background:linear-gradient(145deg,#6d472c,#47291a)}
+.ck-piece{background:radial-gradient(circle at 36% 30%,#ff9a8f,#e23b36 55%,#a01a1a);box-shadow:inset 0 -4px 6px #0005,0 0 0 3px #7a1010,0 4px 6px #000a}
+.ck-piece[data-p="2"]{background:radial-gradient(circle at 36% 30%,#fff,#ece4ff 55%,#b9aee0);box-shadow:inset 0 -4px 6px #3b2a1e44,0 0 0 3px #8f84b8,0 4px 6px #000a}
+.ck-piece[data-king]::after{text-shadow:0 0 8px #ffd66b}
+.mj-tile{background:linear-gradient(180deg,#fffdf4,#efe6cb);border:1px solid #cdbf98;box-shadow:0 3px 0 #2f7a5a,0 5px 6px #3b2a1e44,inset 0 1px 0 #fff;border-radius:6px}
+.mj-pool{background:radial-gradient(ellipse at 50% 20%,#2f7a56,#1b4f38);box-shadow:inset 0 0 24px #0008,inset 0 0 0 2px #7a4f27;border:0}
+.mj-pool .mj-tile{box-shadow:0 2px 0 #2f7a5a,0 3px 4px #0006}
+.wordle-tile{background:linear-gradient(180deg,#fffdf6,#f4e9d2);box-shadow:0 2px 0 #cdb58a;border-color:#d6c196}
+.wordle-tile[data-state=typed]{border-color:#8a6b4a}
+.wordle-tile[data-state=correct]{background:linear-gradient(180deg,#2dbf68,#16a34a);box-shadow:0 2px 0 #0f7a36;color:#fff}
+.wordle-tile[data-state=present]{background:linear-gradient(180deg,#e8b21f,#ca8a04);box-shadow:0 2px 0 #8f6203;color:#fff}
+.wordle-tile[data-state=absent]{background:linear-gradient(180deg,#5b4333,#412d20);box-shadow:0 2px 0 #2a1c13;color:#e9dcc7}
+.wordle-kbrow button{background:linear-gradient(180deg,#fffdf6,#ecdfc3);box-shadow:0 2px 0 #cdb58a}
+.sdk-grid{border-color:#8a5a2b;border-width:3px;box-shadow:0 10px 24px #3b2a1e33,inset 0 0 0 1px #fff}
+.sdk-pad button{background:linear-gradient(180deg,#fffdf6,#f1e5cb);box-shadow:0 2px 0 #cdb58a;border:1px solid #d6c196}
+.vl-cell,.tf-cell{background:linear-gradient(180deg,#fffdf6,#f1e5cb);box-shadow:0 2px 0 #cdb58a,inset 0 1px 0 #fff;border-color:#d6c196}
+.vl-cell.on{background:linear-gradient(180deg,#e9f5ea,#cfe6d3);border-color:#6f9a7a;box-shadow:0 2px 0 #9cc0a3,inset 0 1px 0 #fff}
+.vl-cell.head{box-shadow:0 0 0 2px #b4542c,0 0 14px #b4542c66}
+.vl-num{background:radial-gradient(circle at 35% 30%,#fff,#f6e6cc);box-shadow:0 2px 4px #3b2a1e44}
+.vl-line polyline{stroke:#3f9b6b;filter:drop-shadow(0 0 1px #3f9b6b88)}
+.tf-cell.given{background:linear-gradient(180deg,#e9f5ea,#cfe6d3);box-shadow:0 2px 0 #9cc0a3,inset 0 1px 0 #fff}
+.tf-cell.s0{text-shadow:0 0 10px #ffc83d88}.tf-cell.s1{text-shadow:0 0 10px #ff8a5c66}
+.mj-pool{color:#e8f5ec}
