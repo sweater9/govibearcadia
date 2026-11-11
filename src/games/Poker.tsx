@@ -10,10 +10,10 @@ const BOT_MS = 900
 const SUIT_NAMES = ['spades', 'hearts', 'diamonds', 'clubs']
 const STREETS = { preflop: 'Pre-flop', flop: 'Flop', turn: 'Turn', river: 'River', showdown: 'Showdown', over: 'Finished' } as const
 
-function Face({ id, hidden }: { id?: number; hidden?: boolean }) {
+function Face({ id, hidden, i = 0 }: { id?: number; hidden?: boolean; i?: number }) {
   if (hidden || id === undefined) return <span className="pk-card pk-back" aria-label="Face-down card" />
   const s = suitOf(id)
-  return <span className="pk-card" data-red={s === 1 || s === 2 ? 'true' : undefined} aria-label={`${rankLabel(id)} of ${SUIT_NAMES[s]}`}><b>{rankLabel(id)}</b><i>{SUITS[s]}</i></span>
+  return <span className="pk-card" style={{ '--i': i } as React.CSSProperties} data-s={SUITS[s]} data-r={rankLabel(id)} data-red={s === 1 || s === 2 ? 'true' : undefined} aria-label={`${rankLabel(id)} of ${SUIT_NAMES[s]}`}><b>{rankLabel(id)}</b><i>{SUITS[s]}</i></span>
 }
 
 export function Poker({ onFinish, seed }: GameProps) {
@@ -94,18 +94,19 @@ export function Poker({ onFinish, seed }: GameProps) {
       <ul className="pk-seats" aria-label="Players at the table">
         {state ? state.players.slice(1).map((p, i) => { const seat = i + 1; return <li key={seat} data-turn={betting && state.turn === seat ? 'true' : undefined} data-out={p.out ? 'true' : undefined} data-folded={p.folded && !p.out ? 'true' : undefined}>
           <span className="pk-name">{state.button === seat ? <i className="pk-dealer" title="Dealer">D</i> : null}Computer {seat}</span>
-          <span className="pk-chips">{p.out ? 'Out' : p.chips}</span>
+          <span className="pk-chips">{p.out ? 'Out' : <><i className="pk-coin" />{p.chips}</>}</span>
           <small>{p.out ? '' : p.folded ? 'Folded' : p.allIn ? 'All-in' : p.bet ? `Bet ${p.bet}` : ''}</small>
           {p.shown ? <span className="pk-mini">{p.hole.map((id) => <Face key={id} id={id} />)}</span> : null}
         </li> }) : <li className="pk-hint">Opponents appear here.</li>}
       </ul>
       <div className="pk-board" aria-label="Board">
         <div className="pk-cards">{Array.from({ length: 5 }, (_, i) => state?.board[i] !== undefined ? <Face key={i} id={state.board[i]} /> : <span key={i} className="pk-slot" />)}</div>
+        <div className="pk-potchips" aria-hidden="true">{Array.from({ length: Math.min(6, Math.ceil(pot / (bb * 3))) }, (_, k) => <i key={k} style={{ '--k': k } as React.CSSProperties} data-c={k % 3} />)}</div>
         <p className="pk-pot">Pot <b>{pot}</b> · {state ? STREETS[state.street] : 'Texas Hold’em'} · Blinds {sb}/{bb}</p>
       </div>
       <p className={`pk-status${over ? (state!.winner === 0 ? ' win-message' : ' game-over') : won ? ' win-message' : ''}`} role="status" aria-live="polite">{status}</p>
       <div className="pk-me" data-turn={myTurn ? 'true' : undefined}>
-        <div className="pk-cards" aria-label="Your cards">{me?.hole.length ? me.hole.map((id) => <Face key={id} id={id} />) : <><span className="pk-slot" /><span className="pk-slot" /></>}</div>
+        <div className="pk-cards" aria-label="Your cards">{me?.hole.length ? me.hole.map((id, k) => <Face key={id} id={id} i={k} />) : <><span className="pk-slot" /><span className="pk-slot" /></>}</div>
         <div className="pk-mine"><b>{state && state.button === 0 ? <i className="pk-dealer" title="Dealer">D</i> : null}You</b><span>{state ? (me!.out ? 'Out' : `${me!.chips} chips`) : `${START_CHIPS} chips`}</span><small>{me?.folded && !me.out ? 'Folded' : me?.allIn ? 'All-in' : me?.bet ? `Bet ${me.bet}` : ''}</small></div>
       </div>
     </div>
