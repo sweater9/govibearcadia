@@ -108,7 +108,7 @@ export function Ludo({ onFinish, seed }: GameProps) {
     </div> : null}
     <div className="ld-bar">
       {state && state.dice !== null ? <Die n={state.dice} spin={state.rolls} /> : <span className="ld-die ld-die-empty" aria-hidden="true" />}
-      <p className={`ld-status${state?.phase === 'done' ? ' win-message' : ''}`} role="status" aria-live="polite">{statusText}</p>
+      <p className={`ld-status${state?.phase === 'done' ? (state.winner! < humans ? ' win-message' : ' game-over') : ''}`} role="status" aria-live="polite">{statusText}</p>
       {state && state.phase === 'roll' && !computerTurn ? <button className="primary-btn" onClick={() => act({ type: 'roll' })}>Roll dice</button> : null}
     </div>
     <div className="ld-board" role="group" aria-label="Ludo board" style={{ '--turn': turnSeat.hex } as React.CSSProperties}>
