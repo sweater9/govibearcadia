@@ -725,3 +725,33 @@ button.bs-cell:hover:not(:disabled),button.bs-cell:focus-visible{background:#3b8
 .pp-buy{margin-top:6px;font-size:12px;padding:6px 10px}
 .coin-earned{text-align:center;font-weight:700;color:var(--primary-hover);margin:12px 0 0}
 .pp-shop{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+
+/* Home: trust strip, shelves, comparison */
+.promise{max-width:1200px;margin:0 auto 28px;padding:0 24px;list-style:none;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.promise li{display:flex;gap:12px;align-items:center;border:1px solid var(--border);background:var(--surface);border-radius:16px;padding:14px 16px;color:var(--primary)}
+.promise span{display:grid;gap:2px;font-size:13px;color:var(--text-muted)}
+.promise b{color:var(--text);font-size:15px}
+.shelves{max-width:1200px;margin:0 auto 24px;padding:0 24px;display:grid;gap:28px}
+.row-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.row-head h2{font-family:var(--font-display);font-size:24px;letter-spacing:-.02em;margin:0}
+.row-head p{margin:0;color:var(--text-muted);font-size:14px}
+.row-track{list-style:none;margin:0;padding:4px 2px 14px;display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:thin}
+.row-track li{flex:0 0 168px;scroll-snap-align:start}
+.row-tile{display:grid;gap:4px;border:1px solid var(--border);background:var(--surface);border-radius:16px;padding:8px 8px 12px;transition:box-shadow .2s,border-color .2s}
+.row-tile:hover,.row-tile:focus-visible{border-color:var(--primary);box-shadow:0 10px 26px #3b2a1e22}
+.row-art{display:block;aspect-ratio:4/3;border-radius:11px;overflow:hidden}
+.row-art>*{width:100%;height:100%}
+.row-tile strong{font-size:15px;padding:6px 4px 0}
+.row-tile small{color:var(--text-muted);font-size:12px;padding:0 4px}
+.versus{max-width:1000px;margin:0 auto;padding:30px 24px 90px;text-align:center}
+.versus h2{font-family:var(--font-display);font-size:clamp(28px,4vw,40px);letter-spacing:-.03em;margin:6px 0 24px}
+.versus-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:left}
+.versus-grid>div{border:1px solid var(--border);border-radius:20px;padding:22px 24px;background:var(--surface)}
+.versus-grid h3{margin:0 0 10px;font-size:18px}
+.versus-grid ul{margin:0;padding:0;list-style:none;display:grid;gap:10px;font-size:15px}
+.versus-us{border-color:var(--primary)!important;box-shadow:0 12px 34px #a94a2422}
+.versus-us li::before{content:"✓ ";color:var(--success);font-weight:800}
+.versus-them{color:var(--text-muted)}
+.versus-them li::before{content:"– ";font-weight:800}
+@media(max-width:850px){.promise{grid-template-columns:1fr 1fr}.versus-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.promise{grid-template-columns:1fr 1fr;padding:0 20px;gap:8px}.promise li{padding:10px 12px;gap:8px}.promise span{font-size:11px}.promise b{font-size:13px}.shelves{padding:0 20px}.row-track li{flex-basis:140px}}

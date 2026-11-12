@@ -1,7 +1,9 @@
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Ban, CloudOff, Gift, ShieldCheck } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { GameCard } from '../components/GameCard'
+import { GameRow } from '../components/GameRow'
+import { SHELVES, shelfGames } from '../lib/rows'
 import { categories, games } from '../data/games'
 import { db, toggleFavorite } from '../lib/db'
 import { dailyChallenge, today } from '../lib/passport'
@@ -54,8 +56,8 @@ export function Home() {
       <section className="hero">
         <div className="hero-copy">
           <p className="trust">No tracking, no account, works offline once loaded, progress stays on your device.</p>
-          <h1>Step into your next obsession.</h1>
-          <p className="lead">{games.length} free games for quick escapes and long streaks. No ads, no sign-up. Play alone, or with friends on one device.</p>
+          <h1>The arcade with no ads.</h1>
+          <p className="lead">{games.length} free games for quick escapes and long streaks. No ads, no sign-up. Play alone, or with friends online or on one device.</p>
           <div className="hero-actions">
             <Link className="primary-btn" to={`/play/${recent?.id ?? games[0].id}`}>
               {recent ? 'Continue playing' : 'Start playing'} <ArrowRight size={20} strokeWidth={1.5} />
@@ -73,6 +75,12 @@ export function Home() {
           ))}
         </div>
       </section>
+      <ul className="promise" aria-label="What you get">
+        <li><Ban size={20} strokeWidth={1.5} /><span><b>No ads</b>Never, not between games</span></li>
+        <li><Gift size={20} strokeWidth={1.5} /><span><b>No sign-up</b>Press play, that is it</span></li>
+        <li><CloudOff size={20} strokeWidth={1.5} /><span><b>Works offline</b>Once loaded, no connection needed</span></li>
+        <li><ShieldCheck size={20} strokeWidth={1.5} /><span><b>Yours to keep</b>Progress stays on your device</span></li>
+      </ul>
       <div className="install-slot"><InstallPrompt /></div>
       <div className="today">
         <section className="home-daily daily-card" aria-label="Daily challenge">
@@ -115,6 +123,14 @@ export function Home() {
           </Link>
         </section>
       ) : null}
+      <div className="shelves">
+        {progress.length ? (
+          <GameRow title="Recently played" blurb="Pick up where you left off" games={progress.slice(0, 8).map((p) => games.find((g) => g.id === p.gameId)).filter((g): g is (typeof games)[number] => !!g)} />
+        ) : null}
+        {SHELVES.map((sh) => (
+          <GameRow key={sh.id} title={sh.title} blurb={sh.blurb} games={shelfGames(sh, games)} />
+        ))}
+      </div>
       {history?.length && picks.length ? (
         <section className="recs" aria-label="Recommended for you">
           <p className="eyebrow">Recommended for you</p>
@@ -176,6 +192,33 @@ export function Home() {
         <p className="phase-note">
           {games.length} games · free, no account, and they work offline once loaded.
         </p>
+      </section>
+      <section className="versus" aria-label="How GoVibeArcadia differs">
+        <p className="eyebrow">Why it feels different</p>
+        <h2>Built to be played, not to sell ads</h2>
+        <div className="versus-grid">
+          <div className="versus-us">
+            <h3>GoVibeArcadia</h3>
+            <ul>
+              <li>No ads, ever, so nothing interrupts a round</li>
+              <li>No account: your scores, coins and streaks stay on your device</li>
+              <li>Every game is made and tested by us, nothing reskinned</li>
+              <li>Installs like an app and plays offline</li>
+              <li>No trackers and no third-party requests</li>
+            </ul>
+          </div>
+          <div className="versus-them">
+            <h3>Many free game sites</h3>
+            <ul>
+              <li>Ads between rounds, and sometimes during play</li>
+              <li>Progress sits behind a sign-in</li>
+              <li>Thousands of games of uneven quality</li>
+              <li>Need a connection for every game</li>
+              <li>Third-party ad and analytics networks</li>
+            </ul>
+          </div>
+        </div>
+        <p className="muted"><Link to="/about">What we store and what we send</Link></p>
       </section>
     </main>
   )
