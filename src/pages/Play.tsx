@@ -76,7 +76,7 @@ export function Play() {
   const { meta, Component: Game } = entry
 
   return (
-    <main className={`play-page${locked ? ' locked' : ''}`}>
+    <main className={`play-page${locked ? ' locked' : ''}`} data-category={meta.category}>
       <div className="play-head">
         <Link to="/" className="back">
           <ArrowLeft />

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useId, type ReactNode } from 'react'
 
 /**
  * 160x90 stand-ins for screenshots, one per game. Drawn with currentColor (the category colour), amber for one highlight
@@ -43,10 +43,42 @@ const ART: Record<string, ReactNode> = {
   'taiwanese-mahjong': <><rect x="52" y="22" width="24" height="34" rx="4" {...stroke} /><rect x="80" y="22" width="24" height="34" rx="4" fill={H} /><rect x="108" y="22" width="24" height="34" rx="4" {...stroke} /><circle cx="64" cy="39" r="5" fill="currentColor" /><path d="M88 32h8M88 39h8M88 46h8" stroke="currentColor" strokeWidth="2.5" /><path d="M120 32l-6 14h12z" fill="currentColor" /><rect x="66" y="62" width="24" height="16" rx="4" {...stroke} /><rect x="94" y="62" width="24" height="16" rx="4" {...stroke} /></>,
 }
 
+/** A few stable twinkles per game, from its id, so each cover has its own sky without any randomness at render time. */
+function sparkles(id: string) {
+  let h = 7
+  for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0
+  const next = () => ((h = (h * 1664525 + 1013904223) >>> 0) / 4294967296)
+  return Array.from({ length: 7 }, () => ({ x: 6 + next() * 148, y: 5 + next() * 80, r: 0.6 + next() * 1.3, o: 0.25 + next() * 0.5 }))
+}
+
+/** The cover: a lit scene (gradient, glow, floor light, twinkles) behind the game's own drawing, which gets depth from a soft shadow. */
 export function Thumbnail({ id }: { id: string }) {
+  const uid = useId().replace(/:/g, '')
   return (
     <svg className="thumb-art" viewBox="0 0 160 90" aria-hidden="true" focusable="false">
-      {ART[id] ?? <circle cx="80" cy="45" r="20" {...stroke} />}
+      <defs>
+        <radialGradient id={`${uid}g`} cx="50%" cy="38%" r="70%">
+          <stop offset="0" stopColor="currentColor" stopOpacity=".34" />
+          <stop offset=".6" stopColor="currentColor" stopOpacity=".08" />
+          <stop offset="1" stopColor="#000" stopOpacity=".25" />
+        </radialGradient>
+        <linearGradient id={`${uid}f`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="currentColor" stopOpacity="0" />
+          <stop offset="1" stopColor="currentColor" stopOpacity=".28" />
+        </linearGradient>
+        <linearGradient id={`${uid}s`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity=".16" />
+          <stop offset=".45" stopColor="#fff" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <rect width="160" height="90" fill={`url(#${uid}g)`} />
+      <rect y="58" width="160" height="32" fill={`url(#${uid}f)`} />
+      {sparkles(id).map((p, i) => <circle key={i} cx={p.x} cy={p.y} r={p.r} fill="#fff" opacity={p.o} />)}
+      <ellipse cx="80" cy="80" rx="44" ry="5" fill="#000" opacity=".28" />
+      <g className="thumb-fg" transform="translate(80 45) scale(1.08) translate(-80 -45)">
+        {ART[id] ?? <circle cx="80" cy="45" r="20" {...stroke} />}
+      </g>
+      <rect width="160" height="90" fill={`url(#${uid}s)`} />
     </svg>
   )
 }
