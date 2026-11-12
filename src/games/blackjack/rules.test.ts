@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { blackjackTable } from '../../lib/tables'
 import { START_CHIPS, applyAction, basicStrategy, canDouble, canSplit, handValue, isBlackjack, newGame, validBet, type State } from './rules'
 
 const c = (rank: number, suit = 0) => suit * 13 + rank - 1
@@ -116,5 +117,18 @@ describe('whole sessions', () => {
     }
     expect(s.rounds).toBeGreaterThan(50)
     expect(s.shoeNo).toBeGreaterThanOrEqual(1)
+  })
+
+  it('table limits decide which bets are valid, and when you are out', () => {
+    const rookie = blackjackTable('rookie')
+    expect(validBet(100, 1000, rookie)).toBe(true)
+    expect(validBet(150, 1000, rookie)).toBe(false)
+    const high = blackjackTable('high')
+    expect(validBet(50, 9000, high)).toBe(false)
+    expect(validBet(2500, 9000, high)).toBe(true)
+    expect(newGame('t', 6000, 'high').table).toBe('high')
+    let s = newGame('t', 100, 'high')
+    s = applyAction(s, { type: 'cashout' })
+    expect(s.phase).toBe('over')
   })
 })

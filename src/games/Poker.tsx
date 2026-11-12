@@ -3,7 +3,8 @@ import { createRandom } from '../lib/rng'
 import type { GameProps } from '../types'
 import { chooseAction } from './poker/bot'
 import { getPokerChips, payPokerBuyIn, payPokerPrize } from '../lib/db'
-import { POKER_BUY_IN, pokerPrize } from '../lib/wallet'
+import { pokerPrize } from '../lib/wallet'
+import { POKER_TABLES, pokerTable, unlocked } from '../lib/tables'
 import { SUITS, START_CHIPS, applyAction, blindsFor, legalActions, newGame, potOf, rankLabel, suitOf, type Action, type State } from './poker/rules'
 import { loadSession, saveSession, type Session } from './poker/save'
 import './poker/poker.css'
@@ -23,16 +24,20 @@ export function Poker({ onFinish, seed }: GameProps) {
   const [opponents, setOpponents] = useState(2)
   const [raise, setRaise] = useState(0)
   const [bank, setBank] = useState<number | null>(null)
+  const [pick, setPick] = useState<string | null>(null)
   const latest = useRef<{ act: (a: Action) => void }>({ act: () => {} })
   const state: State | undefined = session?.state
 
   const refreshBank = () => void getPokerChips().then(setBank).catch(() => {})
   const finished = session?.state.street === 'over'
   useEffect(refreshBank, [finished])
+  const chips = bank ?? 1000
+  const chosen = pokerTable(pick && unlocked(pokerTable(pick), chips) ? pick : 'rookie')
   async function start() {
-    await payPokerBuyIn().catch(() => {})
+    const table = unlocked(chosen, chips) ? chosen : POKER_TABLES[0]
+    await payPokerBuyIn(table.buyIn).catch(() => {})
     refreshBank()
-    const next: Session = { state: newGame(opponents + 1, seed ?? String(createRandom()())), actions: [], startedAt: Date.now() }
+    const next: Session = { state: newGame(opponents + 1, seed ?? String(createRandom()())), actions: [], startedAt: Date.now(), table: table.id }
     saveSession(next)
     setSession(next)
   }
@@ -45,7 +50,7 @@ export function Poker({ onFinish, seed }: GameProps) {
     setSession(updated)
     if (next.street === 'over') {
       const won = next.winner === 0
-      if (won) void payPokerPrize(pokerPrize(next.players.length)).then(refreshBank).catch(() => {})
+      if (won) void payPokerPrize(pokerPrize(next.players.length, pokerTable(session.table).buyIn)).then(refreshBank).catch(() => {})
       onFinish({
         score: won ? 1000 : Math.min(500, next.hand * 20),
         won,
@@ -87,7 +92,7 @@ export function Poker({ onFinish, seed }: GameProps) {
 
   const me = state?.players[0]
   const over = state?.street === 'over'
-  const status = !state ? `Last player with chips wins. Buy-in ${POKER_BUY_IN} chips from your poker chips${bank === null ? '' : ` (you have ${bank})`}; the winner takes the whole pool and your chips carry over. Everyone starts with ${START_CHIPS} tournament chips; blinds rise every 8 hands.`
+  const status = !state ? `Last player with chips wins. The ${chosen.name} table costs ${chosen.buyIn} of your poker chips${bank === null ? '' : ` (you have ${bank})`}; the winner takes the whole pool and your chips carry over. Everyone starts with ${START_CHIPS} tournament chips; blinds rise every 8 hands.`
     : over ? (state.winner === 0 ? `You win the tournament after ${state.hand} hands!` : me!.out ? `You are out after ${state.hand} hands.` : `${name(state.winner ?? 1)} wins the tournament.`) + (bank === null ? '' : ` You now have ${bank} poker chips.`)
       : state.street === 'showdown' ? state.wins.map((w) => `${name(w.seat)} win${w.seat === 0 ? '' : 's'} ${w.amount} (${w.label})`).join('; ') + '.'
         : myTurn ? (legal!.toCall > 0 ? `Your turn: ${legal!.toCall} to call.` : 'Your turn: check or bet.')
@@ -96,6 +101,7 @@ export function Poker({ onFinish, seed }: GameProps) {
 
   return <div className="pk">
     {!state || over ? <div className="pk-setup">
+      <label>Table <select value={chosen.id} onChange={(e) => setPick(e.target.value)}>{POKER_TABLES.map((t) => <option key={t.id} value={t.id} disabled={!unlocked(t, chips)}>{t.name} · {unlocked(t, chips) ? `buy-in ${t.buyIn}` : `needs ${t.needs} chips`}</option>)}</select></label>
       <label>Opponents <select value={opponents} onChange={(e) => setOpponents(Number(e.target.value))}>{[1, 2, 3, 4].map((n) => <option key={n} value={n}>{n} computer{n > 1 ? 's' : ''}</option>)}</select></label>
       <button className="primary-btn" onClick={() => void start()}>{over ? 'Play again' : 'Start tournament'}</button>
     </div> : null}

@@ -1,3 +1,4 @@
+import { BLACKJACK_TABLES } from '../../lib/tables'
 import { applyAction, newGame, type Action, type State } from './rules'
 
 const KEY = 'govibearcadia.blackjack.v1'
@@ -18,7 +19,9 @@ export function loadSession(seed?: string): Session | null {
       !Array.isArray(data.actions) || data.actions.length > 6000) return null
     const startChips = data.startChips === undefined ? 1000 : data.startChips
     if (!Number.isSafeInteger(startChips) || startChips < 100 || startChips > 1_000_000) return null
-    let state = newGame(data.seed, startChips)
+    const table = data.table === undefined ? 'regular' : data.table
+    if (!BLACKJACK_TABLES.some((t) => t.id === table)) return null
+    let state = newGame(data.seed, startChips, table)
     for (const action of data.actions) {
       if (!isAction(action)) return null
       const next = applyAction(state, action)
@@ -33,7 +36,7 @@ export function loadSession(seed?: string): Session | null {
 
 export function saveSession({ state, actions, startedAt }: Session) {
   try {
-    localStorage.setItem(KEY, JSON.stringify({ seed: state.seed, startChips: state.startChips, actions, startedAt }))
+    localStorage.setItem(KEY, JSON.stringify({ seed: state.seed, table: state.table, startChips: state.startChips, actions, startedAt }))
   } catch {
     /* the session stays playable when storage is unavailable */
   }

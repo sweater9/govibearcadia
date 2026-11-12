@@ -39,4 +39,4 @@ export const stakeFor = (bankroll: number | undefined): number =>
 
 /** Poker keeps its own chips, separate from Blackjack's: a tournament costs a buy-in, and the winner takes the whole pool. */
 export const POKER_BUY_IN = 100
-export const pokerPrize = (players: number): number => POKER_BUY_IN * players
+export const pokerPrize = (players: number, buyIn: number = POKER_BUY_IN): number => buyIn * players

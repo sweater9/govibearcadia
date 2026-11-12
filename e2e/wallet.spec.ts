@@ -65,3 +65,27 @@ test('Poker keeps its own chips: the buy-in comes off them and they stay after l
   expect((await readTable(page, 'wallet'))[0]).toMatchObject({ pokerChips: 900 })
   expect((await readTable(page, 'wallet'))[0]).not.toHaveProperty('bankroll')
 })
+
+test('tables: Blackjack and Poker offer harder tables that stay locked until you hold enough chips', async ({ page }) => {
+  await page.goto('/play/blackjack?seed=e2e-tables')
+  const bj = page.getByRole('radiogroup', { name: 'Table' })
+  await expect(bj.getByRole('radio', { name: /Rookie/ })).toBeEnabled()
+  await expect(bj.getByRole('radio', { name: /Regular/ })).toBeChecked()
+  await expect(bj.getByRole('radio', { name: /High roller/ })).toBeDisabled()
+  await expect(bj.getByRole('radio', { name: /High roller/ })).toContainText('Needs 5000 chips')
+  await bj.getByRole('radio', { name: /Rookie/ }).click()
+  await page.getByRole('button', { name: 'Start session' }).click()
+  await expect(page.getByRole('button', { name: 'Add 25' })).toBeVisible() // rookie chips
+  await expect(page.getByRole('button', { name: 'Add 500' })).toHaveCount(0)
+
+  await page.goto('/play/poker?seed=e2e-tables-pk')
+  const pk = page.getByRole('combobox', { name: 'Table' })
+  await expect(pk).toHaveValue('rookie')
+  await expect(pk.locator('option[value=regular]')).toBeEnabled() // 1000 chips >= 750
+  await expect(pk.locator('option[value=high]')).toHaveAttribute('disabled', '')
+  await expect(pk.locator('option[value=high]')).toContainText('needs 3000 chips')
+  await pk.selectOption('regular')
+  await page.getByRole('button', { name: 'Start tournament' }).click()
+  await expect(page.locator('.pk-me .pk-card')).toHaveCount(2)
+  expect((await readTable(page, 'wallet'))[0]).toMatchObject({ pokerChips: 500 }) // 1000 - 500 buy-in
+})

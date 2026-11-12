@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { createRandom } from '../lib/rng'
 import { blackjackStake, saveBankroll } from '../lib/db'
+import { BLACKJACK_TABLES, DEFAULT_BLACKJACK_TABLE, blackjackTable, unlocked } from '../lib/tables'
 import type { GameProps } from '../types'
-import { MAX_BET, MIN_BET, START_CHIPS, SUITS, applyAction, basicStrategy, canDouble, canSplit, handValue, isBlackjack, maxBetFor, rankLabel, rankOf, suitOf, validBet, type Action, type Hand, type State, newGame } from './blackjack/rules'
+import { START_CHIPS, SUITS, applyAction, basicStrategy, canDouble, canSplit, handValue, isBlackjack, maxBetFor, rankLabel, rankOf, suitOf, validBet, type Action, type Hand, type State, newGame } from './blackjack/rules'
 import { loadSession, saveSession, type Session } from './blackjack/save'
 import './blackjack/blackjack.css'
 
 const SUIT_NAMES = ['spades', 'hearts', 'diamonds', 'clubs']
-const CHIPS = [10, 50, 100, 500]
 const HINT: Record<string, string> = { hit: 'Hit', stand: 'Stand', double: 'Double', split: 'Split' }
 
 function Face({ id, hidden, i = 0, flip }: { id?: number; hidden?: boolean; i?: number; flip?: boolean }) {
@@ -22,17 +22,26 @@ const RESULT = { win: 'Win', lose: 'Lose', push: 'Push', blackjack: 'Blackjack!'
 export function Blackjack({ onFinish, seed }: GameProps) {
   const [session, setSession] = useState<Session | null>(() => loadSession(seed))
   const [bet, setBet] = useState(50)
+  const [bank, setBank] = useState<number | null>(null)
+  const [pick, setPick] = useState<string | null>(null)
   const [hint, setHint] = useState('')
   const latest = useRef<{ act: (a: Action) => void }>({ act: () => {} })
   const state: State | undefined = session?.state
 
+  const sessionOver = session?.state.phase === 'over'
+  useEffect(() => {
+    void blackjackStake().then(setBank).catch(() => setBank(START_CHIPS))
+  }, [sessionOver])
+  const stakeNow = bank ?? START_CHIPS
+  const chosen = blackjackTable(pick && unlocked(blackjackTable(pick), stakeNow) ? pick : unlocked(blackjackTable(DEFAULT_BLACKJACK_TABLE), stakeNow) ? DEFAULT_BLACKJACK_TABLE : 'rookie')
   async function start() {
     const stake = await blackjackStake().catch(() => START_CHIPS)
+    const table = unlocked(chosen, stake) ? chosen : blackjackTable('rookie')
     const next: Session = { state: newGame(seed ?? String(createRandom()())), actions: [], startedAt: Date.now() }
-    next.state = newGame(next.state.seed, stake)
+    next.state = newGame(next.state.seed, stake, table.id)
     saveSession(next)
     setSession(next)
-    setBet(50)
+    setBet(table.chips[1])
     setHint('')
   }
   function act(action: Action) {
@@ -61,9 +70,10 @@ export function Blackjack({ onFinish, seed }: GameProps) {
   const betting = phase === 'bet' || phase === 'settled'
   const playing = phase === 'play'
   const chips = state?.chips ?? START_CHIPS
-  const wager = Math.min(bet, maxBetFor(chips))
+  const tb = blackjackTable(state?.table ?? chosen.id)
+  const wager = Math.min(bet, maxBetFor(chips, tb.max))
   const hands: Hand[] = state?.hands ?? []
-  const addChip = (n: number) => setBet((b) => Math.min(maxBetFor(chips), b + n))
+  const addChip = (n: number) => setBet((b) => Math.min(maxBetFor(chips, tb.max), b + n))
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -115,19 +125,27 @@ export function Blackjack({ onFinish, seed }: GameProps) {
     </div> : null}
     {betting || !state ? <div className="bj-bet">
       <div className="bj-chips" role="group" aria-label="Add chips to your bet">
-        {CHIPS.map((n) => <button key={n} type="button" className="bj-chip" data-v={n} onClick={() => addChip(n)} disabled={!state || wager + n > maxBetFor(chips)} aria-label={`Add ${n}`}>{n}</button>)}
+        {tb.chips.map((n) => <button key={n} type="button" className="bj-chip" data-v={n} onClick={() => addChip(n)} disabled={!state || wager + n > maxBetFor(chips, tb.max)} aria-label={`Add ${n}`}>{n}</button>)}
       </div>
       <div className="bj-bet-row">
         <span>Bet <b>{state ? wager : 0}</b></span>
-        <button className="secondary-btn" onClick={() => setBet(MIN_BET)} disabled={!state}>Clear</button>
-        {state ? <button className="primary-btn" onClick={() => act({ type: 'bet', amount: wager })} disabled={!validBet(wager, chips)}>Deal</button> : <button className="primary-btn" onClick={() => void start()}>Start session</button>}
+        <button className="secondary-btn" onClick={() => setBet(tb.min)} disabled={!state}>Clear</button>
+        {state ? <button className="primary-btn" onClick={() => act({ type: 'bet', amount: wager })} disabled={!validBet(wager, chips, tb)}>Deal</button> : <button className="primary-btn" onClick={() => void start()}>Start session</button>}
         {state ? <button className="secondary-btn" onClick={() => act({ type: 'cashout' })}>Cash out</button> : null}
       </div>
+    </div> : null}
+    {!state || phase === 'over' ? <div className="bj-tables" role="radiogroup" aria-label="Table">
+      {BLACKJACK_TABLES.map((t) => {
+        const open = unlocked(t, stakeNow)
+        return <button key={t.id} type="button" role="radio" aria-checked={chosen.id === t.id} disabled={!open} className="bj-table-pick" onClick={() => setPick(t.id)}>
+          <b>{t.name}</b><small>{open ? `Bets ${t.min} to ${t.max}` : `Needs ${t.needs} chips`}</small>
+        </button>
+      })}
     </div> : null}
     {phase === 'over' ? <div className="bj-bet"><div className="bj-bet-row"><button className="primary-btn" onClick={() => void start()}>New session</button></div></div> : null}
     {hint ? <p className="bj-hint" aria-live="polite">{hint}</p> : null}
     <details className="bj-how"><summary>How to play</summary>
-      <p>Get closer to 21 than the dealer without going over. Number cards count their value, J Q K are 10, an ace is 1 or 11. The dealer stands on every 17. Blackjack (an ace and a ten-card) pays 3 to 2; other wins pay 1 to 1; a tie is a push. You can double down on your first two cards (one card, double bet) and split a pair once (split aces get one card each). Bets are {MIN_BET} to {MAX_BET} play chips in steps of 5. Chips are not money and have no value: this is only for fun. Keys: H hit, S stand, D double, P split.</p>
+      <p>Get closer to 21 than the dealer without going over. Number cards count their value, J Q K are 10, an ace is 1 or 11. The dealer stands on every 17. Blackjack (an ace and a ten-card) pays 3 to 2; other wins pay 1 to 1; a tie is a push. You can double down on your first two cards (one card, double bet) and split a pair once (split aces get one card each). Bets depend on the table: Rookie 10 to 100, Regular 10 to 500 (needs 500 chips), High roller 100 to 2,500 (needs 5,000 chips), in steps of 5. Chips are not money and have no value: this is only for fun. Keys: H hit, S stand, D double, P split.</p>
     </details>
   </div>
 }

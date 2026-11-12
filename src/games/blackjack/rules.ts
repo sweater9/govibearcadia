@@ -1,4 +1,5 @@
 import { createRandom, shuffle } from '../../lib/rng'
+import { DEFAULT_BLACKJACK_TABLE, blackjackTable } from '../../lib/tables'
 
 /** Blackjack with play-money chips: six decks, dealer stands on all 17s, blackjack pays 3:2, double on any two cards, one split. */
 export const DECKS = 6
@@ -27,6 +28,8 @@ export const isBust = (cards: number[]) => handValue(cards).total > 21
 export type Hand = { cards: number[]; bet: number; doubled: boolean; done: boolean; fromSplit: boolean; result?: 'win' | 'lose' | 'push' | 'blackjack'; payout?: number }
 export type State = {
   seed: string
+  /** Which table (stakes) this session is at; see lib/tables. */
+  table: string
   /** Chips this session began with (the carried-over bankroll); a win is finishing above it. */
   startChips: number
   shoeNo: number
@@ -50,7 +53,7 @@ export type Action =
   | { type: 'split' }
   | { type: 'cashout' }
 
-export const newGame = (seed: string, startChips: number = START_CHIPS): State => ({ seed, startChips, shoeNo: 0, pos: 0, chips: startChips, phase: 'bet', hands: [], active: 0, dealer: [], rounds: 0, blackjacks: 0, peak: startChips, lastBet: 50, message: 'Place your bet.' })
+export const newGame = (seed: string, startChips: number = START_CHIPS, table: string = DEFAULT_BLACKJACK_TABLE): State => ({ seed, table, startChips, shoeNo: 0, pos: 0, chips: startChips, phase: 'bet', hands: [], active: 0, dealer: [], rounds: 0, blackjacks: 0, peak: startChips, lastBet: 50, message: 'Place your bet.' })
 
 const shoeFor = (seed: string, no: number) => shuffle(Array.from({ length: DECKS * 52 }, (_, i) => i), createRandom(`${seed}:shoe${no}`))
 
@@ -67,8 +70,9 @@ const deal = (s: State, to: 'dealer' | number): State => {
   return { ...next, hands: next.hands.map((h, i) => (i === to ? { ...h, cards: [...h.cards, id] } : h)) }
 }
 
-export const maxBetFor = (chips: number) => Math.min(MAX_BET, Math.floor(chips / BET_STEP) * BET_STEP)
-export const validBet = (amount: number, chips: number) => Number.isInteger(amount) && amount >= MIN_BET && amount <= maxBetFor(chips) && amount % BET_STEP === 0
+export const maxBetFor = (chips: number, max: number = MAX_BET) => Math.min(max, Math.floor(chips / BET_STEP) * BET_STEP)
+export const validBet = (amount: number, chips: number, limits: { min: number; max: number } = { min: MIN_BET, max: MAX_BET }) =>
+  Number.isInteger(amount) && amount >= limits.min && amount <= maxBetFor(chips, limits.max) && amount % BET_STEP === 0
 export const canDouble = (s: State) => s.phase === 'play' && s.hands[s.active].cards.length === 2 && s.chips >= s.hands[s.active].bet
 export const canSplit = (s: State) => {
   if (s.phase !== 'play' || s.hands.length !== 1) return false
@@ -100,7 +104,7 @@ function settle(s: State): State {
     return { ...h, done: true, result, payout }
   })
   const net = hands.reduce((sum, h) => sum + (h.payout ?? 0) - h.bet * (h.doubled ? 2 : 1), 0)
-  const over = chips < MIN_BET
+  const over = chips < blackjackTable(next.table).min
   const message = over ? 'Out of chips.' : net > 0 ? `You win ${net}.` : net < 0 ? `You lose ${-net}.` : 'Push.'
   return { ...next, hands, chips, blackjacks, peak: Math.max(next.peak, chips), phase: over ? 'over' : 'settled', rounds: next.rounds + 1, message }
 }
@@ -115,7 +119,7 @@ export function applyAction(s: State, a: Action): State {
   if (s.phase === 'over') return s
   if (a.type === 'cashout') return s.phase === 'bet' || s.phase === 'settled' ? { ...s, phase: 'over', message: 'Cashed out.' } : s
   if (a.type === 'bet') {
-    if ((s.phase !== 'bet' && s.phase !== 'settled') || !validBet(a.amount, s.chips)) return s
+    if ((s.phase !== 'bet' && s.phase !== 'settled') || !validBet(a.amount, s.chips, blackjackTable(s.table))) return s
     let n: State = { ...s, chips: s.chips - a.amount, lastBet: a.amount, phase: 'play', hands: [{ cards: [], bet: a.amount, doubled: false, done: false, fromSplit: false }], active: 0, dealer: [], message: '' }
     n = deal(n, 0); n = deal(n, 'dealer'); n = deal(n, 0); n = deal(n, 'dealer')
     const upcard = pip(n.dealer[0])

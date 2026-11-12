@@ -108,10 +108,10 @@ export async function getPokerChips(): Promise<number> {
   return stakeFor((await walletOf()).pokerChips)
 }
 /** Pays the tournament buy-in out of your Poker chips. */
-export async function payPokerBuyIn(): Promise<void> {
+export async function payPokerBuyIn(buyIn: number = POKER_BUY_IN): Promise<void> {
   await db.transaction('rw', db.wallet, async () => {
     const w = await walletOf()
-    await db.wallet.put({ ...w, pokerChips: stakeFor(w.pokerChips) - POKER_BUY_IN })
+    await db.wallet.put({ ...w, pokerChips: stakeFor(w.pokerChips) - buyIn })
   })
 }
 /** Adds a tournament prize to your Poker chips. */
