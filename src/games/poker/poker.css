@@ -45,7 +45,7 @@
 @media(prefers-reduced-motion:reduce){.pk-card{animation:none}}
 
 /* ---- visual polish ---- */
-.pk-table{background:radial-gradient(ellipse at 50% 30%,#3d9168 0%,#226a49 48%,#143f2c 100%);box-shadow:inset 0 0 0 4px #7a4f27,inset 0 0 0 6px #2b3f5c,inset 0 0 60px #0007,0 14px 34px #3b2a1e40;border-radius:28px;position:relative;overflow:hidden}
+.pk-table{background:radial-gradient(ellipse at 50% 30%,#3d9168 0%,#226a49 48%,#143f2c 100%);box-shadow:inset 0 0 0 4px #2b3f5c,inset 0 0 0 6px #6fd3ff33,inset 0 0 60px #0007,0 14px 34px #3b2a1e40;border-radius:28px;position:relative;overflow:hidden}
 .pk-table::before{content:"";position:absolute;inset:0;background:repeating-radial-gradient(circle at 50% 40%,#ffffff06 0 2px,transparent 2px 5px);pointer-events:none}
 .pk-table>*{position:relative}
 .pk-seats li{background:linear-gradient(180deg,#0000004d,#0000002b);border:1px solid #ffffff1f;backdrop-filter:blur(2px)}

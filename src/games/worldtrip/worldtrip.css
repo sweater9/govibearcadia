@@ -86,3 +86,6 @@
   .wt-board{width:min(calc(100vw - 8px),calc(100svh - 372px),620px);margin-inline:calc(50% - min(calc(100vw - 8px),calc(100svh - 372px),620px)/2)}
 }
 .wt-thinking{margin:0;padding:10px 18px;border-radius:999px;background:#151c26;color:#6fd3ff;font-weight:700;animation:pulse 1.2s ease-in-out infinite}
+
+/* Carbon and Ice: a navy table under the cream tiles */
+.wt-board{background:linear-gradient(145deg,#24344b,#142033);box-shadow:0 18px 40px #0000004d,inset 0 0 0 2px #6fd3ff22,0 0 0 3px #0d131d}

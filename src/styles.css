@@ -849,3 +849,11 @@ main{overflow-x:clip}
 .ck-piece[data-p="2"]{background:radial-gradient(circle at 36% 30%,#ffffff,#dfe8f5 55%,#9fb0c6);box-shadow:inset 0 -4px 6px #00000044,0 0 0 3px #7f93ad,0 4px 6px #000000aa}
 .ck-piece[data-king]::after{color:#ffc247}
 .ck-piece[data-p="2"][data-king]::after{color:#b8791a}
+
+/* boards and tables in the Carbon and Ice palette */
+.ck-board{box-shadow:0 0 0 3px #26364d,0 18px 40px -18px #000}
+.ck-sq{background:#24344b}.ck-sq[data-dark]{background:#0f1826}
+.ck-sq[data-dark]:hover:not(:disabled),.ck-sq[data-dark]:focus-visible{background:#16243a}
+.ck-piece{background:radial-gradient(circle at 35% 30%,#ff8a8a,#e23b3b 60%,#a51f1f)}
+.ck-piece[data-p="2"]{background:radial-gradient(circle at 35% 30%,#fff,#cfe0f5 60%,#8fa6c4)}
+.bj-table,.pk-table{box-shadow:inset 0 0 0 4px #2b3f5c,inset 0 0 0 6px #6fd3ff33,inset 0 0 60px #0007}
