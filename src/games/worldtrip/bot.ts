@@ -1,5 +1,5 @@
 import { BOARD, GROUPS, CENTRE_COST, isClaimable } from './board'
-import { AUCTION_STEP, activePlayer, canBuildCentre, feeFor, priceOf, type Action, type State } from './rules'
+import { AUCTION_STEP, HOTEL_FEE, activePlayer, canBuildCentre, feeFor, priceOf, type Action, type State } from './rules'
 
 /** Credits a computer keeps in hand so one visitor fee cannot empty it. */
 const RESERVE = 150
@@ -23,14 +23,27 @@ export function chooseAction(s: State): Action {
     return raise <= ceiling && s.players[bidder].cash - raise >= 100 ? { type: 'bid', amount: raise } : { type: 'drop' }
   }
   if (s.offer) {
-    const { buyer, space, price } = s.offer
-    const value = priceOf(BOARD[space])
-    const fair = price <= Math.floor(value * (completesGroup(s, buyer, space) ? 1.4 : 0.9))
-    return fair && s.players[buyer].cash - price >= 100 ? { type: 'accept' } : { type: 'decline' }
+    const { buyer, give, take, cash } = s.offer
+    // The computer is the buyer: it receives `give`, hands over `take` and pays `cash`.
+    const gets = (i: number) => give.includes(i) || (s.holdings[i]?.owner === buyer && !take.includes(i))
+    const completes = (i: number) => { const sp = BOARD[i]; return sp.kind === 'city' && GROUPS[sp.group].every(gets) }
+    const received = give.reduce((sum, i) => sum + priceOf(BOARD[i]) * (completes(i) ? 1.4 : 0.9), 0)
+    const lost = take.reduce((sum, i) => {
+      const sp = BOARD[i]
+      const wasSet = sp.kind === 'city' && GROUPS[sp.group].every((j) => s.holdings[j]?.owner === buyer)
+      return sum + priceOf(sp) * (wasSet ? 1.4 : 1)
+    }, 0)
+    return received - lost >= cash && s.players[buyer].cash - Math.max(0, cash) >= 100 ? { type: 'accept' } : { type: 'decline' }
   }
   const index = activePlayer(s)
   const me = s.players[index]
-  if (s.phase === 'roll') return { type: 'roll' }
+  if (s.phase === 'roll') {
+    if (me.inHotel) {
+      if (me.pass) return { type: 'usepass' }
+      if (me.cash - HOTEL_FEE >= 400) return { type: 'payout' }
+    }
+    return { type: 'roll' }
+  }
   if (s.phase === 'buy') {
     const space = BOARD[me.position]
     if (!isClaimable(space)) return { type: 'skip' }

@@ -8,10 +8,10 @@ function isAction(value: unknown): value is Action {
   if (!value || typeof value !== 'object') return false
   const a = value as Action
   switch (a.type) {
-    case 'roll': case 'buy': case 'skip': case 'accept': case 'decline': case 'end': case 'drop': return true
+    case 'roll': case 'buy': case 'skip': case 'accept': case 'decline': case 'end': case 'drop': case 'payout': case 'usepass': return true
     case 'bid': return Number.isSafeInteger(a.amount)
-    case 'upgrade': return Number.isInteger(a.space) && a.space >= 0 && a.space < BOARD.length
-    case 'offer': return !!a.offer && Number.isInteger(a.offer.space) && Number.isInteger(a.offer.buyer) && Number.isSafeInteger(a.offer.price)
+    case 'upgrade': case 'mortgage': case 'redeem': return Number.isInteger(a.space) && a.space >= 0 && a.space < BOARD.length
+    case 'offer': return !!a.offer && Number.isInteger(a.offer.buyer) && Number.isSafeInteger(a.offer.cash) && Array.isArray(a.offer.give) && Array.isArray(a.offer.take) && [...a.offer.give, ...a.offer.take].every((i) => Number.isInteger(i) && i >= 0 && i < BOARD.length)
     default: return false
   }
 }
