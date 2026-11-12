@@ -404,7 +404,7 @@ describe('mortgages', () => {
     expect(canRedeem(poor, 0, find('Rome'))).toBe(false)
   })
   it('blocks mortgaging a group that has a visitor centre, and building on a mortgaged group', () => {
-    let s = { ...own(setup(), 0, 'Vancouver', 'Toronto'), phase: 'manage' as const }
+    let s: State = { ...own(setup(), 0, 'Vancouver', 'Toronto'), phase: 'manage' }
     const m = applyAction(s, { type: 'mortgage', space: find('Toronto') })
     expect(canBuildCentre(m, 0, find('Vancouver'))).toBe(false)
     s = applyAction(s, { type: 'upgrade', space: find('Vancouver') })
