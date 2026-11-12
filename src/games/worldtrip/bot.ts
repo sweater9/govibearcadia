@@ -1,11 +1,11 @@
 import { BOARD, GROUPS, CENTRE_COST, isClaimable } from './board'
-import { activePlayer, canBuildCentre, feeFor, priceOf, type Action, type State } from './rules'
+import { AUCTION_STEP, activePlayer, canBuildCentre, feeFor, priceOf, type Action, type State } from './rules'
 
 /** Credits a computer keeps in hand so one visitor fee cannot empty it. */
 const RESERVE = 150
 
-/** Who has to act now: the buyer while an offer is pending, otherwise the player whose turn it is. */
-export const actor = (s: State) => (s.offer ? s.offer.buyer : activePlayer(s))
+/** Who has to act now: the bidder during an auction, the buyer while an offer is pending, otherwise the player whose turn it is. */
+export const actor = (s: State) => (s.auction ? s.auction.order[s.auction.pos] : s.offer ? s.offer.buyer : activePlayer(s))
 
 /** Would owning this stop give the player every city of its colour group? */
 function completesGroup(s: State, player: number, space: number): boolean {
@@ -15,6 +15,13 @@ function completesGroup(s: State, player: number, space: number): boolean {
 
 /** A simple, deterministic computer player: claims stops while it stays solvent, builds visitor centres, and takes fair offers. No randomness, so a saved match replays identically. */
 export function chooseAction(s: State): Action {
+  if (s.auction) {
+    const { space, bid, order, pos } = s.auction
+    const bidder = order[pos]
+    const ceiling = Math.floor(priceOf(BOARD[space]) * (completesGroup(s, bidder, space) ? 1.3 : 0.8))
+    const raise = bid + AUCTION_STEP
+    return raise <= ceiling && s.players[bidder].cash - raise >= 100 ? { type: 'bid', amount: raise } : { type: 'drop' }
+  }
   if (s.offer) {
     const { buyer, space, price } = s.offer
     const value = priceOf(BOARD[space])

@@ -37,4 +37,11 @@ describe('computer player', () => {
     expect(chooseAction(withOffer)).toEqual({ type: 'decline' })
     expect(chooseAction({ ...withOffer, offer: { space: 1, buyer: 1, price: 1 } })).toEqual({ type: 'accept' })
   })
+  it('bids in an auction up to a fair price, then drops out', () => {
+    const s = newGame(2, 'auction')
+    const base: State = { ...s, phase: 'auction', auction: { space: 1, bid: 0, leader: -1, order: [1, 0], pos: 0, dropped: [false, false] } }
+    expect(actor(base)).toBe(1)
+    expect(chooseAction(base)).toEqual({ type: 'bid', amount: 10 })
+    expect(chooseAction({ ...base, auction: { ...base.auction!, bid: 60, leader: 0 } })).toEqual({ type: 'drop' })
+  })
 })

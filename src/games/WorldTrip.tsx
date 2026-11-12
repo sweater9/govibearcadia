@@ -4,7 +4,7 @@ import type { GameProps } from '../types'
 import { BOARD, CELLS, CENTRE_COST, GRID, GROUP_COLOURS, isClaimable, type Space } from './worldtrip/board'
 import { actor, chooseAction } from './worldtrip/bot'
 import { LandmarkArt } from './worldtrip/Landmark'
-import { activePlayer, ALLOWANCE, applyAction, canBuildCentre, DEFAULT_TURNS, feeFor, money, newGame, standings, START_CASH, TURN_CHOICES, type Action, type State } from './worldtrip/rules'
+import { activePlayer, ALLOWANCE, applyAction, AUCTION_STEP, canBuildCentre, DEFAULT_TURNS, feeAt, money, newGame, standings, START_CASH, TURN_CHOICES, type Action, type State } from './worldtrip/rules'
 import { loadMatch, saveMatch } from './worldtrip/save'
 import './worldtrip/worldtrip.css'
 
@@ -60,7 +60,7 @@ function StopCard({ state, index, name }: { state: State; index: number; name: (
     <div>
       <h3>{space.name}</h3>
       <p>Space {index + 1} of {BOARD.length}{space.kind === 'city' ? ` · ${space.country}` : ''}</p>
-      {isClaimable(space) ? <p>{holding ? `Owned by ${name(holding.owner)}` : `For sale ${money(space.price)}`} · visitor fee {money(feeFor(space, !!holding?.centre))}{holding?.centre ? ' (visitor centre)' : ''}</p> : null}
+      {isClaimable(space) ? <p>{holding ? `Owned by ${name(holding.owner)}` : `For sale ${money(space.price)}`} · visitor fee {money(feeAt(state, index))}{holding?.centre ? ' (visitor centre)' : ''}</p> : null}
       {space.kind === 'fee' ? <p>Flat fee {money(space.amount)}</p> : null}
       {space.kind === 'card' ? <p>Draw a Travel Card with an immediate effect.</p> : null}
       {space.kind === 'corner' ? <p>{space.name === 'Departure Gate' ? `Collect ${money(ALLOWANCE)} each lap.` : 'A free stop.'}</p> : null}
@@ -99,7 +99,7 @@ function Manage({ state, act, name }: { state: State; act: (a: Action) => void; 
       })}</ul>
       {!state.traded ? <form className="wt-form" onSubmit={propose}>
         <label>Stop <select name="space">{owned.map((i) => <option key={i} value={i}>{BOARD[i].name}</option>)}</select></label>
-        <label>Buyer <select name="buyer">{state.players.map((_, i) => (i === index ? null : <option key={i} value={i}>{name(i)}</option>))}</select></label>
+        <label>Buyer <select name="buyer">{state.players.map((p, i) => (i === index || p.out ? null : <option key={i} value={i}>{name(i)}</option>))}</select></label>
         <label>Price (cr) <input name="price" type="number" min="1" step="1" required /></label>
         <button className="secondary-btn">Offer sale</button>
         {error ? <p role="alert">{error}</p> : null}
@@ -177,6 +177,15 @@ export function WorldTrip({ onFinish, seed }: GameProps) {
     {state && state.phase !== 'done' ? <div className="wt-actions">
       {waiting ? <p className="wt-thinking" role="status">{name(actor(state))} is playing…</p> : null}
       {!waiting && state.phase === 'roll' ? <button className="primary-btn" onClick={() => act({ type: 'roll' })}>Roll dice</button> : null}
+      {!waiting && state.phase === 'auction' && state.auction ? (() => {
+        const { bid, order, pos } = state.auction
+        const cash = state.players[order[pos]].cash
+        return <>
+          <button className="primary-btn" onClick={() => act({ type: 'bid', amount: bid + AUCTION_STEP })}>Bid {money(bid + AUCTION_STEP)}</button>
+          {cash >= bid + 5 * AUCTION_STEP ? <button className="secondary-btn" onClick={() => act({ type: 'bid', amount: bid + 5 * AUCTION_STEP })}>Bid {money(bid + 5 * AUCTION_STEP)}</button> : null}
+          <button className="secondary-btn" onClick={() => act({ type: 'drop' })}>Drop out</button>
+        </>
+      })() : null}
       {!waiting && state.phase === 'buy' && landed && isClaimable(landed) ? <>
         <button className="primary-btn" aria-label={`Claim ${landed.name} for ${money(landed.price)}`} onClick={() => act({ type: 'buy' })}>Claim · {money(landed.price)}</button>
         <button className="secondary-btn" onClick={() => act({ type: 'skip' })}>Pass</button>
@@ -190,7 +199,7 @@ export function WorldTrip({ onFinish, seed }: GameProps) {
         {state ? <ul className="wt-balances" aria-label={state.phase === 'done' ? 'Final standings' : 'Player balances'}>
           {(state.phase === 'done' ? ranking : [...ranking].sort((a, b) => a.index - b.index)).map(({ index, cash, worth }) => <li key={index} data-active={state.phase !== 'done' && index === current ? 'true' : undefined}>
             <span className="wt-token" style={{ background: PLAYER_COLOURS[index] }}>{index + 1}</span>
-            <span className="wt-bal"><strong>{name(index)}</strong><b>{money(worth)} net worth</b><small>{money(cash)} credits{state.phase === 'done' ? ` · cities: ${state.collected[index].map((s) => BOARD[s].name).join(', ') || 'none'}` : ''}</small></span>
+            <span className="wt-bal"><strong>{name(index)}</strong><b>{state.players[index].out ? 'Out of the trip' : `${money(worth)} net worth`}</b><small>{money(cash)} credits{state.phase === 'done' ? ` · cities: ${state.collected[index].map((s) => BOARD[s].name).join(', ') || 'none'}` : ''}</small></span>
           </li>)}
         </ul> : null}
         {state && state.phase !== 'done' && !confirmRestart ? <button className="secondary-btn" onClick={() => setConfirmRestart(true)}>New match</button> : null}
@@ -198,7 +207,7 @@ export function WorldTrip({ onFinish, seed }: GameProps) {
     </div>
     <details><summary>How to play</summary>
       <p>Roll two dice and travel clockwise round the 40 spaces. Passing or landing on the Departure Gate earns {money(ALLOWANCE)}. Claim an unowned city, airport or travel service when you land, or pass. Landing on another player’s stop costs its visitor fee.</p>
-      <p>Own every city in a colour group to build visitor centres, which double a city’s fee. Draw Travel Cards for quick events, and pay the flat fees. Offer one stop for sale each turn; pass the device to the buyer to accept or decline. If you run short, you pay what you have and stay in the match.</p>
+      <p>Own every city in a colour group to build visitor centres, which double a city’s fee. Draw Travel Cards for quick events, and pay the flat fees. Own the whole colour group and its fees double; airports and travel services charge more for each one an owner holds. Pass on a stop and it goes to auction: everyone bids in turn, and the last bidder left wins it. Offer one stop for sale each turn; pass the device to the buyer to accept or decline. If you cannot pay, your stops are sold back to the bank at half price; if that is still not enough you are out of the trip, and the last traveller left wins.</p>
       <p>After {state?.turnsEach ?? turnsEach} turns each, the highest net worth wins: credits plus the printed value of your stops and visitor centres. Ties share the win. Select any space on the board to see its details.</p>
     </details>
   </div>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { BOARD, BOARD_SIZE, CELLS, CENTRE_COST, GROUPS, GRID } from './board'
-import { ALLOWANCE, applyAction, canBuildCentre, newGame, netWorth, standings, START_CASH, type Action, type State } from './rules'
+import { ALLOWANCE, applyAction, canBuildCentre, feeAt, activePlayer, newGame, netWorth, standings, START_CASH, type Action, type State } from './rules'
 import { loadMatch, saveMatch } from './save'
 
 const find = (name: string) => BOARD.findIndex((s) => s.name === name)
@@ -143,6 +143,7 @@ describe('a whole match', () => {
     for (let i = 0; i < 5000 && s.phase !== 'done'; i++) {
       if (s.phase === 'roll') act({ type: 'roll' })
       else if (s.phase === 'buy') act({ type: 'buy' })
+      else if (s.phase === 'auction') act({ type: 'drop' })
       else act({ type: 'end' })
     }
     return { s, actions }
@@ -151,7 +152,7 @@ describe('a whole match', () => {
     for (const t of [12, 20, 30]) {
       const { s } = play(t)
       expect(s.phase).toBe('done')
-      expect(s.turn).toBe(t * 3)
+      expect(s.turn).toBeLessThanOrEqual(t * 3)
       expect(standings(s)).toHaveLength(3)
     }
   })
@@ -170,5 +171,118 @@ describe('a whole match', () => {
     expect(back?.computers).toBe(1)
     store.set('govibearcadia.world-trip.v1', '{"count":2}')
     expect(loadMatch()).toBeNull()
+  })
+})
+
+describe('auctions', () => {
+  const passed = () => {
+    const { after } = rollTo(setup([2]), 6) // Mexico City, unowned
+    return applyAction(after, { type: 'skip' })
+  }
+  it('sends a declined stop to auction, starting with the next player', () => {
+    const s = passed()
+    expect(s.phase).toBe('auction')
+    expect(s.auction?.order).toEqual([1, 0])
+    expect(s.auction?.space).toBe(6)
+  })
+  it('goes to the highest bidder, who pays their bid', () => {
+    let s = passed()
+    s = applyAction(s, { type: 'bid', amount: 30 }) // player 2
+    s = applyAction(s, { type: 'bid', amount: 60 }) // player 1 (the one who passed)
+    s = applyAction(s, { type: 'drop' }) // player 2
+    expect(s.phase).toBe('manage')
+    expect(s.holdings[6]?.owner).toBe(0)
+    expect(s.players[0].cash).toBe(START_CASH - 60)
+    expect(s.auction).toBeNull()
+  })
+  it('rejects bids that are too low, off-step or beyond the bidder’s credits', () => {
+    const s = passed()
+    expect(applyAction(s, { type: 'bid', amount: 0 })).toBe(s)
+    expect(applyAction(s, { type: 'bid', amount: 15 })).toBe(s)
+    expect(applyAction(s, { type: 'bid', amount: START_CASH + 10 })).toBe(s)
+    const a = applyAction(s, { type: 'bid', amount: 50 })
+    expect(applyAction(a, { type: 'bid', amount: 50 })).toBe(a)
+  })
+  it('leaves the stop unclaimed when nobody bids', () => {
+    let s = passed()
+    s = applyAction(s, { type: 'drop' })
+    s = applyAction(s, { type: 'drop' })
+    expect(s.phase).toBe('manage')
+    expect(s.holdings[6]).toBeNull()
+  })
+  it('auctions a stop the lander cannot afford, and skips bidders who cannot outbid', () => {
+    const { after } = rollTo({ ...setup([2]), players: setup([2]).players.map((p, i) => (i === 0 ? { ...p, cash: 50 } : p)) }, 6)
+    expect(after.phase).toBe('auction')
+    expect(after.auction?.order).toEqual([1, 0])
+  })
+})
+
+describe('fees that grow', () => {
+  it('doubles a city fee for a full colour group, and again with a centre', () => {
+    let s = own(setup(), 0, 'Vancouver')
+    expect(feeAt(s, find('Vancouver'))).toBe(6)
+    s = own(s, 0, 'Toronto')
+    expect(feeAt(s, find('Vancouver'))).toBe(12)
+    s = { ...s, phase: 'manage' }
+    s = applyAction(s, { type: 'upgrade', space: find('Vancouver') })
+    expect(feeAt(s, find('Vancouver'))).toBe(24)
+  })
+  it('charges more for each airport and travel service the owner holds', () => {
+    let s = own(setup(), 0, 'Pacific Airport')
+    expect(feeAt(s, find('Pacific Airport'))).toBe(50)
+    s = own(s, 0, 'Atlantic Airport', 'Europe Airport')
+    expect(feeAt(s, find('Pacific Airport'))).toBe(150)
+    s = own(s, 0, 'Rail Pass', 'Ferry Pass')
+    expect(feeAt(s, find('Rail Pass'))).toBe(70)
+  })
+})
+
+describe('running out of credits', () => {
+  const broke = (cash: number, owned: string[] = []) => {
+    const s = own({ ...setup([0, 0]), turn: 0 }, 1, ...owned)
+    return { ...s, players: s.players.map((p, i) => (i === 0 ? { ...p, cash } : p)) }
+  }
+  /** Rolls from the Departure Gate until player 1 lands on the given stop. */
+  const landOn = (s: State, target: number) => {
+    for (let i = 0; i < 600; i++) {
+      const r = applyAction({ ...s, seed: `b${i}` }, { type: 'roll' })
+      if (r.players[0].position === target) return r
+    }
+    throw new Error('no seed found')
+  }
+  it('sells stops back to the bank at half price before anyone goes out', () => {
+    const base = broke(10, [])
+    const s = own(base, 0, 'Vancouver') // worth 60: sells for 30
+    const r = landOn(s, find('Ticket Fee')) // 10 + 30 from the sale is still short of the 100 fee, so out
+    expect(r.players[0].out).toBe(true)
+    expect(r.holdings[find('Vancouver')]).toBeNull()
+  })
+  it('pays in full from the sale and keeps playing when that is enough', () => {
+    const s = own(broke(10), 0, 'Rome', 'Lisbon') // 100 + 80 = 180 on sale
+    const r = landOn(s, find('Ticket Fee'))
+    expect(r.players[0].out).toBe(false)
+    expect(r.players[0].cash).toBeGreaterThanOrEqual(0)
+    expect(r.message).toMatch(/Sold/)
+  })
+  it('puts a bankrupt player out, skips their turns and ends the trip when one traveller is left', () => {
+    const s = broke(0)
+    const r = landOn(s, find('Ticket Fee'))
+    expect(r.players[0].out).toBe(true)
+    expect(r.phase).toBe('done')
+    expect(r.message).toMatch(/last traveller standing/)
+    expect(standings(r)[0].index).toBe(1)
+  })
+  it('skips an eliminated player in a three-player match', () => {
+    const three = newGame(3, 'skip')
+    const s: State = { ...three, players: three.players.map((p, i) => (i === 1 ? { ...p, out: true } : p)), phase: 'manage' }
+    const r = applyAction(s, { type: 'end' })
+    expect(activePlayer(r)).toBe(2)
+    const r2 = applyAction({ ...r, phase: 'manage' }, { type: 'end' })
+    expect(activePlayer(r2)).toBe(0)
+  })
+  it('does not offer trades to an eliminated player', () => {
+    const s = { ...own(setup(), 0, 'Lisbon'), phase: 'manage' as const }
+    const out = { ...s, players: s.players.map((p, i) => (i === 1 ? { ...p, out: true } : p)) }
+    expect(applyAction(out, { type: 'offer', offer: { space: find('Lisbon'), buyer: 1, price: 10 } })).toBe(out)
   })
 })

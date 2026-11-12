@@ -1,6 +1,17 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import { applyAction, newGame } from '../src/games/worldtrip/rules'
 import { expectRows, readTable } from './helpers'
+
+/** After a stop is passed it goes to auction: drop out of every bidding turn until it is time to end the turn. */
+async function untilEndTurn(page: Page) {
+  const end = page.getByRole('button', { name: 'End turn' })
+  const drop = page.getByRole('button', { name: 'Drop out' })
+  for (let i = 0; i < 12; i++) {
+    await expect(end.or(drop)).toBeVisible({ timeout: 15_000 })
+    if (await end.isVisible()) return
+    await drop.click()
+  }
+}
 
 test('plays a complete match offline, resumes after a reload and records the result once', async ({ page, context }) => {
   await page.goto('/')
@@ -18,6 +29,7 @@ test('plays a complete match offline, resumes after a reload and records the res
       await page.reload()
       await expect(page.locator('.wt-status')).toContainText('Round 1 of 12 · Player 1. Rolled')
     }
+    await untilEndTurn(page)
     await page.getByRole('button', { name: 'End turn' }).click()
   }
   await expect(page.getByRole('list', { name: 'Final standings' })).toBeVisible()
@@ -64,6 +76,7 @@ test('a computer opponent takes its turns on its own and the match saves once', 
     await page.getByRole('button', { name: 'Roll dice' }).click()
     const pass = page.getByRole('button', { name: 'Pass', exact: true })
     if (await pass.isVisible()) await pass.click()
+    await untilEndTurn(page)
     await page.getByRole('button', { name: 'End turn' }).click()
     if (round < 11) await expect(page.getByRole('button', { name: 'Roll dice' })).toBeVisible({ timeout: 15_000 }) // the computer played in between
   }

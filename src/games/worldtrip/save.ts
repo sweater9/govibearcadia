@@ -8,7 +8,8 @@ function isAction(value: unknown): value is Action {
   if (!value || typeof value !== 'object') return false
   const a = value as Action
   switch (a.type) {
-    case 'roll': case 'buy': case 'skip': case 'accept': case 'decline': case 'end': return true
+    case 'roll': case 'buy': case 'skip': case 'accept': case 'decline': case 'end': case 'drop': return true
+    case 'bid': return Number.isSafeInteger(a.amount)
     case 'upgrade': return Number.isInteger(a.space) && a.space >= 0 && a.space < BOARD.length
     case 'offer': return !!a.offer && Number.isInteger(a.offer.space) && Number.isInteger(a.offer.buyer) && Number.isSafeInteger(a.offer.price)
     default: return false
@@ -21,7 +22,7 @@ export function loadMatch(seed?: string): Match | null {
     const data = JSON.parse(localStorage.getItem(KEY) ?? 'null')
     if (!data || ![2, 3, 4].includes(data.count) || !isTurnsEach(data.turnsEach) || typeof data.seed !== 'string' ||
       (seed !== undefined && seed !== data.seed) || !Number.isSafeInteger(data.startedAt) || data.startedAt < 0 ||
-      !Array.isArray(data.actions) || data.actions.length > 1500) return null
+      !Array.isArray(data.actions) || data.actions.length > 4000) return null
     const computers = data.computers === undefined ? 0 : data.computers
     if (!Number.isInteger(computers) || computers < 0 || computers >= data.count) return null
     let state = newGame(data.count, data.seed, data.turnsEach)

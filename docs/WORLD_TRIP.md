@@ -12,15 +12,17 @@ An original offline property-trading game for 2 to 4 players on one device. Its 
 
 - Everyone starts on the Departure Gate with 1500 credits and takes 12 turns (12, 20 or 30 selectable). Highest net worth wins; ties share the win.
 - Roll two dice, move clockwise. Passing or landing on the Departure Gate pays a 150 credit travel allowance. The other corners are free stops.
-- Claim an unowned city, airport or service when you land (or pass). Landing on another player's stop pays its visitor fee. Cities: a tenth of the price. Airports 50, services 35.
-- Owning every city in a colour group lets you build a visitor centre on each (50, 100, 150 or 200 credits by group), which doubles that city's fee. Not on airports or services.
-- Travel Cards (10, seeded) have immediate effects. A player short of credits pays what they have and stays in the match.
+- Claim an unowned city, airport or service when you land. Pass on it (or be unable to afford it) and it goes to auction: every traveller still in the trip bids in turn (steps of 10), starting with the next player, and the last bidder left pays their bid and takes it. If nobody bids it stays unclaimed.
+- Landing on another player's stop pays its visitor fee. Cities: a tenth of the price, doubled when the owner holds the whole colour group. Airports 50 and services 35, multiplied by how many of that kind the owner holds.
+- Owning every city in a colour group lets you build a visitor centre on each (50, 100, 150 or 200 credits by group), which doubles that city's fee again (four times the base with a full group and a centre). Not on airports or services.
+- Travel Cards (10, seeded) have immediate effects.
+- A player who cannot pay a fee or card sells stops back to the bank at half value (cheapest first). If that is still not enough they are out of the trip: they take no more turns, their remaining credits go to the creditor, and the trip ends early when one traveller is left.
 - One offer to sell a stop per turn; the buyer accepts or declines on the same device.
 - Net worth = credits + printed price of owned stops + printed cost of visitor centres.
 
 ## Engine, save and tests
 
-Pure rules in `rules.ts` (no React), seeded dice (`seed:turn`). The save (`govibearcadia.world-trip.v1`) stores the seed, settings and action list and replays them on load, so a damaged save is rejected. Tests: `rules.test.ts` (40-space count, order, clockwise cell layout, wraparound and lap bonus, group eligibility, trade transfer, replay reload, whole matches at 12/20/30 turns), `WorldTrip.test.tsx`, `e2e/world-trip.spec.ts`.
+Pure rules in `rules.ts` (no React), seeded dice (`seed:turn`). The save (`govibearcadia.world-trip.v1`) stores the seed, settings and action list and replays them on load, so a damaged save is rejected. Tests: `rules.test.ts` (40-space count, order, clockwise cell layout, wraparound and lap bonus, group eligibility, trade transfer, auctions, growing fees, selling to the bank and bankruptcy, replay reload, whole matches at 12/20/30 turns), `WorldTrip.test.tsx`, `e2e/world-trip.spec.ts`.
 
 ## Not final
 
@@ -30,6 +32,6 @@ The allowance, prices, fees and centre costs are starting values and have not be
 
 At setup, "Computers" sets how many seats the computer plays (0 to one fewer than the player count; the default is one). Human seats come first, so with 3 players and 1 computer you are Player 1, Player 2 and Computer 1. A computer takes its turn on a short timer (about 0.8 s per action) so you can follow it.
 
-The computer (`worldtrip/bot.ts`) is deterministic and uses no randomness, so a saved match still replays exactly from its action list. It claims a stop while it keeps a 150 cr reserve (or when the stop completes a colour group), builds the best visitor centre it can afford above the reserve, and accepts an offer only at a fair price (up to 90% of the printed value, 140% if it completes a group, and never leaving less than 100 cr). It does not offer stops for sale. Tests play whole 2, 3 and 4 seat matches between computers and check every action is legal.
+The computer (`worldtrip/bot.ts`) is deterministic and uses no randomness, so a saved match still replays exactly from its action list. It bids in auctions up to 80% of a stop's printed value (130% if it completes a group, never leaving less than 100 cr) and otherwise drops out. It claims a stop while it keeps a 150 cr reserve (or when the stop completes a colour group), builds the best visitor centre it can afford above the reserve, and accepts an offer only at a fair price (up to 90% of the printed value, 140% if it completes a group, and never leaving less than 100 cr). It does not offer stops for sale. Tests play whole 2, 3 and 4 seat matches between computers and check every action is legal.
 
 Online rooms for World Trip are not built.
