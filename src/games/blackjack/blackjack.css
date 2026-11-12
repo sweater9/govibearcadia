@@ -1,7 +1,7 @@
 .bj{display:grid;gap:8px;justify-items:center;width:100%}
 .bj>*{width:100%;max-width:640px}
 .bj-stats{display:flex;justify-content:space-between;gap:8px;font-size:.85rem}
-.bj-stats span{padding:3px 12px;border-radius:999px;background:#13100f66;color:#faf7f5;border:1px solid #e2cfa9}
+.bj-stats span{padding:3px 12px;border-radius:999px;background:#0a101866;color:#f1f6fe;border:1px solid #e2cfa9}
 .bj-stats b{font-variant-numeric:tabular-nums}
 .bj-table{display:grid;gap:6px;padding:10px;border-radius:18px;background:radial-gradient(circle at 50% 20%,#2f7a56,#1b5238);color:#fff;box-shadow:inset 0 0 0 3px #8f5a2a}
 .bj-seat h3{margin:0 0 4px;font-size:.85rem;font-weight:700;display:flex;gap:8px;align-items:baseline}
@@ -28,7 +28,7 @@
 .bj-chip[data-v="10"]{background:#2f6f9f}.bj-chip[data-v="50"]{background:#3f9b6b}.bj-chip[data-v="100"]{background:#222}.bj-chip[data-v="500"]{background:#7a3fa0}
 .bj-chip:disabled{opacity:.4;cursor:default}
 .bj-bet-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
-.bj-bet-row>span{padding:3px 12px;border-radius:999px;background:#13100f66;color:#faf7f5;border:1px solid #e2cfa9;font-size:.9rem}
+.bj-bet-row>span{padding:3px 12px;border-radius:999px;background:#0a101866;color:#f1f6fe;border:1px solid #e2cfa9;font-size:.9rem}
 .bj-bet-row button{min-height:36px;padding:6px 12px}
 .bj-hint{margin:0;font-size:.85rem;text-align:center}
 .bj-how{font-size:.85rem}.bj-how p{margin:.4rem 0}
