@@ -78,3 +78,10 @@
 }
 @media(max-width:420px){.rm-card::after{font-size:1.1rem;padding-top:10px}.rm-centre{padding:8px 10px}}
 @media(prefers-reduced-motion:reduce){.rm-status.win-message{animation:none}}
+
+/* The card you just drew: lifted, ringed and tagged so it is easy to find in a re-sorted hand. */
+.rm-card[data-new]{translate:0 -8px;box-shadow:0 0 0 3px #2f7d4f,0 6px 14px #2f7d4f88;z-index:2}
+.rm-card[data-new]::before{content:'NEW';position:absolute;top:-9px;right:-4px;padding:0 4px;border-radius:6px;background:#2f7d4f;color:#fff;font-size:.55rem;font-weight:800;letter-spacing:.04em;z-index:3}
+.rm-opps li[data-out]{opacity:.55;text-decoration:line-through}
+@media(prefers-reduced-motion:no-preference){.rm-card[data-new]{animation:rm-new .5s ease-out}}
+@keyframes rm-new{from{translate:0 -28px;opacity:.4}to{translate:0 -8px;opacity:1}}

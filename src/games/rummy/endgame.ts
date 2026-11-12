@@ -1,19 +1,37 @@
 import { chooseAction } from './bot'
-import { applyAction, newGame, type Action } from './rules'
+import { matchResult, newPool, settle, startDeal } from './pool'
+import { applyAction, type Action } from './rules'
 
-/** Test helper: a seed whose computer-only 2-player game is won by seat 0 declaring; returns every action up to the declaration, and the declaration itself. */
-export function nearlyDeclared(prefix: string): { seed: string; actions: Action[]; declare: Extract<Action, { type: 'declare' }> } {
-  for (let n = 0; n < 300; n++) {
+/**
+ * Test helper: a seed whose computer-only 2-player pool (limit 100) is won by seat 0 declaring in the last deal.
+ * Returns every deal before it, the last deal's actions up to the declaration, and the declaration itself.
+ */
+export function nearlyWon(prefix: string): { seed: string; limit: number; past: Action[][]; actions: Action[]; declare: Extract<Action, { type: 'declare' }> } {
+  const limit = 100
+  for (let n = 0; n < 400; n++) {
     const seed = `${prefix}${n}`
-    let s = newGame(2, seed)
-    const actions: Action[] = []
-    while (s.phase !== 'done' && actions.length < 600) {
-      const a = chooseAction(s)
-      actions.push(a)
-      s = applyAction(s, a)
+    let pool = newPool(2, limit)
+    const past: Action[][] = []
+    for (let deal = 0; deal < 12; deal++) {
+      const dealt = startDeal(pool, seed)
+      let state = dealt.state
+      const seats = dealt.seats
+      const actions: Action[] = []
+      while (state.phase !== 'done' && actions.length < 600) {
+        const a = chooseAction(state)
+        actions.push(a)
+        state = applyAction(state, a)
+      }
+      if (state.phase !== 'done') break
+      pool = settle(pool, seats, state)
+      const result = matchResult(pool)
+      const last = actions[actions.length - 1]
+      if (result.over) {
+        if (result.winner === 0 && state.winner === 0 && last.type === 'declare' && actions.length > 3 && past.length >= 1) return { seed, limit, past, actions: actions.slice(0, -1), declare: last }
+        break
+      }
+      past.push(actions)
     }
-    const last = actions[actions.length - 1]
-    if (s.phase === 'done' && s.winner === 0 && last.type === 'declare' && actions.length > 3) return { seed, actions: actions.slice(0, -1), declare: last }
   }
   throw new Error('no seed found')
 }
