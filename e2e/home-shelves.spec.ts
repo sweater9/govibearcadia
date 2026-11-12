@@ -31,3 +31,11 @@ test('the shelves and the comparison fit the screen without sideways scrolling',
   await expect(page.getByRole('region', { name: 'How GoVibeArcadia differs' })).toBeVisible()
   expect(await overflowsHorizontally(page)).toBe(false)
 })
+
+test('a game page offers more games like it', async ({ page }) => {
+  await page.goto('/play/sudoku-master')
+  const more = page.getByRole('region', { name: 'More like this' })
+  await expect(more).toBeVisible()
+  await expect(more.getByRole('link', { name: /Sudoku Master/ })).toHaveCount(0)
+  await expect(more.getByRole('link').first()).toHaveAttribute('href', /\/play\//)
+})

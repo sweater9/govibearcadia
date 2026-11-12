@@ -757,3 +757,7 @@ button.bs-cell:hover:not(:disabled),button.bs-cell:focus-visible{background:#3b8
 @media(max-width:560px){.promise{grid-template-columns:1fr 1fr;padding:0 20px;gap:8px}.promise li{padding:10px 12px;gap:8px}.promise span{font-size:11px}.promise b{font-size:13px}.shelves{padding:0 20px}.row-track li{flex-basis:140px}}
 .shelves>.row{min-width:0}
 .row-track{max-width:100%}
+
+/* Game page: related shelf, steadier stats on phones */
+.play-more{max-width:1040px;margin:36px auto 0}
+.play-page.locked .play-more{display:none}

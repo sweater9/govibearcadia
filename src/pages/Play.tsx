@@ -3,12 +3,13 @@ import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { GameBoundary } from '../components/GameBoundary'
 import { getGame } from '../games/registry'
-import { games } from '../data/games'
 import { db, recordPlay, toggleFavorite } from '../lib/db'
 import { SoundToggle } from '../components/SoundToggle'
 import { attachGameSound } from '../lib/sound'
 import { attachGameEffects } from '../lib/effects'
 import { coinsFor } from '../lib/wallet'
+import { GameRow } from '../components/GameRow'
+import { games } from '../data/games'
 import { lockScreen, unlockScreen } from '../lib/screenLock'
 import { ShareButton } from '../components/ShareButton'
 import { challengePath, parseChallenge, randomSeed, shareChallenge, verdict, verdictText } from '../lib/challenge'
@@ -133,6 +134,9 @@ export function Play() {
       ) : null}
       {daily && dailyWin ? <ShareButton text={shareDaily(meta.title, daily, dailyWin.score, dailyWin.durationMs)} /> : null}
       <p className="game-help">Keyboard and touch controls supported · Progress is saved on this device</p>
+      <div className="play-more">
+        <GameRow title="More like this" blurb={`More ${meta.category.toLowerCase()} games`} games={games.filter((g) => g.category === meta.category && g.id !== meta.id).slice(0, 6)} />
+      </div>
     </main>
   )
 }

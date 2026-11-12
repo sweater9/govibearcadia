@@ -79,3 +79,5 @@
 .bj-seat h3{font-size:1rem}.bj-status{font-size:1rem}
 }
 @media(prefers-reduced-motion:reduce){.bj-card[data-flip],.bj-status.win-message{animation:none}}
+
+@media(max-width:560px){.bj-stats{gap:4px;font-size:.72rem}.bj-stats span{flex:1;border-radius:10px;padding:3px 2px;display:grid;justify-items:center;line-height:1.15;text-align:center}}
