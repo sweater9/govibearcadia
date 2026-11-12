@@ -4,7 +4,7 @@ export type ThemeId = 'neon' | 'ocean' | 'forest' | 'ember' | 'slate' | 'rose' |
 export type Theme = { id: ThemeId; name: string; level: number; blurb: string; /** Coins; a priced theme must be bought, whatever your level. */ price?: number }
 
 export const THEMES: readonly Theme[] = [
-  { id: 'neon', name: 'Terracotta', level: 1, blurb: 'Warm clay, the arcade’s own' },
+  { id: 'neon', name: 'Marquee', level: 1, blurb: 'Coin gold, the arcade’s own' },
   { id: 'ocean', name: 'Ocean', level: 2, blurb: 'A cool blue accent' },
   { id: 'forest', name: 'Forest', level: 3, blurb: 'A fresh green accent' },
   { id: 'ember', name: 'Ember', level: 5, blurb: 'A warm coral accent' },
