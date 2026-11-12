@@ -5,13 +5,21 @@ import { Poker } from './Poker'
 import { chooseAction } from './poker/bot'
 import { applyAction, newGame } from './poker/rules'
 
-beforeEach(() => localStorage.clear())
+const db = vi.hoisted(() => ({ paidIn: 0, prizes: [] as number[] }))
+vi.mock('../lib/db', () => ({ getPokerChips: async () => 1000, payPokerBuyIn: async () => { db.paidIn++ }, payPokerPrize: async (n: number) => { db.prizes.push(n) } }))
+
+beforeEach(() => {
+  localStorage.clear()
+  db.paidIn = 0
+  db.prizes = []
+})
 afterEach(() => vi.useRealTimers())
 
 describe('Poker', () => {
-  it('shows setup first, then deals two cards and posts the blinds', () => {
+  it('shows setup first, charges the buy-in once, then deals two cards and posts the blinds', async () => {
     const { container } = render(<Poker onFinish={vi.fn()} seed="ui" />)
-    fireEvent.click(screen.getByRole('button', { name: 'Start tournament' }))
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Start tournament' })) })
+    expect(db.paidIn).toBe(1)
     expect(container.querySelectorAll('.pk-me .pk-card')).toHaveLength(2)
     expect(container.querySelectorAll('.pk-seats li')).toHaveLength(2)
     expect(screen.getByText(/Blinds 10\/20/)).toBeInTheDocument()
@@ -38,11 +46,11 @@ describe('Poker', () => {
     expect(screen.getByRole('button', { name: 'Play again' })).toBeInTheDocument()
   })
 
-  it('folding every hand until busted reports once', () => {
+  it('folding every hand until busted reports once and pays no prize', async () => {
     vi.useFakeTimers()
     const onFinish = vi.fn()
     render(<StrictMode><Poker onFinish={onFinish} seed="fold-out" /></StrictMode>)
-    fireEvent.click(screen.getByRole('button', { name: 'Start tournament' }))
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Start tournament' })) })
     for (let i = 0; i < 400 && !onFinish.mock.calls.length; i++) {
       const fold = screen.queryByRole('button', { name: 'Fold' })
       if (fold && !fold.hasAttribute('disabled')) fireEvent.click(fold)
@@ -52,5 +60,7 @@ describe('Poker', () => {
     }
     expect(onFinish).toHaveBeenCalledTimes(1)
     expect(onFinish.mock.calls[0][0]).toMatchObject({ won: false })
+    expect(db.paidIn).toBe(1)
+    expect(db.prizes).toEqual([])
   })
 })

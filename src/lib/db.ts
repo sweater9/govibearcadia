@@ -1,11 +1,11 @@
 import Dexie, { type EntityTable } from 'dexie'
 import type { GameId, GameProgress, GameResult, PlayRecord } from '../types'
 import { makeBackup, mergeBackup, type Backup } from './backup'
-import { balance, canBuy, stakeFor } from './wallet'
+import { POKER_BUY_IN, balance, canBuy, stakeFor } from './wallet'
 
 type Favorite = { gameId: GameId; addedAt: string }
 /** One row, id 'main': bought shop items and the carried-over Blackjack bankroll. Coins earned are derived from history. */
-type WalletRow = { id: 'main'; owned: string[]; bankroll?: number }
+type WalletRow = { id: 'main'; owned: string[]; bankroll?: number; pokerChips?: number }
 
 class ArcadeDB extends Dexie {
   progress!: EntityTable<GameProgress, 'gameId'>
@@ -57,15 +57,15 @@ export async function toggleFavorite(gameId: GameId): Promise<void> {
 /** Everything stored on this device, ready to be written to a backup file. */
 export async function exportAll(): Promise<Backup> {
   const [progress, favorites, history, wallet] = await Promise.all([db.progress.toArray(), db.favorites.toArray(), db.history.toArray(), walletOf()])
-  return makeBackup({ progress, favorites, history, wallet: { owned: wallet.owned, ...(wallet.bankroll !== undefined ? { bankroll: wallet.bankroll } : {}) } })
+  return makeBackup({ progress, favorites, history, wallet: { owned: wallet.owned, ...(wallet.bankroll !== undefined ? { bankroll: wallet.bankroll } : {}), ...(wallet.pokerChips !== undefined ? { pokerChips: wallet.pokerChips } : {}) } })
 }
 
 /** Merges a validated backup into the database in one transaction. Returns how many new runs were added. */
 export async function importBackup(backup: Backup): Promise<number> {
   const added = await db.transaction('rw', db.progress, db.favorites, db.history, db.wallet, async () => {
     const [progress, favorites, history, w] = await Promise.all([db.progress.toArray(), db.favorites.toArray(), db.history.toArray(), walletOf()])
-    const merged = mergeBackup({ progress, favorites, history, wallet: { owned: w.owned, bankroll: w.bankroll } }, backup)
-    await db.wallet.put({ id: 'main', owned: merged.wallet.owned, ...(merged.wallet.bankroll !== undefined ? { bankroll: merged.wallet.bankroll } : {}) })
+    const merged = mergeBackup({ progress, favorites, history, wallet: { owned: w.owned, bankroll: w.bankroll, pokerChips: w.pokerChips } }, backup)
+    await db.wallet.put({ id: 'main', owned: merged.wallet.owned, ...(merged.wallet.bankroll !== undefined ? { bankroll: merged.wallet.bankroll } : {}), ...(merged.wallet.pokerChips !== undefined ? { pokerChips: merged.wallet.pokerChips } : {}) })
     await db.progress.bulkPut(merged.progress)
     await db.favorites.bulkPut(merged.favorites)
     await db.history.bulkAdd(merged.newHistory)
@@ -101,4 +101,23 @@ export async function blackjackStake(): Promise<number> {
 }
 export async function saveBankroll(chips: number): Promise<void> {
   await db.transaction('rw', db.wallet, async () => db.wallet.put({ ...(await walletOf()), bankroll: Math.max(0, Math.floor(chips)) }))
+}
+
+/** Your Poker chips (restaked when you cannot cover a buy-in). */
+export async function getPokerChips(): Promise<number> {
+  return stakeFor((await walletOf()).pokerChips)
+}
+/** Pays the tournament buy-in out of your Poker chips. */
+export async function payPokerBuyIn(): Promise<void> {
+  await db.transaction('rw', db.wallet, async () => {
+    const w = await walletOf()
+    await db.wallet.put({ ...w, pokerChips: stakeFor(w.pokerChips) - POKER_BUY_IN })
+  })
+}
+/** Adds a tournament prize to your Poker chips. */
+export async function payPokerPrize(amount: number): Promise<void> {
+  await db.transaction('rw', db.wallet, async () => {
+    const w = await walletOf()
+    await db.wallet.put({ ...w, pokerChips: Math.min(1_000_000, stakeFor(w.pokerChips) + Math.max(0, Math.floor(amount))) })
+  })
 }

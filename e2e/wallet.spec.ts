@@ -56,3 +56,12 @@ test('the Blackjack bankroll carries over to the next session', async ({ page })
   await page.getByRole('button', { name: 'New session' }).click()
   await expect(page.getByText('Started with')).toContainText(Number(chips) < 100 ? '1000' : chips)
 })
+
+test('Poker keeps its own chips: the buy-in comes off them and they stay after leaving', async ({ page }) => {
+  await page.goto('/play/poker?seed=e2e-pk-chips')
+  await expect(page.getByText(/you have 1000/)).toBeVisible()
+  await page.getByRole('button', { name: 'Start tournament' }).click()
+  await expect(page.locator('.pk-me .pk-card')).toHaveCount(2)
+  expect((await readTable(page, 'wallet'))[0]).toMatchObject({ pokerChips: 900 })
+  expect((await readTable(page, 'wallet'))[0]).not.toHaveProperty('bankroll')
+})

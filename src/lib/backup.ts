@@ -2,7 +2,8 @@
 import type { GameProgress, PlayRecord } from '../types'
 
 export type Favorite = { gameId: string; addedAt: string }
-export type WalletData = { owned: string[]; bankroll?: number }
+/** `bankroll` is the Blackjack chips and `pokerChips` the Poker chips; each game keeps its own, carried between sessions. */
+export type WalletData = { owned: string[]; bankroll?: number; pokerChips?: number }
 export type Backup = {
   app: 'govibearcadia'
   version: 1
@@ -80,8 +81,8 @@ export function parseBackup(text: string): ParseResult {
   }
   if (raw.wallet !== undefined) {
     const w = raw.wallet
-    if (!isObj(w) || !Array.isArray(w.owned) || w.owned.length > 100 || !w.owned.every(str) || (w.bankroll !== undefined && !(num(w.bankroll) && w.bankroll >= 0 && w.bankroll <= 1_000_000))) return { ok: false, error: 'The backup contains a damaged wallet.' }
-    out.wallet = { owned: [...new Set(w.owned as string[])], ...(w.bankroll !== undefined ? { bankroll: Math.floor(w.bankroll as number) } : {}) }
+    if (!isObj(w) || !Array.isArray(w.owned) || w.owned.length > 100 || !w.owned.every(str) || (w.bankroll !== undefined && !(num(w.bankroll) && w.bankroll >= 0 && w.bankroll <= 1_000_000)) || (w.pokerChips !== undefined && !(num(w.pokerChips) && w.pokerChips >= 0 && w.pokerChips <= 1_000_000))) return { ok: false, error: 'The backup contains a damaged wallet.' }
+    out.wallet = { owned: [...new Set(w.owned as string[])], ...(w.bankroll !== undefined ? { bankroll: Math.floor(w.bankroll as number) } : {}), ...(w.pokerChips !== undefined ? { pokerChips: Math.floor(w.pokerChips as number) } : {}) }
   }
   return { ok: true, backup: out }
 }
@@ -116,6 +117,7 @@ export function mergeBackup(
 
   const owned = [...new Set([...(current.wallet?.owned ?? []), ...(incoming.wallet?.owned ?? [])])]
   const rolls = [current.wallet?.bankroll, incoming.wallet?.bankroll].filter((b): b is number => b !== undefined)
-  const wallet: WalletData = { owned, ...(rolls.length ? { bankroll: Math.max(...rolls) } : {}) }
+  const pokers = [current.wallet?.pokerChips, incoming.wallet?.pokerChips].filter((b): b is number => b !== undefined)
+  const wallet: WalletData = { owned, ...(rolls.length ? { bankroll: Math.max(...rolls) } : {}), ...(pokers.length ? { pokerChips: Math.max(...pokers) } : {}) }
   return { progress: [...progress.values()], favorites: [...favorites.values()], newHistory, wallet }
 }

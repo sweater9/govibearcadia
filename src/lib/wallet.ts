@@ -36,3 +36,7 @@ export const BANKROLL_MIN_TO_PLAY = 100
 /** The chips to sit down with: what you left with, or a fresh stake when you are (nearly) broke. */
 export const stakeFor = (bankroll: number | undefined): number =>
   bankroll === undefined || !Number.isFinite(bankroll) || bankroll < BANKROLL_MIN_TO_PLAY ? BANKROLL_START : Math.min(BANKROLL_MAX, Math.floor(bankroll))
+
+/** Poker keeps its own chips, separate from Blackjack's: a tournament costs a buy-in, and the winner takes the whole pool. */
+export const POKER_BUY_IN = 100
+export const pokerPrize = (players: number): number => POKER_BUY_IN * players

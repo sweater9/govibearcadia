@@ -33,5 +33,12 @@ it('v3 adds the wallet: buying spends earned coins and the Blackjack bankroll ca
   await saveBankroll(2750)
   expect(await blackjackStake()).toBe(2750)
   await saveBankroll(20)
-  expect(await blackjackStake()).toBe(1000) // restaked when broke
+  expect(await blackjackStake()).toBe(1000) // restaked when broke  // Poker keeps its own chips: a buy-in comes off them, a prize goes on, and Blackjack's are untouched.
+  const { getPokerChips, payPokerBuyIn, payPokerPrize } = await import('./db')
+  expect(await getPokerChips()).toBe(1000)
+  await payPokerBuyIn()
+  expect(await getPokerChips()).toBe(900)
+  await payPokerPrize(300)
+  expect(await getPokerChips()).toBe(1200)
+  expect(await blackjackStake()).toBe(1000)
 })

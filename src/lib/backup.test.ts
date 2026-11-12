@@ -68,9 +68,9 @@ describe('merging', () => {
 describe('wallet in backups', () => {
   const base = { progress: [], favorites: [], history: [] }
   it('round-trips, merges owned items and keeps the larger bankroll', () => {
-    const made = makeBackup({ ...base, wallet: { owned: ['rose'], bankroll: 1500 } })
+    const made = makeBackup({ ...base, wallet: { owned: ['rose'], bankroll: 1500, pokerChips: 700 } })
     const parsed = parseBackup(JSON.stringify(made))
-    expect(parsed.ok && parsed.backup.wallet).toEqual({ owned: ['rose'], bankroll: 1500 })
+    expect(parsed.ok && parsed.backup.wallet).toEqual({ owned: ['rose'], bankroll: 1500, pokerChips: 700 })
     const merged = mergeBackup({ ...base, wallet: { owned: ['slate'], bankroll: 2000 } }, { ...base, wallet: { owned: ['rose', 'slate'], bankroll: 1500 } })
     expect(merged.wallet).toEqual({ owned: ['slate', 'rose'], bankroll: 2000 })
   })
