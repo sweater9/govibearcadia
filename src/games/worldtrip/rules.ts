@@ -5,6 +5,8 @@ export const START_CASH = 1500
 export const ALLOWANCE = 150
 export const TURN_CHOICES = [12, 20, 30] as const
 export const DEFAULT_TURNS = 12
+export const MIN_PLAYERS = 2
+export const MAX_PLAYERS = 6
 /** What it costs to leave the Hotel Stopover early, and the most turns anyone waits there. */
 export const HOTEL_FEE = 50
 export const HOTEL_TRIES = 3
@@ -424,4 +426,28 @@ export function applyAction(s: State, action: Action): State {
     return { ...s, offer: action.offer }
   }
   return s
+}
+
+/**
+ * A traveller who left the room (online only). They are out of the trip and their stops go back to the bank. Whatever
+ * they were holding up is cleared: their turn passes on, their bids in an auction are void, and an offer to them is withdrawn.
+ * The trip ends when only one traveller is left.
+ */
+export function removePlayer(s: State, index: number): State {
+  if (s.phase === 'done' || !s.players[index] || s.players[index].out) return s
+  const players = s.players.map((p, i) => (i === index ? { ...p, out: true, inHotel: false, cash: 0 } : p))
+  const holdings = s.holdings.map((h) => (h?.owner === index ? null : h))
+  const lead = `${playerName(index)} left the trip. `
+  const base: State = { ...s, players, holdings }
+  if (activePlayer(s) === index) return advanceTurn(base, lead)
+  if (players.filter((p) => !p.out).length <= 1) return { ...base, phase: 'done', auction: null, offer: null, message: `${lead}${playerName(players.findIndex((p) => !p.out))} is the last traveller standing.` }
+  if (s.auction) {
+    const a = s.auction
+    const dropped = a.dropped.slice()
+    dropped[index] = true
+    const voided = a.leader === index
+    return progress(base, { ...a, dropped, leader: voided ? -1 : a.leader, bid: voided ? 0 : a.bid }, a.order[a.pos] === index ? a.pos + 1 : a.pos, lead)
+  }
+  if (s.offer?.buyer === index) return { ...base, offer: null, traded: true, message: `${lead}The offer to them is withdrawn.` }
+  return { ...base, message: lead.trim() }
 }

@@ -11,13 +11,14 @@ import type { View as BattleshipView } from '../games/battleship/rules'
 import { TicTacToeBoard } from '../games/tictactoe/Board'
 import type { TState } from '../games/tictactoe/rules'
 import { netWorth, type State as WorldTripState } from '../games/worldtrip/rules'
+import type { WorldTripMessage } from '../games/WorldTripRoom'
 import { recordPlay } from '../lib/db'
 import { ONLINE_GAME_LIST, gameFromParam, getNick, roomSocketUrl, type OnlineGameId } from '../lib/online'
 import { isRoomCode } from '../lib/roomcode'
 
-const WorldTripOnline = lazy(() => import('../games/WorldTripOnline'))
+const WorldTripRoom = lazy(() => import('../games/WorldTripRoom'))
 
-type Connected = [boolean, boolean]
+type Connected = boolean[]
 /** Connect Four sends its board flat (cells, line, moves); the other games nest it under `board`. */
 type Common = Pick<View, 'you' | 'yourColour' | 'turn' | 'winner' | 'draw' | 'round' | 'wins' | 'rematch'>
 type StateMessage = Common & Partial<Pick<View, 'cells' | 'line' | 'moves'>> & { type: 'state'; connected: Connected; board?: unknown }
@@ -205,7 +206,9 @@ export function RoomPage() {
             </Link>
           </div>
         ) : (
-          <div className={game === 'world-trip' ? 'wt-room' : game === 'connect-four' ? 'c4' : game === 'tic-tac-toe' ? 'ttt' : game === 'battleship' ? 'bs' : 'ck'}>
+          game === 'world-trip' ? (
+            <Suspense fallback={<p>Loading the room…</p>}><WorldTripRoom state={state as unknown as WorldTripMessage | null} reconnecting={status === 'reconnecting'} notice={notice} send={send} /></Suspense>
+          ) : <div className={game === 'connect-four' ? 'c4' : game === 'tic-tac-toe' ? 'ttt' : game === 'battleship' ? 'bs' : 'ck'}>
             <div className="game-toolbar c4-bar">
               <div>
                 <small>Status</small>
@@ -222,9 +225,7 @@ export function RoomPage() {
                 </div>
               ) : null}
             </div>
-            {game === 'world-trip' ? (
-              state?.board ? <Suspense fallback={<p>Loading the board…</p>}><WorldTripOnline state={state.board as WorldTripState} you={state.you} oppHere={oppHere} canAct={myTurn && !over && oppHere} onAct={(action) => send({ type: 'move', action })} /></Suspense> : <p>Connecting…</p>
-            ) : game === 'connect-four' ? (
+            {game === 'connect-four' ? (
               <div className="c4-board" data-over={over} data-thinking={!!state && !over && !myTurn}>
                 <div className="c4-grid" aria-hidden="true">
                   {(state?.cells ?? Array(42).fill(0)).map((p, i) => (

@@ -3,8 +3,7 @@ import { createLimiter } from '../src/lib/ratelimit'
 import { dayKey, isNick, isRankedGame, weekKey, type Nick } from '../src/lib/leaderboard'
 import { sha256Hex } from './hash'
 import type { Leaderboard } from './leaderboard'
-import { ONLINE_GAMES, ONLINE_GAME_IDS, type OnlineGame } from '../src/games/onlineGames'
-import type { Seat } from '../src/lib/onlineRoom'
+import { ONLINE_GAMES, ONLINE_GAME_IDS, type OnlineGame, type SeatContext } from '../src/games/onlineGames'
 
 /** Largest message a client may send. Anything bigger closes the socket (protocol error). */
 export const MAX_MESSAGE_BYTES = 2048
@@ -14,8 +13,10 @@ const IDLE_MS = 2 * 60 * 60 * 1000
 const messageLimit = createLimiter(20, 5000)
 const TOKEN = /^[A-Za-z0-9_-]{16,64}$/
 
-type Attachment = { seat: Seat }
-type Seats = [string | null, string | null]
+type Attachment = { seat: number }
+/** One entry per seat: the token that claimed it, or null. Two seats for most games. */
+type Seats = (string | null)[]
+type Nicks = (Nick | null)[]
 
 const json = (body: unknown, status: number) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
 
@@ -37,12 +38,18 @@ export class Room extends DurableObject<Env> {
 
     const storedGame = await this.ctx.storage.get<string>('game')
     if (storedGame && storedGame !== game) return json({ error: 'wrong-game' }, 409)
-    const seats = (await this.ctx.storage.get<Seats>('seats')) ?? [null, null]
-    let seat: Seat | undefined = ([0, 1] as const).find((s) => seats[s] === token)
-    if (seat === undefined) seat = ([0, 1] as const).find((s) => seats[s] === null)
-    if (seat === undefined) return json({ error: 'room-full' }, 409)
+    const impl = ONLINE_GAMES[game]
+    const seats = (await this.ctx.storage.get<Seats>('seats')) ?? Array.from({ length: impl.seats ?? 2 }, () => null)
+    let seat: number | undefined = seats.findIndex((t) => t === token)
+    if (seat < 0) {
+      // A new traveller: only while the game still lets seats be claimed (World Trip closes at the start).
+      const room = storedGame ? impl.parse(await this.ctx.storage.get('room')) : null
+      if (storedGame && room && impl.open && !impl.open(room)) return json({ error: 'room-full' }, 409)
+      seat = seats.findIndex((t) => t === null)
+    }
+    if (seat < 0) return json({ error: 'room-full' }, 409)
 
-    if (!storedGame) await this.ctx.storage.put({ game, seats, room: ONLINE_GAMES[game].newRoom() })
+    if (!storedGame) await this.ctx.storage.put({ game, seats, room: impl.newRoom() })
     if (seats[seat] !== token) {
       seats[seat] = token
       await this.ctx.storage.put('seats', seats)
@@ -77,7 +84,7 @@ export class Room extends DurableObject<Env> {
     if (!messageLimit.hit(`${this.ctx.id.toString()}:${seat}`, Date.now())) return void ws.send(JSON.stringify({ type: 'error', code: 'slow-down' }))
     if (data.type === 'nick') {
       // Opt-in leaderboard nickname: three word-list indices, or anything else to opt out.
-      const nicks = (await this.ctx.storage.get<[Nick | null, Nick | null]>('nicks')) ?? [null, null]
+      const nicks = (await this.ctx.storage.get<Nicks>('nicks')) ?? []
       nicks[seat] = isNick(data) ? { a: data.a, n: data.n, k: data.k } : null
       await this.ctx.storage.put('nicks', nicks)
       return
@@ -88,9 +95,10 @@ export class Room extends DurableObject<Env> {
     if (!room) return ws.close(1011, 'room state lost')
 
     let outcome
+    const ctx = await this.seatContext()
     if (data.type === 'move') outcome = game.impl.move(room, seat, data)
-    else if (data.type === 'rematch') outcome = game.impl.rematch(room, seat)
-    else if (typeof data.type === 'string' && game.impl.extra?.includes(data.type) && game.impl.act) outcome = game.impl.act(room, seat, data)
+    else if (data.type === 'rematch') outcome = game.impl.rematch(room, seat, ctx)
+    else if (typeof data.type === 'string' && game.impl.extra?.includes(data.type) && game.impl.act) outcome = game.impl.act(room, seat, data, ctx)
     else return void ws.send(JSON.stringify({ type: 'error', code: 'unknown-message' }))
 
     if (!outcome.ok) return void ws.send(JSON.stringify({ type: 'error', code: outcome.error }))
@@ -104,13 +112,14 @@ export class Room extends DurableObject<Env> {
   private async recordIfWon(game: { id: string; impl: OnlineGame }, before: unknown, after: unknown): Promise<void> {
     try {
       if (!isRankedGame(game.id)) return // only ranked games reach the leaderboards
-      const was = game.impl.view(before, 0) as { turn: number | null }
-      const now = game.impl.view(after, 0) as { turn: number | null; winner: number | null }
+      const ctx = await this.seatContext()
+      const was = game.impl.view(before, 0, ctx) as { turn: number | null }
+      const now = game.impl.view(after, 0, ctx) as { turn: number | null; winner: number | null }
       if (was.turn === null || now.turn !== null || now.winner === null) return
-      const seat = now.winner as Seat
-      const nicks = (await this.ctx.storage.get<[Nick | null, Nick | null]>('nicks')) ?? [null, null]
+      const seat = now.winner
+      const nicks = (await this.ctx.storage.get<Nicks>('nicks')) ?? []
       const nick = nicks[seat]
-      const seats = await this.ctx.storage.get<[string | null, string | null]>('seats')
+      const seats = await this.ctx.storage.get<Seats>('seats')
       if (!nick || !seats?.[0] || !seats[1]) return
       const present = new Set(this.ctx.getWebSockets().map((ws) => (ws.deserializeAttachment() as Attachment | null)?.seat))
       if (!present.has(0) || !present.has(1)) return // both players must be in the room
@@ -158,16 +167,22 @@ export class Room extends DurableObject<Env> {
     if (!game) return
     const room = known ?? game.impl.parse(await this.ctx.storage.get('room'))
     if (!room) return
-    const sockets = this.ctx.getWebSockets()
-    const connected: [boolean, boolean] = [false, false]
-    for (const ws of sockets) {
+    const ctx = await this.seatContext()
+    for (const ws of this.ctx.getWebSockets()) {
+      const seat = (ws.deserializeAttachment() as Attachment | null)?.seat
+      if (seat === undefined || ws.readyState !== WebSocket.READY_STATE_OPEN) continue
+      ws.send(JSON.stringify({ type: 'state', v: 1, game: game.id, connected: ctx.connected, ...game.impl.view(room, seat, ctx) }))
+    }
+  }
+
+  /** Which seats have been claimed, and which of them have an open socket right now. */
+  private async seatContext(): Promise<SeatContext> {
+    const seats = (await this.ctx.storage.get<Seats>('seats')) ?? []
+    const connected = seats.map(() => false)
+    for (const ws of this.ctx.getWebSockets()) {
       const seat = (ws.deserializeAttachment() as Attachment | null)?.seat
       if (seat !== undefined && ws.readyState === WebSocket.READY_STATE_OPEN) connected[seat] = true
     }
-    for (const ws of sockets) {
-      const seat = (ws.deserializeAttachment() as Attachment | null)?.seat
-      if (seat === undefined || ws.readyState !== WebSocket.READY_STATE_OPEN) continue
-      ws.send(JSON.stringify({ type: 'state', v: 1, game: game.id, connected, ...game.impl.view(room, seat) }))
-    }
+    return { seated: seats.map((t) => t !== null), connected }
   }
 }

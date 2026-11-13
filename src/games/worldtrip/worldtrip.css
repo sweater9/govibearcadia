@@ -118,3 +118,13 @@
 .wt-move{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .wt-move .wt-die{width:44px;height:44px;animation:none}
 .wt-hint{margin:0;color:var(--text-muted);font-size:.88rem}.wt-card-deed{background:none;box-shadow:none;border-radius:0;overflow:visible}.wt-card-deed::before{display:none}.wt-card-deed .wt-deed{margin-inline:auto}
+
+/* Online lobby: who has joined, and the host's Start button. */
+.wt-lobby{display:grid;gap:12px;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--surface)}
+.wt-lobby h3{margin:0}
+.wt-lobby ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.wt-lobby li{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:var(--surface-inset);font-size:.95rem}
+.wt-lobby li[data-open="true"]{opacity:.55;border:1px dashed var(--border)}
+.wt-lobby li[data-away="true"]{opacity:.7}
+.wt-lobby .wt-token{width:24px;height:24px;font-size:.75rem;flex:none}
+.wt-lobby p{margin:0;color:var(--text-muted)}

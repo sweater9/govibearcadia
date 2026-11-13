@@ -5,7 +5,7 @@ import { expect, test, type Page } from '@playwright/test'
 
 const moves = (p: Page) => [p.getByRole('button', { name: /^Roll (dice|for doubles)$/ }), p.getByRole('button', { name: /^Move \d+ spaces$/ }), p.getByRole('button', { name: 'Pass', exact: true }), p.getByRole('button', { name: 'Drop out' }), p.getByRole('button', { name: /^(End turn|Roll again)$/ })]
 
-test('two players play World Trip from an invite link to the final standings, and a third visitor is turned away', async ({ browser, baseURL, isMobile }) => {
+test('two players play World Trip from an invite link to the final standings, and a visitor after the start is turned away', async ({ browser, baseURL, isMobile }) => {
   test.setTimeout(420_000)
   const opts = isMobile ? { baseURL, viewport: { width: 393, height: 851 }, hasTouch: true } : { baseURL }
   const a = await (await browser.newContext(opts)).newPage()
@@ -16,6 +16,9 @@ test('two players play World Trip from an invite link to the final standings, an
   await expect(a).toHaveURL(/\/room\/[A-Z2-9]{6}\?g=world-trip$/)
   const code = a.url().split('/').pop()!.split('?')[0]
   await b.goto(`/room/${code}?g=world-trip`)
+  await expect(b.getByRole('region', { name: 'Lobby' })).toContainText('Player 1, host')
+  await expect(b.getByRole('button', { name: 'Start trip' })).toHaveCount(0) // only the host starts
+  await a.getByRole('button', { name: 'Start trip' }).click()
   await expect(a.getByRole('list', { name: 'Board in travel order' }).getByRole('button')).toHaveCount(40)
   await expect(b.getByRole('list', { name: 'Board in travel order' }).getByRole('button')).toHaveCount(40)
 

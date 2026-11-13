@@ -1,5 +1,4 @@
-import { MIN_PLAYERS, MAX_PLAYERS } from './colours'
-import { applyAction, isTurnsEach, newGame, type Action, type State } from './rules'
+import { applyAction, isTurnsEach, MAX_PLAYERS, MIN_PLAYERS, newGame, type Action, type State } from './rules'
 import { isAction } from './actions'
 
 const KEY = 'govibearcadia.world-trip.v1'
