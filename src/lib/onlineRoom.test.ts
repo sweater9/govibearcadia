@@ -67,7 +67,7 @@ describe('online battleship through the Worker interface', () => {
 
 import { RANKED_GAMES } from './leaderboard'
 describe('leaderboard and rooms agree', () => {
-  it('ranks exactly the games that have online rooms', () => {
-    expect([...RANKED_GAMES].sort()).toEqual(Object.keys(ONLINE_GAMES).sort())
+  it('ranks exactly the games that have online rooms, except World Trip (a multi-round match, not ranked)', () => {
+    expect([...RANKED_GAMES].sort()).toEqual(Object.keys(ONLINE_GAMES).filter((id) => id !== 'world-trip').sort())
   })
 })
