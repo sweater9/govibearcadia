@@ -104,3 +104,39 @@ describe('game', () => {
     }, 60000)
   }
 })
+
+describe('dropping and wrong declarations', () => {
+  it('a drop before the first draw costs 20 and a drop after drawing costs 40', () => {
+    const first = applyAction(newGame(3, 'drop-a'), { type: 'drop' })
+    expect(first.out).toEqual([20, null, null])
+    expect(first.turn).toBe(1)
+    let s = newGame(3, 'drop-b')
+    s = applyAction(s, { type: 'draw', from: 'stock' })
+    s = applyAction(s, { type: 'discard', card: s.hands[0][0] })
+    s = applyAction(s, { type: 'draw', from: 'stock' })
+    s = applyAction(s, { type: 'discard', card: s.hands[1][0] })
+    s = applyAction(s, { type: 'draw', from: 'stock' })
+    s = applyAction(s, { type: 'discard', card: s.hands[2][0] })
+    expect(applyAction(s, { type: 'drop' }).out[0]).toBe(40)
+  })
+  it('a dropped player is skipped and the last player left wins the deal', () => {
+    let s = applyAction(newGame(3, 'drop-c'), { type: 'drop' })
+    s = applyAction(s, { type: 'drop' })
+    expect(s.phase).toBe('done')
+    expect(s.winner).toBe(2)
+    expect(s.scores).toEqual([20, 20, 0])
+  })
+  it('a drop is only possible before drawing, and a wrong declaration only after', () => {
+    const s = newGame(2, 'drop-d')
+    expect(applyAction(s, { type: 'wrong-show' })).toBe(s)
+    const drawn = applyAction(s, { type: 'draw', from: 'stock' })
+    expect(applyAction(drawn, { type: 'drop' })).toBe(drawn)
+  })
+  it('a wrong declaration costs 80 and ends the deal for the other player in a two-player game', () => {
+    const drawn = applyAction(newGame(2, 'wrong-a'), { type: 'draw', from: 'stock' })
+    const s = applyAction(drawn, { type: 'wrong-show' })
+    expect(s.phase).toBe('done')
+    expect(s.winner).toBe(1)
+    expect(s.scores).toEqual([80, 0])
+  })
+})

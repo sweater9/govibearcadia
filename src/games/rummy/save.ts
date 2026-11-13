@@ -11,6 +11,7 @@ const isAction = (v: unknown): v is Action => {
   const a = v as Action
   if (a.type === 'draw') return a.from === 'stock' || a.from === 'discard'
   if (a.type === 'discard') return isId(a.card)
+  if (a.type === 'drop' || a.type === 'wrong-show') return true
   return a.type === 'declare' && isId(a.card) && Array.isArray(a.groups) && a.groups.every((g) => Array.isArray(g) && g.every(isId))
 }
 

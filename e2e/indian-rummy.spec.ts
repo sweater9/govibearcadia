@@ -42,3 +42,11 @@ test('pressing S draws from the stock', async ({ page }) => {
   await page.keyboard.press('s')
   await expect(page.locator('.rm-hand .rm-card')).toHaveCount(14)
 })
+
+test('dropping out of a deal costs 20 before the first draw and is shown in the points', async ({ page }) => {
+  await page.goto('/play/indian-rummy?seed=e2e-rummy-drop')
+  await page.getByRole('button', { name: 'Start game' }).click()
+  await page.getByRole('button', { name: 'Drop (20)' }).click()
+  await expect(page.getByRole('list', { name: 'Players and points' })).toContainText('20')
+  expect(await overflowsHorizontally(page)).toBe(false)
+})

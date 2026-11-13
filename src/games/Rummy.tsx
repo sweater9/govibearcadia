@@ -3,7 +3,7 @@ import { createRandom } from '../lib/rng'
 import type { GameProps } from '../types'
 import { chooseAction } from './rummy/bot'
 import { POOL_LIMITS, DEFAULT_LIMIT, matchResult, newPool, settle, startDeal } from './rummy/pool'
-import { SUITS, applyAction, bestPlan, card, cardName, declareError, meldKind, rankLabel, type Action, type State } from './rummy/rules'
+import { FIRST_DROP, MIDDLE_DROP, SUITS, WRONG_SHOW, applyAction, bestPlan, card, cardName, declareError, meldKind, rankLabel, type Action, type State } from './rummy/rules'
 import { loadMatch, saveMatch, type Match } from './rummy/save'
 import './rummy/rummy.css'
 
@@ -203,6 +203,8 @@ export function Rummy({ onFinish, seed }: GameProps) {
       <button className="secondary-btn" onClick={autoGroup}>Auto-group</button>
       <button className="primary-btn" onClick={discard} disabled={!canDiscard}>Discard</button>
       <button className="primary-btn" onClick={declare} disabled={declareProblem !== null} title={declareProblem ?? 'Declare'}>Declare</button>
+      <button className="secondary-btn" onClick={() => act({ type: 'drop' })} disabled={!human || state.phase !== 'draw'} title="Leave this deal and take a small penalty instead of a big loss">{`Drop (${state.drew[0] ? MIDDLE_DROP : FIRST_DROP})`}</button>
+      {human && state.phase === 'discard' && declareProblem !== null && chosen.length === 1 ? <button className="secondary-btn" onClick={() => act({ type: 'wrong-show' })} title="Declare without a valid hand: you are out of the deal and score 80">{`Wrong show (${WRONG_SHOW})`}</button> : null}
     </div> : null}
     <div className="rm-hand" aria-label="Your hand">
       {!state ? <p className="rm-hint">Press Start game to deal 13 cards each.</p> : null}
@@ -215,7 +217,7 @@ export function Rummy({ onFinish, seed }: GameProps) {
     {state && !done && human && state.phase === 'discard' && declareProblem ? <p className="rm-hint" aria-live="polite">Declare: {declareProblem}</p> : null}
     <details className="rm-how"><summary>How to play</summary>
       <p>Each player gets 13 cards. On your turn draw one card (from the stock or the top discard), then discard one. Group your cards into sequences (3 or more in a row of one suit; the ace is low or high) and sets (3 or 4 of a rank in different suits). Jokers (★ and the wild rank shown on the table) can stand in for any card.</p>
-      <p>To win, declare with at least two sequences, one of them pure (no joker), and every other card in a sequence or set. The card you throw away when declaring is not counted. A rival scores their loose cards (A, K, Q, J = 10, jokers 0), capped at 80; with no pure sequence plus a second sequence every card counts.</p>
+      <p>To win, declare with at least two sequences, one of them pure (no joker), and every other card in a sequence or set. The card you throw away when declaring is not counted. A rival scores their loose cards (A, K, Q, J = 10, jokers 0), capped at 80; with no pure sequence plus a second sequence every card counts. You can drop out of a deal for 20 points before your first draw or 40 after it, and a wrong declaration costs 80 and puts you out of the deal.</p>
       <p>It is a pool game: points from each deal add up. Whoever reaches the pool limit (300 by default) is out, and the player with the fewest points when the others are out wins. A winner of a deal scores 0. Keys: S stock, T take discard, G group, X discard.</p>
     </details>
   </div>

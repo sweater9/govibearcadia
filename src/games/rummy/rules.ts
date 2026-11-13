@@ -4,6 +4,10 @@ import { createRandom, shuffle } from '../../lib/rng'
 export const DECK_SIZE = 106
 export const HAND = 13
 export const MAX_POINTS = 80
+/** Dropping out of a deal costs 20 before your first draw and 40 afterwards; a wrong declaration costs the full 80 (the usual online rules). */
+export const FIRST_DROP = 20
+export const MIDDLE_DROP = 40
+export const WRONG_SHOW = MAX_POINTS
 export const MIN_PLAYERS = 2
 export const MAX_PLAYERS = 4
 export const SUITS = ['♠', '♥', '♦', '♣'] as const
@@ -30,6 +34,10 @@ export type State = {
   /** The card taken from the discard pile this turn; it may not go straight back. */
   taken: number | null
   turns: number
+  /** Points charged to a player who dropped or made a wrong declaration; they take no further part in the deal. */
+  out: (number | null)[]
+  /** Whether each player has drawn yet this deal (a drop before the first draw is cheaper). */
+  drew: boolean[]
   reshuffles: number
   winner: number | null
   scores: number[] | null
@@ -39,6 +47,8 @@ export type Action =
   | { type: 'draw'; from: 'stock' | 'discard' }
   | { type: 'discard'; card: number }
   | { type: 'declare'; card: number; groups: number[][] }
+  | { type: 'drop' }
+  | { type: 'wrong-show' }
 
 export const maxTurns = (players: number) => players * 45
 
@@ -52,7 +62,7 @@ export function newGame(players: number, seed: string): State {
   return {
     players, seed, hands, stock: deck.slice(at), discard: [discardFirst],
     wild: cut.printedJoker ? 1 : cut.rank,
-    turn: 0, phase: 'draw', taken: null, turns: 0, reshuffles: 0, winner: null, scores: null,
+    turn: 0, phase: 'draw', taken: null, turns: 0, out: Array(players).fill(null), drew: Array(players).fill(false), reshuffles: 0, winner: null, scores: null,
     message: `The wild joker is ${rankLabel(cut.printedJoker ? 1 : cut.rank)}.`,
   }
 }
@@ -201,8 +211,11 @@ function reshuffleIfEmpty(s: State): State {
   return { ...s, stock: shuffle(rest, createRandom(`${s.seed}:reshuffle${s.reshuffles}`)), discard: [top], reshuffles: s.reshuffles + 1 }
 }
 
+/** The next player who is still in the deal. */
+const nextSeat = (s: State, from: number) => { let n = (from + 1) % s.players; for (let i = 0; i < s.players && s.out[n] !== null; i++) n = (n + 1) % s.players; return n }
+
 function finish(s: State, winner: number | null, message: string): State {
-  const scores = s.hands.map((h, p) => (p === winner ? 0 : penaltyPoints(h, s.wild)))
+  const scores = s.hands.map((h, p) => (p === winner ? 0 : s.out[p] ?? penaltyPoints(h, s.wild)))
   const lowest = winner ?? scores.indexOf(Math.min(...scores))
   return { ...s, phase: 'done', winner: lowest, scores, message }
 }
@@ -211,21 +224,32 @@ export function applyAction(state: State, action: Action): State {
   if (state.phase === 'done') return state
   const s = reshuffleIfEmpty(state)
   const hand = s.hands[s.turn]
+  if (action.type === 'drop' || action.type === 'wrong-show') {
+    if (action.type === 'drop' ? s.phase !== 'draw' : s.phase !== 'discard') return state
+    const penalty = action.type === 'wrong-show' ? WRONG_SHOW : s.drew[s.turn] ? MIDDLE_DROP : FIRST_DROP
+    const out = s.out.map((v, p) => (p === s.turn ? penalty : v))
+    const left = out.map((v, p) => (v === null ? p : -1)).filter((p) => p >= 0)
+    const who = s.turn === 0 ? 'You' : `Player ${s.turn + 1}`
+    const said = `${who} ${action.type === 'drop' ? 'dropped' : 'made a wrong declaration'} (${penalty} points).`
+    const next: State = { ...s, out, taken: null, phase: 'draw', message: said }
+    if (left.length === 1) return finish({ ...next, turn: left[0] }, left[0], `${said} The last player in wins the deal.`)
+    return { ...next, turn: nextSeat(next, s.turn) }
+  }
   if (action.type === 'draw') {
     if (s.phase !== 'draw') return state
     if (action.from === 'stock') {
       if (s.stock.length === 0) return state
       const drawn = s.stock[s.stock.length - 1]
-      return withHand({ ...s, stock: s.stock.slice(0, -1), phase: 'discard', taken: null, message: '' }, [...hand, drawn])
+      return withHand({ ...s, stock: s.stock.slice(0, -1), phase: 'discard', taken: null, drew: s.drew.map((d, p) => d || p === s.turn), message: '' }, [...hand, drawn])
     }
     if (s.discard.length === 0) return state
     const top = s.discard[s.discard.length - 1]
-    return withHand({ ...s, discard: s.discard.slice(0, -1), phase: 'discard', taken: top, message: '' }, [...hand, top])
+    return withHand({ ...s, discard: s.discard.slice(0, -1), phase: 'discard', taken: top, drew: s.drew.map((d, p) => d || p === s.turn), message: '' }, [...hand, top])
   }
   if (s.phase !== 'discard') return state
   if (action.type === 'discard') {
     if (!hand.includes(action.card) || action.card === s.taken) return state
-    const next = { ...withHand(s, hand.filter((id) => id !== action.card)), discard: [...s.discard, action.card], phase: 'draw' as const, taken: null, turn: (s.turn + 1) % s.players, turns: s.turns + 1, message: '' }
+    const next = { ...withHand(s, hand.filter((id) => id !== action.card)), discard: [...s.discard, action.card], phase: 'draw' as const, taken: null, turn: nextSeat(s, s.turn), turns: s.turns + 1, message: '' }
     return next.turns >= maxTurns(s.players) ? finish(next, null, 'The turn limit was reached: lowest points wins.') : next
   }
   if (action.card === s.taken) return state
