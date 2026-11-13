@@ -92,10 +92,10 @@
 
 /* Title deeds: cream paper cards with a colour band, read as cards you hold */
 .wt-deed{position:relative;display:grid;gap:8px;width:100%;max-width:260px;padding:0 0 12px;border-radius:12px;overflow:hidden;background:#fbf4e4;color:#2a2118;box-shadow:0 1px 0 #fff8 inset,0 14px 28px -12px #000,0 0 0 1px #00000040;font-size:.86rem}
-.wt-deed header{position:relative;display:grid;gap:1px;padding:12px 40px 10px 14px;color:#fff;text-shadow:0 1px 2px #0006}
-.wt-deed header small{font-size:.7rem;opacity:.92}
-.wt-deed header h4{margin:0;font-family:var(--font-display);font-size:1.2rem;line-height:1.1}
-.wt-deed header span{font-size:.78rem;opacity:.92}
+.wt-deed-head{position:relative;display:grid;gap:1px;padding:12px 40px 10px 14px;color:#fff;text-shadow:0 1px 2px #0006}
+.wt-deed-head small{font-size:.7rem;opacity:.92}
+.wt-deed-head h4{margin:0;font-family:var(--font-display);font-size:1.2rem;line-height:1.1}
+.wt-deed-head span{font-size:.78rem;opacity:.92}
 .wt-deed-owner{position:absolute;top:10px;right:10px;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font-size:.8rem;color:#fff;box-shadow:0 0 0 2px #fff8}
 .wt-deed-art{margin:0 12px;border-radius:8px;overflow:hidden;box-shadow:0 0 0 1px #0002}
 .wt-deed-art svg{display:block;width:100%;height:auto}
@@ -103,12 +103,12 @@
 .wt-deed dl div{display:flex;justify-content:space-between;gap:10px;padding:3px 6px;border-radius:6px}
 .wt-deed dl div[data-now=true]{background:#2a21181a;font-weight:700}
 .wt-deed dt,.wt-deed dd{margin:0}
-.wt-deed footer{margin:0 12px;padding-top:8px;border-top:1px dashed #2a211866;display:grid;gap:2px}
-.wt-deed footer p{margin:0;display:flex;justify-content:space-between}
+.wt-deed-foot{margin:0 12px;padding-top:8px;border-top:1px dashed #2a211866;display:grid;gap:2px}
+.wt-deed-foot p{margin:0;display:flex;justify-content:space-between}
 .wt-deed-state{margin:0 12px;font-size:.78rem;color:#6a5a45;text-align:center}
 .wt-deed[data-mortgaged=true]{filter:grayscale(.85) brightness(.92)}
 .wt-deed-compact{max-width:178px;font-size:.76rem}
-.wt-deed-compact header{padding:8px 32px 7px 10px}.wt-deed-compact header h4{font-size:1rem}
+.wt-deed-compact .wt-deed-head{padding:8px 32px 7px 10px}.wt-deed-compact .wt-deed-head h4{font-size:1rem}
 .wt-hand{display:grid;gap:8px}
 .wt-hand-tabs{display:flex;flex-wrap:wrap;gap:6px}
 .wt-hand-tabs button{padding:6px 12px;border-radius:999px;border:1px solid #ffffff24;background:#ffffff0d;color:var(--text);font:inherit;font-size:.85rem;cursor:pointer}
@@ -117,7 +117,7 @@
 .wt-hand-row>*{flex:none;scroll-snap-align:start}
 .wt-move{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .wt-move .wt-die{width:44px;height:44px;animation:none}
-.wt-hint{margin:0;color:var(--text-muted);font-size:.88rem}.wt-card-deed{background:none;box-shadow:none;border-radius:0;overflow:visible}.wt-card-deed::before{display:none}.wt-card-deed .wt-deed{margin-inline:auto}
+.wt-hint{margin:0;color:var(--text-muted);font-size:.88rem}.wt-card.wt-card-deed{display:block;grid-template-columns:none;background:none;box-shadow:none;border-radius:0;overflow:visible;padding:0}.wt-card-deed::before{display:none}.wt-card-deed .wt-deed{margin-inline:auto}
 
 /* Online lobby: who has joined, and the host's Start button. */
 .wt-lobby{display:grid;gap:12px;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--surface)}
@@ -131,3 +131,9 @@
 
 /* Carbon and Ice: a navy table under the cream tiles */
 .wt-board{background:linear-gradient(145deg,#24344b,#142033);box-shadow:0 18px 40px #0000004d,inset 0 0 0 2px #6fd3ff22,0 0 0 3px #0d131d}
+
+/* Deeds are cream paper whatever the page theme: keep their own ink, not the card text colour. */
+.wt-card .wt-deed p,.wt-deed p{color:#2a2118;font-size:inherit;margin:0}
+.wt-card .wt-deed .wt-deed-state{color:#6a5a45;font-size:.78rem;margin:0 12px}
+.wt-deed dd{white-space:nowrap;flex:none}
+@media(min-width:700px){.wt-lobby ul{grid-template-columns:repeat(3,minmax(0,1fr))}}

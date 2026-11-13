@@ -23,21 +23,21 @@ export function Deed({ state, index, name, compact }: { state: State; index: num
     { text: 'With a visitor centre', value: fee * 4, now: !!holding?.centre },
   ] : [1, 2, 3, 4].map((n) => ({ text: `${n} ${space.kind === 'airport' ? (n === 1 ? 'airport' : 'airports') : (n === 1 ? 'service' : 'services')} owned`, value: fee * n, now: heldOf === n }))
   return <article className={`wt-deed${compact ? ' wt-deed-compact' : ''}`} aria-label={`Deed: ${space.name}`} data-mortgaged={holding?.mortgaged ? 'true' : undefined}>
-    <header style={{ background: colour }}>
+    <div className="wt-deed-head" style={{ background: colour }}>
       <small>{label}</small>
       <h4>{space.name}</h4>
       {space.kind === 'city' ? <span>{space.country}</span> : null}
       {holding ? <b className="wt-deed-owner" style={{ background: PLAYER_COLOURS[holding.owner] }} title={`Owned by ${name(holding.owner)}`}>{holding.owner + 1}</b> : null}
-    </header>
+    </div>
     {space.kind === 'city' && !compact ? <div className="wt-deed-art"><LandmarkArt kind={space.landmark} city={space.name} /></div> : null}
     <dl>
       {rows.map((r) => <div key={r.text} data-now={r.now ? 'true' : undefined}><dt>{r.text}</dt><dd>{money(r.value)}</dd></div>)}
     </dl>
-    <footer>
+    <div className="wt-deed-foot">
       <p><span>Price</span><strong>{money(space.price)}</strong></p>
       <p><span>Mortgage value</span><strong>{money(mortgageValue(space))}</strong></p>
       {space.kind === 'city' ? <p><span>Visitor centre</span><strong>{money(CENTRE_COST[space.group])}</strong></p> : null}
-    </footer>
+    </div>
     {holding ? <p className="wt-deed-state">{holding.mortgaged ? 'Mortgaged: no fees collected' : `Fee now ${money(feeAt(state, index))}`}{holding.centre ? ' · visitor centre' : ''}</p> : <p className="wt-deed-state">For sale</p>}
   </article>
 }
