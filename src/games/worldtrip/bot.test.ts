@@ -17,7 +17,7 @@ function playOut(seed: string, players: number, turnsEach = 12) {
 
 describe('computer player', () => {
   it('finishes whole matches with only legal actions, for 2, 3 and 4 seats', () => {
-    for (const n of [2, 3, 4]) for (const seed of ['a', 'b', 'c', 'd']) {
+    for (const n of [2, 3, 4, 5, 6]) for (const seed of ['a', 'b', 'c', 'd']) {
       const s = playOut(`${seed}-${n}`, n)
       expect(s.turn).toBe(12 * n)
       expect(standings(s)[0].worth).toBeGreaterThan(0)

@@ -3,6 +3,7 @@ import { createRandom } from '../lib/rng'
 import type { GameProps } from '../types'
 import { BOARD, CELLS, CENTRE_COST, GRID, GROUP_COLOURS, isClaimable, type Space } from './worldtrip/board'
 import { actor, chooseAction } from './worldtrip/bot'
+import { PLAYER_COLOURS, MIN_PLAYERS, MAX_PLAYERS } from './worldtrip/colours'
 import { Deed } from './worldtrip/Deed'
 import { LandmarkArt } from './worldtrip/Landmark'
 import { activePlayer, ALLOWANCE, applyAction, AUCTION_STEP, canBuildCentre, canMortgage, canRedeem, DEFAULT_TURNS, feeAt, HOTEL_FEE, money, mortgageValue, newGame, offerProblem, redeemCost, standings, START_CASH, TURN_CHOICES, type Action, type State } from './worldtrip/rules'
@@ -11,7 +12,6 @@ import { statusFor } from './worldtrip/status'
 import './worldtrip/worldtrip.css'
 
 const COMPUTER_DELAY_MS = 800
-const PLAYER_COLOURS = ['#b4542c', '#2f6f9f', '#2f6b45', '#7a4fa0']
 const CODES: Record<string, string> = {
   Vancouver: 'VAN', Toronto: 'TOR', 'Mexico City': 'MEX', 'New York': 'NYC', 'San Francisco': 'SFO', Lisbon: 'LIS', Barcelona: 'BCN', Rome: 'ROM',
   Amsterdam: 'AMS', Paris: 'PAR', London: 'LON', Stockholm: 'STO', Copenhagen: 'CPH', Oslo: 'OSL', 'Cape Town': 'CPT', Nairobi: 'NBO', Dubai: 'DXB',
@@ -270,7 +270,7 @@ export function WorldTrip({ onFinish, seed }: GameProps) {
 
   return <div className="wt">
     {!state || state.phase === 'done' || confirmRestart ? <div className="wt-setup">
-      <label>Players <select value={count} onChange={(e) => setCount(Number(e.target.value))}>{[2, 3, 4].map((n) => <option key={n} value={n}>{n} players</option>)}</select></label>
+      <label>Players <select value={count} onChange={(e) => setCount(Number(e.target.value))}>{Array.from({ length: MAX_PLAYERS - MIN_PLAYERS + 1 }, (_, k) => k + MIN_PLAYERS).map((n) => <option key={n} value={n}>{n} players</option>)}</select></label>
       <label>Computers <select value={Math.min(computersWanted, count - 1)} onChange={(e) => setComputersWanted(Number(e.target.value))}>{Array.from({ length: count }, (_, n) => <option key={n} value={n}>{n === 0 ? 'None' : n}</option>)}</select></label>
       <label>Turns each <select value={turnsEach} onChange={(e) => setTurnsEach(Number(e.target.value))}>{TURN_CHOICES.map((n) => <option key={n} value={n}>{n}{n === DEFAULT_TURNS ? ' (standard)' : ''}</option>)}</select></label>
       <button className="primary-btn" onClick={start}>{confirmRestart ? 'Replace match' : 'Start match'}</button>

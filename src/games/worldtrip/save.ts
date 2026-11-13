@@ -1,3 +1,4 @@
+import { MIN_PLAYERS, MAX_PLAYERS } from './colours'
 import { applyAction, isTurnsEach, newGame, type Action, type State } from './rules'
 import { isAction } from './actions'
 
@@ -8,7 +9,7 @@ export type Match = { state: State; actions: Action[]; startedAt: number; comput
 export function loadMatch(seed?: string): Match | null {
   try {
     const data = JSON.parse(localStorage.getItem(KEY) ?? 'null')
-    if (!data || ![2, 3, 4].includes(data.count) || !isTurnsEach(data.turnsEach) || typeof data.seed !== 'string' ||
+    if (!data || !Number.isInteger(data.count) || data.count < MIN_PLAYERS || data.count > MAX_PLAYERS || !isTurnsEach(data.turnsEach) || typeof data.seed !== 'string' ||
       (seed !== undefined && seed !== data.seed) || !Number.isSafeInteger(data.startedAt) || data.startedAt < 0 ||
       !Array.isArray(data.actions) || data.actions.length > 4000) return null
     const computers = data.computers === undefined ? 0 : data.computers

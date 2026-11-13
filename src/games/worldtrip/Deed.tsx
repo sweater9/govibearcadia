@@ -2,7 +2,7 @@ import { BOARD, CENTRE_COST, GROUP_COLOURS, GROUPS, isClaimable } from './board'
 import { feeAt, money, mortgageValue, type State } from './rules'
 import { LandmarkArt } from './Landmark'
 
-const PLAYER_COLOURS = ['#b4542c', '#2f6f9f', '#2f6b45', '#7a4fa0']
+import { PLAYER_COLOURS } from './colours'
 
 /**
  * A title deed for one claimable stop, laid out like a board-game property card: a colour band, the name, the rent ladder, then price and mortgage.
