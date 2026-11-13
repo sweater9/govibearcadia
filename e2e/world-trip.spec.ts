@@ -14,7 +14,7 @@ async function finishTrip(page: Page, afterFirstRoll?: () => Promise<void>) {
     if (await standings.isVisible()) return
     let clicked = false
     for (const button of moves) {
-      if ((await button.isVisible()) && (await button.isEnabled())) {
+      if ((await button.isVisible()) && (await button.isEnabled({ timeout: 500 }).catch(() => false))) {
         await button.click({ timeout: 3000 }).catch(() => undefined) // a button can vanish as the piece finishes walking
         if (!rolled && button === moves[0] && afterFirstRoll) { rolled = true; await afterFirstRoll() }
         clicked = true
@@ -27,6 +27,7 @@ async function finishTrip(page: Page, afterFirstRoll?: () => Promise<void>) {
 }
 
 test('plays a complete match offline, resumes after a reload and records the result once', async ({ page, context }) => {
+  test.setTimeout(240_000) // each human roll now walks the piece square by square
   await page.goto('/')
   await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true)
   await context.setOffline(true)

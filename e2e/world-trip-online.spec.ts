@@ -29,7 +29,7 @@ test('two players play World Trip from an invite link to the final standings, an
     let clicked = false
     for (const p of [a, b]) {
       for (const button of moves(p)) {
-        if (await button.isVisible() && (await button.isEnabled())) { await button.click({ timeout: 3000 }).catch(() => undefined); clicked = true; break }
+        if (await button.isVisible() && (await button.isEnabled({ timeout: 500 }).catch(() => false))) { await button.click({ timeout: 3000 }).catch(() => undefined); clicked = true; break }
       }
     }
     if (!clicked) await a.waitForTimeout(150)
