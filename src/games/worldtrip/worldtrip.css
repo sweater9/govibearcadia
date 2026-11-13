@@ -55,8 +55,8 @@
 .wt-turn .wt-token{width:1.3em;height:1.3em;font-size:.7em}
 .wt-status{max-width:90%}
 .wt-dice{gap:10px}
-.wt-die{position:relative;display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:18%;border:0;border-radius:22%;background:linear-gradient(145deg,#10161f,#1b2534);box-shadow:0 3px 0 #000000,0 6px 10px #00000044;animation:die-roll .5s ease-out}
-.wt-die i{width:70%;height:70%;margin:auto;border-radius:50%;background:#111823;align-self:center;justify-self:center}
+.wt-die{position:relative;display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:18%;border:0;border-radius:22%;background:linear-gradient(145deg,#f6f9ff,#c9d7ec);box-shadow:0 3px 0 #7f93b0,0 6px 10px #00000055;animation:die-roll .5s ease-out}
+.wt-die i{width:70%;height:70%;margin:auto;border-radius:50%;background:#16202e;align-self:center;justify-self:center}
 .wt-die[data-n="1"] i{grid-area:2/2}
 .wt-die[data-n="2"] i:nth-child(1){grid-area:1/1}.wt-die[data-n="2"] i:nth-child(2){grid-area:3/3}
 .wt-die[data-n="3"] i:nth-child(1){grid-area:1/1}.wt-die[data-n="3"] i:nth-child(2){grid-area:2/2}.wt-die[data-n="3"] i:nth-child(3){grid-area:3/3}
