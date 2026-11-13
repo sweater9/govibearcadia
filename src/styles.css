@@ -857,3 +857,7 @@ main{overflow-x:clip}
 .ck-piece{background:radial-gradient(circle at 35% 30%,#ff8a8a,#e23b3b 60%,#a51f1f)}
 .ck-piece[data-p="2"]{background:radial-gradient(circle at 35% 30%,#fff,#cfe0f5 60%,#8fa6c4)}
 .bj-table,.pk-table{box-shadow:inset 0 0 0 4px #2b3f5c,inset 0 0 0 6px #6fd3ff33,inset 0 0 60px #0007}
+
+/* covers: tint the outlined shapes so they read as glass pieces on the lit scene, not wireframes */
+.thumb-art rect[fill="none"],.thumb-art circle[fill="none"]{fill:color-mix(in srgb,currentColor 16%,transparent)}
+.thumb-art rect[fill="none"],.thumb-art circle[fill="none"],.thumb-art path[stroke]{filter:drop-shadow(0 0 3px color-mix(in srgb,currentColor 45%,transparent))}
