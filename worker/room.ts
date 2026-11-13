@@ -1,6 +1,6 @@
 import { DurableObject } from 'cloudflare:workers'
 import { createLimiter } from '../src/lib/ratelimit'
-import { dayKey, isNick, weekKey, type Nick } from '../src/lib/leaderboard'
+import { dayKey, isNick, isRankedGame, weekKey, type Nick } from '../src/lib/leaderboard'
 import { sha256Hex } from './hash'
 import type { Leaderboard } from './leaderboard'
 import { ONLINE_GAMES, ONLINE_GAME_IDS, type OnlineGame } from '../src/games/onlineGames'
@@ -103,6 +103,7 @@ export class Room extends DurableObject<Env> {
   /** When a move ends a round with a winner who opted in, tell the leaderboard. Never lets a failure reach the game. */
   private async recordIfWon(game: { id: string; impl: OnlineGame }, before: unknown, after: unknown): Promise<void> {
     try {
+      if (!isRankedGame(game.id)) return // only ranked games reach the leaderboards
       const was = game.impl.view(before, 0) as { turn: number | null }
       const now = game.impl.view(after, 0) as { turn: number | null; winner: number | null }
       if (was.turn === null || now.turn !== null || now.winner === null) return

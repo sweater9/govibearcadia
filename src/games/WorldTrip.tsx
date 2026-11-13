@@ -6,6 +6,7 @@ import { actor, chooseAction } from './worldtrip/bot'
 import { LandmarkArt } from './worldtrip/Landmark'
 import { activePlayer, ALLOWANCE, applyAction, AUCTION_STEP, canBuildCentre, canMortgage, canRedeem, DEFAULT_TURNS, feeAt, HOTEL_FEE, money, mortgageValue, newGame, offerProblem, redeemCost, standings, START_CASH, TURN_CHOICES, type Action, type State } from './worldtrip/rules'
 import { loadMatch, saveMatch } from './worldtrip/save'
+import { statusFor } from './worldtrip/status'
 import './worldtrip/worldtrip.css'
 
 const COMPUTER_DELAY_MS = 800
@@ -68,7 +69,7 @@ function StopCard({ state, index, name }: { state: State; index: number; name: (
   </section>
 }
 
-function Manage({ state, act, name }: { state: State; act: (a: Action) => void; name: (i: number) => string }) {
+function Manage({ state, act, name, online }: { state: State; act: (a: Action) => void; name: (i: number) => string; online?: boolean }) {
   const index = activePlayer(state)
   const owned = state.holdings.flatMap((h, i) => (h?.owner === index ? [i] : []))
   const others = state.players.flatMap((p, i) => (i === index || p.out ? [] : [i]))
@@ -91,7 +92,7 @@ function Manage({ state, act, name }: { state: State; act: (a: Action) => void; 
   if (state.offer) {
     const o = state.offer
     return <section aria-label="Pending offer">
-      <p role="status">Pass the device to {name(o.buyer)}. {name(index)} offers {describe(o.give)}{o.cash > 0 ? ` for ${money(o.cash)}` : o.cash < 0 ? ` with ${money(-o.cash)} from them to you` : ''}, and asks for {describe(o.take)}.</p>
+      <p role="status">{online ? `${name(o.buyer)}, a trade is proposed.` : `Pass the device to ${name(o.buyer)}.`} {name(index)} offers {describe(o.give)}{o.cash > 0 ? ` for ${money(o.cash)}` : o.cash < 0 ? ` with ${money(-o.cash)} from them to you` : ''}, and asks for {describe(o.take)}.</p>
       <div className="wt-actions"><button className="primary-btn" onClick={() => act({ type: 'accept' })}>Accept offer</button><button className="secondary-btn" onClick={() => act({ type: 'decline' })}>Decline offer</button></div>
     </section>
   }
@@ -124,13 +125,72 @@ function Manage({ state, act, name }: { state: State; act: (a: Action) => void; 
   </>
 }
 
+/** The board, the action buttons and the side panel: shared by the single-device game and online rooms. */
+export function Table({ state, act, name, status, canAct, thinking, extra, preview, online }: {
+  state: State; act: (a: Action) => void; name: (i: number) => string; status: string
+  /** Whether the person looking at this screen is the one who has to act now. */
+  canAct: boolean
+  /** What to say while someone else has to act; null for none. */
+  thinking: string | null
+  extra?: React.ReactNode
+  /** Setup screen before a match: just the empty board. */
+  preview?: boolean
+  /** Online room: each player has their own screen, so there is no device to pass. */
+  online?: boolean
+}) {
+  const [picked, setPicked] = useState<number | null>(null)
+  const current = activePlayer(state)
+  const run = (a: Action) => { setPicked(null); act(a) }
+  const ranking = standings(state)
+  const viewIndex = picked ?? state.players[current].position
+  const landed = BOARD[state.players[current].position]
+  const waiting = !canAct
+  return <>
+    {!preview && state.phase !== 'done' ? <div className="wt-actions">
+      {waiting && thinking ? <p className="wt-thinking" role="status">{thinking}</p> : null}
+      {!waiting && state.phase === 'roll' && state.players[current].inHotel ? <>
+        {state.players[current].pass ? <button className="secondary-btn" onClick={() => run({ type: 'usepass' })}>Use boarding pass</button> : null}
+        {state.players[current].cash >= HOTEL_FEE ? <button className="secondary-btn" onClick={() => run({ type: 'payout' })}>Pay {money(HOTEL_FEE)} to leave</button> : null}
+      </> : null}
+      {!waiting && state.phase === 'roll' ? <button className="primary-btn" onClick={() => run({ type: 'roll' })}>{state.players[current].inHotel ? 'Roll for doubles' : 'Roll dice'}</button> : null}
+      {!waiting && state.phase === 'auction' && state.auction ? (() => {
+        const { bid, order, pos } = state.auction
+        const cash = state.players[order[pos]].cash
+        return <>
+          <button className="primary-btn" onClick={() => run({ type: 'bid', amount: bid + AUCTION_STEP })}>Bid {money(bid + AUCTION_STEP)}</button>
+          {cash >= bid + 5 * AUCTION_STEP ? <button className="secondary-btn" onClick={() => run({ type: 'bid', amount: bid + 5 * AUCTION_STEP })}>Bid {money(bid + 5 * AUCTION_STEP)}</button> : null}
+          <button className="secondary-btn" onClick={() => run({ type: 'drop' })}>Drop out</button>
+        </>
+      })() : null}
+      {!waiting && state.phase === 'buy' && isClaimable(landed) ? <>
+        <button className="primary-btn" aria-label={`Claim ${landed.name} for ${money(landed.price)}`} onClick={() => run({ type: 'buy' })}>Claim · {money(landed.price)}</button>
+        <button className="secondary-btn" onClick={() => run({ type: 'skip' })}>Pass</button>
+      </> : null}
+    </div> : null}
+    <div className="wt-layout">
+      <Board state={state} selected={viewIndex} onSelect={setPicked} status={status} name={name} />
+      <div className="wt-side">
+        <StopCard state={state} index={viewIndex} name={name} />
+        {!preview && state.phase === 'manage' && !waiting ? <Manage key={state.turn} state={state} act={run} name={name} online={online} /> : null}
+        {!preview ? <ul className="wt-balances" aria-label={state.phase === 'done' ? 'Final standings' : 'Player balances'}>
+          {(state.phase === 'done' ? ranking : [...ranking].sort((a, b) => a.index - b.index)).map(({ index, cash, worth }) => <li key={index} data-active={state.phase !== 'done' && index === current ? 'true' : undefined}>
+            <span className="wt-token" style={{ background: PLAYER_COLOURS[index] }}>{index + 1}</span>
+            <span className="wt-bal"><strong>{name(index)}</strong><b>{state.players[index].out ? 'Out of the trip' : `${money(worth)} net worth`}</b><small>{state.players[index].inHotel ? 'At the Hotel Stopover · ' : ''}{state.players[index].pass ? 'Boarding pass · ' : ''}{money(cash)} credits{state.phase === 'done' ? ` · cities: ${state.collected[index].map((s) => BOARD[s].name).join(', ') || 'none'}` : ''}</small></span>
+          </li>)}
+        </ul> : null}
+        {extra}
+      </div>
+    </div>
+  </>
+}
+
+
 export function WorldTrip({ onFinish, seed }: GameProps) {
   const [match, setMatch] = useState(() => loadMatch(seed))
   const [count, setCount] = useState(2)
   const [computersWanted, setComputersWanted] = useState(1)
   const [turnsEach, setTurnsEach] = useState<number>(DEFAULT_TURNS)
   const [confirmRestart, setConfirmRestart] = useState(false)
-  const [picked, setPicked] = useState<number | null>(null)
   const state = match?.state
 
   function start() {
@@ -138,7 +198,6 @@ export function WorldTrip({ onFinish, seed }: GameProps) {
     saveMatch(next)
     setMatch(next)
     setConfirmRestart(false)
-    setPicked(null)
   }
   function act(action: Action) {
     if (!match) return
@@ -147,7 +206,6 @@ export function WorldTrip({ onFinish, seed }: GameProps) {
     const updated = { ...match, state: next, actions: [...match.actions, action] }
     saveMatch(updated)
     setMatch(updated)
-    setPicked(null)
     if (next.phase === 'done') {
       const ranking = standings(next)
       onFinish({ score: ranking[0].worth, won: true, durationMs: Math.max(0, Date.now() - match.startedAt), stats: { players: next.players.length, turns: next.turn, turnsEach: next.turnsEach } })
@@ -160,7 +218,6 @@ export function WorldTrip({ onFinish, seed }: GameProps) {
   const name = (i: number) => (isComputer(i) ? `Computer ${i - humans + 1}` : `Player ${i + 1}`)
   const relabel = (text: string) =>
     text.replace(/Pass the device to Player 1\./, humans === 1 ? 'Your turn.' : 'Pass the device to Player 1.').replace(/Pass the device to Player (\d)\./g, (m, n) => (isComputer(Number(n) - 1) ? '' : m)).replace(/Player (\d)/g, (m, n) => (isComputer(Number(n) - 1) ? name(Number(n) - 1) : m)).trim()
-  const current = state ? activePlayer(state) : 0
   const waiting = !!state && state.phase !== 'done' && isComputer(actor(state))
   const latest = useRef<{ act: (a: Action) => void }>({ act: () => {} })
   useEffect(() => {
@@ -173,14 +230,8 @@ export function WorldTrip({ onFinish, seed }: GameProps) {
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [match, confirmRestart])
-  const ranking = state ? standings(state) : []
-  const leaders = ranking.filter((e) => e.worth === ranking[0]?.worth)
-  const viewIndex = picked ?? (state ? state.players[current].position : 0)
-  const landed = state ? BOARD[state.players[current].position] : null
   const view = state ?? newGame(count, '', turnsEach)
-  const statusText = !state ? `Everyone starts at the Departure Gate with ${money(START_CASH)}.` : state.phase === 'done'
-    ? `${leaders.map(({ index }) => name(index)).join(' and ')} ${leaders.length > 1 ? 'share the win' : 'wins'} with ${money(leaders[0].worth)}.`
-    : `Round ${Math.floor(state.turn / state.players.length) + 1} of ${state.turnsEach} · ${name(current)}. ${state.dice ? `Rolled ${state.dice.join(' + ')}. ` : ''}${relabel(state.message)}`
+  const statusText = !state ? `Everyone starts at the Departure Gate with ${money(START_CASH)}.` : statusFor(state, name, relabel)
 
   return <div className="wt">
     {!state || state.phase === 'done' || confirmRestart ? <div className="wt-setup">
@@ -190,41 +241,9 @@ export function WorldTrip({ onFinish, seed }: GameProps) {
       <button className="primary-btn" onClick={start}>{confirmRestart ? 'Replace match' : 'Start match'}</button>
       {confirmRestart ? <button className="secondary-btn" onClick={() => setConfirmRestart(false)}>Keep playing</button> : null}
     </div> : null}
-    {state && state.phase !== 'done' ? <div className="wt-actions">
-      {waiting ? <p className="wt-thinking" role="status">{name(actor(state))} is playing…</p> : null}
-      {!waiting && state.phase === 'roll' && state.players[current].inHotel ? <>
-        {state.players[current].pass ? <button className="secondary-btn" onClick={() => act({ type: 'usepass' })}>Use boarding pass</button> : null}
-        {state.players[current].cash >= HOTEL_FEE ? <button className="secondary-btn" onClick={() => act({ type: 'payout' })}>Pay {money(HOTEL_FEE)} to leave</button> : null}
-      </> : null}
-      {!waiting && state.phase === 'roll' ? <button className="primary-btn" onClick={() => act({ type: 'roll' })}>{state.players[current].inHotel ? 'Roll for doubles' : 'Roll dice'}</button> : null}
-      {!waiting && state.phase === 'auction' && state.auction ? (() => {
-        const { bid, order, pos } = state.auction
-        const cash = state.players[order[pos]].cash
-        return <>
-          <button className="primary-btn" onClick={() => act({ type: 'bid', amount: bid + AUCTION_STEP })}>Bid {money(bid + AUCTION_STEP)}</button>
-          {cash >= bid + 5 * AUCTION_STEP ? <button className="secondary-btn" onClick={() => act({ type: 'bid', amount: bid + 5 * AUCTION_STEP })}>Bid {money(bid + 5 * AUCTION_STEP)}</button> : null}
-          <button className="secondary-btn" onClick={() => act({ type: 'drop' })}>Drop out</button>
-        </>
-      })() : null}
-      {!waiting && state.phase === 'buy' && landed && isClaimable(landed) ? <>
-        <button className="primary-btn" aria-label={`Claim ${landed.name} for ${money(landed.price)}`} onClick={() => act({ type: 'buy' })}>Claim · {money(landed.price)}</button>
-        <button className="secondary-btn" onClick={() => act({ type: 'skip' })}>Pass</button>
-      </> : null}
-    </div> : null}
-    <div className="wt-layout">
-      <Board state={view} selected={viewIndex} onSelect={setPicked} status={statusText} name={name} />
-      <div className="wt-side">
-        <StopCard state={view} index={viewIndex} name={name} />
-        {state && state.phase === 'manage' && !waiting ? <Manage key={state.turn} state={state} act={act} name={name} /> : null}
-        {state ? <ul className="wt-balances" aria-label={state.phase === 'done' ? 'Final standings' : 'Player balances'}>
-          {(state.phase === 'done' ? ranking : [...ranking].sort((a, b) => a.index - b.index)).map(({ index, cash, worth }) => <li key={index} data-active={state.phase !== 'done' && index === current ? 'true' : undefined}>
-            <span className="wt-token" style={{ background: PLAYER_COLOURS[index] }}>{index + 1}</span>
-            <span className="wt-bal"><strong>{name(index)}</strong><b>{state.players[index].out ? 'Out of the trip' : `${money(worth)} net worth`}</b><small>{state.players[index].inHotel ? 'At the Hotel Stopover · ' : ''}{state.players[index].pass ? 'Boarding pass · ' : ''}{money(cash)} credits{state.phase === 'done' ? ` · cities: ${state.collected[index].map((s) => BOARD[s].name).join(', ') || 'none'}` : ''}</small></span>
-          </li>)}
-        </ul> : null}
-        {state && state.phase !== 'done' && !confirmRestart ? <button className="secondary-btn" onClick={() => setConfirmRestart(true)}>New match</button> : null}
-      </div>
-    </div>
+    {state ? <Table state={state} act={act} name={name} status={statusText} canAct={!waiting} thinking={`${name(actor(state))} is playing…`}
+      extra={state.phase !== 'done' && !confirmRestart ? <button className="secondary-btn" onClick={() => setConfirmRestart(true)}>New match</button> : null} />
+      : <Table state={view} act={act} name={name} status={statusText} canAct={false} thinking={null} preview />}
     <details><summary>How to play</summary>
       <p>Roll two dice and travel clockwise round the 40 spaces. Passing or landing on the Departure Gate earns {money(ALLOWANCE)}. Claim an unowned city, airport or travel service when you land, or pass. Landing on another player’s stop costs its visitor fee.</p>
       <p>Own every city in a colour group to build visitor centres, which double a city’s fee. Draw Travel Cards for quick events, and pay the flat fees. Roll doubles to take another turn, but a third double in a row, a Fortune Card, or the Scenic Stopover sends you to the Hotel Stopover: roll doubles to leave, pay 50, use a boarding pass, or pay automatically after three tries. Own the whole colour group and its fees double; airports and travel services charge more for each one an owner holds. Pass on a stop and it goes to auction: everyone bids in turn, and the last bidder left wins it. Mortgage a stop for half its price (no fees on it until you redeem it for a little more). Propose one trade a turn, swapping stops and credits; pass the device to the buyer to accept or decline. If you cannot pay, your stops are sold back to the bank at half price; if that is still not enough you are out of the trip, and the last traveller left wins.</p>

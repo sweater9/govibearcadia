@@ -1,20 +1,8 @@
 import { applyAction, isTurnsEach, newGame, type Action, type State } from './rules'
-import { BOARD } from './board'
+import { isAction } from './actions'
 
 const KEY = 'govibearcadia.world-trip.v1'
 export type Match = { state: State; actions: Action[]; startedAt: number; computers: number }
-
-function isAction(value: unknown): value is Action {
-  if (!value || typeof value !== 'object') return false
-  const a = value as Action
-  switch (a.type) {
-    case 'roll': case 'buy': case 'skip': case 'accept': case 'decline': case 'end': case 'drop': case 'payout': case 'usepass': return true
-    case 'bid': return Number.isSafeInteger(a.amount)
-    case 'upgrade': case 'mortgage': case 'redeem': return Number.isInteger(a.space) && a.space >= 0 && a.space < BOARD.length
-    case 'offer': return !!a.offer && Number.isInteger(a.offer.buyer) && Number.isSafeInteger(a.offer.cash) && Array.isArray(a.offer.give) && Array.isArray(a.offer.take) && [...a.offer.give, ...a.offer.take].every((i) => Number.isInteger(i) && i >= 0 && i < BOARD.length)
-    default: return false
-  }
-}
 
 /** A saved match is its seed, settings and action list; loading replays them, so a damaged save is rejected rather than trusted. */
 export function loadMatch(seed?: string): Match | null {

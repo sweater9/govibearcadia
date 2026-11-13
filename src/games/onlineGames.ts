@@ -7,6 +7,7 @@ import * as c4 from './connect4/online'
 import * as bs from './battleship/rules'
 import * as ck from './checkers/rules'
 import * as ttt from './tictactoe/rules'
+import * as wt from './worldtrip/online'
 
 export type Message = Record<string, unknown>
 export type Result = { ok: true; room: unknown } | { ok: false; error: string }
@@ -69,5 +70,13 @@ const battleship: OnlineGame = {
   act: (room, seat, m) => bs.act(room as bs.Room, seat, m),
 }
 
-export const ONLINE_GAMES: Record<string, OnlineGame> = { 'connect-four': connectFour, 'tic-tac-toe': tictactoe, checkers, battleship }
+const worldTrip: OnlineGame = {
+  newRoom: () => wt.newRoom(),
+  move: (room, seat, m) => wt.applyMove(room as wt.Room, seat, m),
+  rematch: (room, seat) => wt.requestRematch(room as wt.Room, seat),
+  view: (room, seat) => wt.viewFor(room as wt.Room, seat),
+  parse: wt.parseRoom,
+}
+
+export const ONLINE_GAMES: Record<string, OnlineGame> = { 'connect-four': connectFour, 'tic-tac-toe': tictactoe, checkers, battleship, 'world-trip': worldTrip }
 export const ONLINE_GAME_IDS = Object.keys(ONLINE_GAMES)

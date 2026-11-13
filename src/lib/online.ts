@@ -45,6 +45,7 @@ export const ONLINE_GAME_LIST = [
   { id: 'tic-tac-toe', title: 'Tic-Tac-Toe' },
   { id: 'checkers', title: 'Checkers' },
   { id: 'battleship', title: 'Battleship' },
+  { id: 'world-trip', title: 'World Trip' },
 ] as const
 export type OnlineGameId = (typeof ONLINE_GAME_LIST)[number]['id']
 
