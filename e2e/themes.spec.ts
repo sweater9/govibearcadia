@@ -31,9 +31,9 @@ test('themes unlock with level, apply instantly and survive a reload', async ({ 
 
   await page.locator('[data-theme-option="ember"]').click()
   expect(await theme(page)).toBe('ember')
-  expect(await primary(page)).toBe('#C2410C') // the accent changes...
+  expect(await primary(page)).toBe('#FF7A4D') // the accent changes...
   expect(await filter(page)).toBe('none') // ...and the page is never colour-shifted, so the palette and its contrast stay as designed
-  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(250, 243, 232)')
+  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(13, 19, 29)')
   await expect(page.locator('[data-theme-option="ember"]')).toHaveAttribute('aria-checked', 'true')
 
   await page.reload()
@@ -46,7 +46,7 @@ test('themes unlock with level, apply instantly and survive a reload', async ({ 
   await page.locator('[data-theme-option="neon"]').click()
   expect(await theme(page)).toBe('neon')
   expect(await filter(page)).toBe('none')
-  expect(await primary(page)).toBe('#A94A24')
+  expect(await primary(page)).toBe('#6FD3FF')
 })
 
 test('a locked theme smuggled into storage is ignored', async ({ page }) => {
