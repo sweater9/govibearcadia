@@ -86,3 +86,6 @@
   .wt-board{width:min(calc(100vw - 8px),calc(100svh - 372px),620px);margin-inline:calc(50% - min(calc(100vw - 8px),calc(100svh - 372px),620px)/2)}
 }
 .wt-thinking{margin:0;padding:10px 18px;border-radius:999px;background:#fff3df;color:#A94A24;font-weight:700;animation:pulse 1.2s ease-in-out infinite}
+
+/* An online room has the room code and a back link above the board, so on short screens the title makes way for the board. */
+@media (max-height:700px){.play-page:has(.wt-room) .room-title{display:none}}
