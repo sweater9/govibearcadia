@@ -3,6 +3,7 @@ import { createRandom } from '../lib/rng'
 import type { GameProps } from '../types'
 import { BOARD, CELLS, CENTRE_COST, GRID, GROUP_COLOURS, isClaimable, type Space } from './worldtrip/board'
 import { actor, chooseAction } from './worldtrip/bot'
+import { Deed } from './worldtrip/Deed'
 import { LandmarkArt } from './worldtrip/Landmark'
 import { activePlayer, ALLOWANCE, applyAction, AUCTION_STEP, canBuildCentre, canMortgage, canRedeem, DEFAULT_TURNS, feeAt, HOTEL_FEE, money, mortgageValue, newGame, offerProblem, redeemCost, standings, START_CASH, TURN_CHOICES, type Action, type State } from './worldtrip/rules'
 import { loadMatch, saveMatch } from './worldtrip/save'
@@ -54,6 +55,11 @@ function Board({ state, selected, onSelect, status, name }: { state: State; sele
 }
 
 function StopCard({ state, index, name }: { state: State; index: number; name: (i: number) => string }) {
+  if (isClaimable(BOARD[index])) return <section className="wt-card wt-card-deed" aria-label="Selected stop"><Deed state={state} index={index} name={name} /></section>
+  return <PlainStop state={state} index={index} name={name} />
+}
+
+function PlainStop({ state, index, name }: { state: State; index: number; name: (i: number) => string }) {
   const space = BOARD[index]
   const holding = state.holdings[index]
   return <section className="wt-card" aria-label="Selected stop" style={{ '--group': space.kind === 'city' ? GROUP_COLOURS[space.group] : '#b8780f' } as React.CSSProperties}>
@@ -66,6 +72,20 @@ function StopCard({ state, index, name }: { state: State; index: number; name: (
       {space.kind === 'card' ? <p>{space.deck === 'travel' ? 'Draw a Travel Card: a small event.' : 'Draw a Fortune Card: a bigger swing, and sometimes the Hotel Stopover.'}</p> : null}
       {space.kind === 'corner' ? <p>{space.name === 'Departure Gate' ? `Collect ${money(ALLOWANCE)} each lap.` : space.name === 'Hotel Stopover' ? `Just visiting is free. A stranded player rolls doubles to leave, or pays ${money(HOTEL_FEE)}, or after three tries must pay.` : space.name === 'Scenic Stopover' ? 'Missed flight: go to the Hotel Stopover.' : 'A free stop.'}</p> : null}
     </div>
+  </section>
+}
+
+/** The title deeds each player holds, one tab per player; the player whose turn it is shows first. */
+function Hand({ state, name, current }: { state: State; name: (i: number) => string; current: number }) {
+  const [who, setWho] = useState<number | null>(null)
+  const p = who ?? current
+  const cards = state.holdings.flatMap((h, i) => (h?.owner === p ? [i] : []))
+  return <section className="wt-hand" aria-label="Property cards">
+    <div className="wt-hand-tabs" role="group" aria-label="Whose cards">
+      {state.players.map((pl, i) => <button key={i} type="button" aria-pressed={p === i} onClick={() => setWho(i)}>{name(i)}{pl.out ? ' (out)' : ''}</button>)}
+    </div>
+    {cards.length ? <div className="wt-hand-row">{cards.map((i) => <Deed key={i} state={state} index={i} name={name} compact />)}</div>
+      : <p className="wt-hint">{name(p)} holds no property cards yet. Claim a stop to add its deed here.</p>}
   </section>
 }
 
@@ -139,21 +159,35 @@ export function Table({ state, act, name, status, canAct, thinking, extra, previ
   online?: boolean
 }) {
   const [picked, setPicked] = useState<number | null>(null)
+  /** After you roll, the board still shows where you stood until you press Move and walk your piece across the squares. */
+  const [pending, setPending] = useState<{ before: State; who: number } | null>(null)
+  const [walked, setWalked] = useState<number | null>(null)
   const current = activePlayer(state)
-  const run = (a: Action) => { setPicked(null); act(a) }
-  const ranking = standings(state)
-  const viewIndex = picked ?? state.players[current].position
-  const landed = BOARD[state.players[current].position]
+  const run = (a: Action) => { setPicked(null); if (a.type === 'roll' && !preview) setPending({ before: state, who: current }); act(a) }
+  const moved = !!pending && state !== pending.before && state.turn === pending.before.turn && !!state.dice && state.players[pending.who].position !== pending.before.players[pending.who].position
+  const total = state.dice ? state.dice[0] + state.dice[1] : 0
+  useEffect(() => { if (pending && state !== pending.before && !moved) setPending(null) }, [state, pending, moved])
+  useEffect(() => {
+    if (!moved || walked === null) return
+    const timer = setTimeout(() => { if (walked >= total) { setPending(null); setWalked(null) } else setWalked(walked + 1) }, walked >= total ? 280 : 190)
+    return () => clearTimeout(timer)
+  }, [moved, walked, total])
+  const shown: State = moved && pending ? { ...pending.before, dice: state.dice, players: pending.before.players.map((p, i) => (i === pending.who && walked !== null ? { ...p, position: (p.position + walked) % BOARD.length } : p)) } : state
+  const ranking = standings(shown)
+  const viewIndex = picked ?? shown.players[current].position
+  const landed = BOARD[shown.players[current].position]
   const waiting = !canAct
+  const walking = moved && !waiting
   return <>
     {!preview && state.phase !== 'done' ? <div className="wt-actions">
       {waiting && thinking ? <p className="wt-thinking" role="status">{thinking}</p> : null}
-      {!waiting && state.phase === 'roll' && state.players[current].inHotel ? <>
+      {walking ? <div className="wt-move"><button className="primary-btn" disabled={walked !== null} onClick={() => setWalked(0)}>{`Move ${total} spaces`}</button></div> : null}
+      {!waiting && !walking && state.phase === 'roll' && state.players[current].inHotel ? <>
         {state.players[current].pass ? <button className="secondary-btn" onClick={() => run({ type: 'usepass' })}>Use boarding pass</button> : null}
         {state.players[current].cash >= HOTEL_FEE ? <button className="secondary-btn" onClick={() => run({ type: 'payout' })}>Pay {money(HOTEL_FEE)} to leave</button> : null}
       </> : null}
-      {!waiting && state.phase === 'roll' ? <button className="primary-btn" onClick={() => run({ type: 'roll' })}>{state.players[current].inHotel ? 'Roll for doubles' : 'Roll dice'}</button> : null}
-      {!waiting && state.phase === 'auction' && state.auction ? (() => {
+      {!waiting && !walking && state.phase === 'roll' ? <button className="primary-btn" onClick={() => run({ type: 'roll' })}>{state.players[current].inHotel ? 'Roll for doubles' : 'Roll dice'}</button> : null}
+      {!waiting && !walking && state.phase === 'auction' && state.auction ? (() => {
         const { bid, order, pos } = state.auction
         const cash = state.players[order[pos]].cash
         return <>
@@ -162,16 +196,17 @@ export function Table({ state, act, name, status, canAct, thinking, extra, previ
           <button className="secondary-btn" onClick={() => run({ type: 'drop' })}>Drop out</button>
         </>
       })() : null}
-      {!waiting && state.phase === 'buy' && isClaimable(landed) ? <>
+      {!waiting && !walking && state.phase === 'buy' && isClaimable(landed) ? <>
         <button className="primary-btn" aria-label={`Claim ${landed.name} for ${money(landed.price)}`} onClick={() => run({ type: 'buy' })}>Claim · {money(landed.price)}</button>
         <button className="secondary-btn" onClick={() => run({ type: 'skip' })}>Pass</button>
       </> : null}
     </div> : null}
     <div className="wt-layout">
-      <Board state={state} selected={viewIndex} onSelect={setPicked} status={status} name={name} />
+      <Board state={shown} selected={viewIndex} onSelect={setPicked} status={walking ? `Rolled ${shown.dice?.[0]} and ${shown.dice?.[1]}. ${walked === null ? `Press Move to walk ${total} spaces.` : 'Walking…'}` : status} name={name} />
       <div className="wt-side">
-        <StopCard state={state} index={viewIndex} name={name} />
-        {!preview && state.phase === 'manage' && !waiting ? <Manage key={state.turn} state={state} act={run} name={name} online={online} /> : null}
+        <StopCard state={shown} index={viewIndex} name={name} />
+        {!preview ? <Hand state={shown} name={name} current={current} /> : null}
+        {!preview && !walking && state.phase === 'manage' && !waiting ? <Manage key={state.turn} state={state} act={run} name={name} online={online} /> : null}
         {!preview ? <ul className="wt-balances" aria-label={state.phase === 'done' ? 'Final standings' : 'Player balances'}>
           {(state.phase === 'done' ? ranking : [...ranking].sort((a, b) => a.index - b.index)).map(({ index, cash, worth }) => <li key={index} data-active={state.phase !== 'done' && index === current ? 'true' : undefined}>
             <span className="wt-token" style={{ background: PLAYER_COLOURS[index] }}>{index + 1}</span>

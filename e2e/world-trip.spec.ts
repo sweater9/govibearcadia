@@ -8,14 +8,14 @@ import { expectRows, readTable } from './helpers'
  */
 async function finishTrip(page: Page, afterFirstRoll?: () => Promise<void>) {
   const standings = page.getByRole('list', { name: 'Final standings' })
-  const moves = [page.getByRole('button', { name: /^Roll (dice|for doubles)$/ }), page.getByRole('button', { name: 'Pass', exact: true }), page.getByRole('button', { name: 'Drop out' }), page.getByRole('button', { name: /^(End turn|Roll again)$/ })]
+  const moves = [page.getByRole('button', { name: /^Roll (dice|for doubles)$/ }), page.getByRole('button', { name: /^Move \d+ spaces$/ }), page.getByRole('button', { name: 'Pass', exact: true }), page.getByRole('button', { name: 'Drop out' }), page.getByRole('button', { name: /^(End turn|Roll again)$/ })]
   let rolled = false
   for (let i = 0; i < 900; i++) {
     if (await standings.isVisible()) return
     let clicked = false
     for (const button of moves) {
-      if (await button.isVisible()) {
-        await button.click()
+      if ((await button.isVisible()) && (await button.isEnabled())) {
+        await button.click({ timeout: 3000 }).catch(() => undefined) // a button can vanish as the piece finishes walking
         if (!rolled && button === moves[0] && afterFirstRoll) { rolled = true; await afterFirstRoll() }
         clicked = true
         break
@@ -51,7 +51,9 @@ test('a buyer can accept a saved offer for a stop', async ({ page }) => {
   await page.getByLabel('Computers').selectOption('0')
   await page.getByRole('button', { name: 'Start match' }).click()
   await page.getByRole('button', { name: 'Roll dice' }).click()
+  await page.getByRole('button', { name: /^Move \d+ spaces$/ }).click()
   await page.getByRole('button', { name: /^Claim / }).click()
+  await expect(page.getByRole('region', { name: 'Property cards' })).toContainText('Player 1')
   await page.getByText('Propose a trade', { exact: true }).click()
   await page.getByRole('group', { name: 'You give' }).getByRole('checkbox').first().check()
   await page.getByLabel('Credits from them').fill('150')
@@ -83,4 +85,17 @@ test('a computer opponent takes its turns on its own and the match saves once', 
   await expect(page.getByRole('list', { name: 'Final standings' })).toBeVisible({ timeout: 15_000 })
   await expect(page.getByText('Computer 1').first()).toBeVisible()
   await expectRows(page, 'history', 1)
+})
+
+test('after a roll you press Move and your piece walks before you can claim the stop', async ({ page }) => {
+  const seed = Array.from({ length: 60 }, (_, i) => `deal-${i}`).find((s) => applyAction(newGame(2, s), { type: 'roll' }).phase === 'buy')!
+  await page.goto(`/play/world-trip?seed=${seed}`)
+  await page.getByLabel('Computers').selectOption('0')
+  await page.getByRole('button', { name: 'Start match' }).click()
+  await page.getByRole('button', { name: 'Roll dice' }).click()
+  await expect(page.getByRole('button', { name: /^Claim / })).toHaveCount(0)
+  await expect(page.locator('.wt-status')).toContainText('Press Move')
+  await page.getByRole('button', { name: /^Move \d+ spaces$/ }).click()
+  await expect(page.getByRole('button', { name: /^Claim / })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Selected stop' }).locator('.wt-deed')).toBeVisible()
 })

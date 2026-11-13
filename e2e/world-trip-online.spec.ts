@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test'
 // Two real browser contexts play World Trip through the lobby against the real Worker. Moves are random (the room's dice seed is secret),
 // so each player just does the least on their turn until the standings show.
 
-const moves = (p: Page) => [p.getByRole('button', { name: /^Roll (dice|for doubles)$/ }), p.getByRole('button', { name: 'Pass', exact: true }), p.getByRole('button', { name: 'Drop out' }), p.getByRole('button', { name: /^(End turn|Roll again)$/ })]
+const moves = (p: Page) => [p.getByRole('button', { name: /^Roll (dice|for doubles)$/ }), p.getByRole('button', { name: /^Move \d+ spaces$/ }), p.getByRole('button', { name: 'Pass', exact: true }), p.getByRole('button', { name: 'Drop out' }), p.getByRole('button', { name: /^(End turn|Roll again)$/ })]
 
 test('two players play World Trip from an invite link to the final standings, and a third visitor is turned away', async ({ browser, baseURL, isMobile }) => {
   test.setTimeout(420_000)
@@ -29,7 +29,7 @@ test('two players play World Trip from an invite link to the final standings, an
     let clicked = false
     for (const p of [a, b]) {
       for (const button of moves(p)) {
-        if (await button.isVisible() && (await button.isEnabled())) { await button.click(); clicked = true; break }
+        if (await button.isVisible() && (await button.isEnabled())) { await button.click({ timeout: 3000 }).catch(() => undefined); clicked = true; break }
       }
     }
     if (!clicked) await a.waitForTimeout(150)
