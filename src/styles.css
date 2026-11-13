@@ -861,3 +861,4 @@ main{overflow-x:clip}
 /* covers: tint the outlined shapes so they read as glass pieces on the lit scene, not wireframes */
 .thumb-art rect[fill="none"],.thumb-art circle[fill="none"]{fill:color-mix(in srgb,currentColor 16%,transparent)}
 .thumb-art rect[fill="none"],.thumb-art circle[fill="none"],.thumb-art path[stroke]{filter:drop-shadow(0 0 3px color-mix(in srgb,currentColor 45%,transparent))}
+.info-page>p{margin-bottom:24px}.info-page>p:last-child{margin-bottom:0}
