@@ -75,11 +75,11 @@ test('the hero is left-aligned with the trust line, and the start-here cards are
   expect(daily!.y).toBeLessThan(900)
 })
 
-test('exactly the four games with online rooms carry the Online badge, and the phone page does not overflow', async ({ page }) => {
+test('exactly the five games with online rooms carry the Online badge, and the phone page does not overflow', async ({ page }) => {
   await page.goto('/')
   const badged = page.locator('article.game-card', { has: page.locator('.online-badge') })
-  await expect(badged).toHaveCount(4)
-  for (const title of ['Connect Four', 'Tic-Tac-Toe', 'Checkers', 'Battleship']) {
+  await expect(badged).toHaveCount(5)
+  for (const title of ['Connect Four', 'Tic-Tac-Toe', 'Checkers', 'Battleship', 'World Trip']) {
     await expect(badged.getByRole('heading', { name: title })).toBeVisible()
   }
   expect(await overflowsHorizontally(page)).toBe(false)
