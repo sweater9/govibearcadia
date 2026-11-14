@@ -158,6 +158,25 @@ const gravityFlip: Cover = (u, f) => <g>
   </g>
 </g>
 
+/** Traffic Dodger: a night road, three lanes of tail-lights and the player's car squeezing between them. */
+const trafficDodger: Cover = (u, f) => {
+  const car = (x: number, y: number, c: string, key: string) => <g key={key}>
+    <rect x={x} y={y} width="16" height="26" rx="5" fill={c} />
+    <rect x={x + 3} y={y + 6} width="10" height="8" rx="2" fill="#0a121c" opacity=".75" />
+    <rect x={x + 2} y={y + 22} width="3.4" height="2.2" fill="#ff4d4d" /><rect x={x + 10.6} y={y + 22} width="3.4" height="2.2" fill="#ff4d4d" />
+  </g>
+  return <g>
+    <rect width="160" height="90" fill="#0f1622" />
+    <rect x="30" width="100" height="90" fill="#18222f" />
+    {[55, 80, 105].map((x) => <path key={x} d={`M${x} 0V90`} stroke="#7fd8ff" strokeOpacity=".55" strokeWidth="1.2" strokeDasharray="7 6" />)}
+    {car(36, 8, '#ff7a59', 'a')}{car(86, 18, '#ffd166', 'b')}{car(110, -4, '#9b8cff', 'c')}{car(36, 52, '#5eead4', 'd')}
+    <rect x="73" y="50" width="16" height="30" rx="5" fill={f('teal')} />
+    <rect x="76" y="58" width="10" height="9" rx="2" fill="#0a121c" opacity=".75" />
+    <ellipse cx="81" cy="84" rx="11" ry="3" fill="#000" opacity=".35" filter={`url(#${u}-soft)`} />
+  </g>
+}
+
 export const ARCADE_COVERS: Record<string, Cover> = {
+  'traffic-dodger': trafficDodger,
   'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'gravity-flip': gravityFlip,
 }

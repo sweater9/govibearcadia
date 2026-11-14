@@ -30,6 +30,7 @@ const PLAY_AREA = {
   'world-trip': '.wt-board',
   klondike: '.kl-board',
   nonogram: '.ng-board',
+  'traffic-dodger': '.tr-pad',
   ludo: '.ld-board',
   'indian-rummy': '.rm-hand',
   blackjack: '.bj-table',

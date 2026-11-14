@@ -182,6 +182,15 @@ export const registry: GameEntry[] = [
       estimated: '3–15 min',
     },
     Component: lazy(() => import('./Nonogram').then((m) => ({ default: m.Nonogram }))),
+      id: 'traffic-dodger',
+      title: 'Traffic Dodger',
+      description: 'Weave through oncoming traffic on a four-lane road. It gets faster the longer you last.',
+      category: 'Arcade',
+      accent: 'from-sky-400 to-fuchsia-500',
+      glyph: '🚗',
+      estimated: '1–5 min',
+    },
+    Component: lazy(() => import('./TrafficDodger').then((m) => ({ default: m.TrafficDodger }))),
   },
   {
     meta: {
