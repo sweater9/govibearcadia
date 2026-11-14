@@ -351,6 +351,18 @@ export const registry: GameEntry[] = [
   },
   {
     meta: {
+      id: 'chess',
+      title: 'Chess',
+      description: 'The full game of chess against the computer: castling, en passant, promotion, three levels. Play White or Black.',
+      category: 'Strategy',
+      accent: 'from-slate-700 to-amber-400',
+      glyph: '♞',
+      estimated: '10–40 min',
+    },
+    Component: lazy(() => import('./Chess').then((m) => ({ default: m.Chess }))),
+  },
+  {
+    meta: {
       id: 'blackjack',
       title: 'Blackjack',
       description: 'Beat the dealer to 21 with play-money chips: hit, stand, double down and split. Chips have no real value.',
