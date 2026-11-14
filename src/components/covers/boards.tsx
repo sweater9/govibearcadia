@@ -134,7 +134,7 @@ const ghataBara: Cover = (u, f) => {
     })}
     {seats.map(([c, r, m]) => {
       const [x, y] = cell(c, r)
-      return <g key={m}><Disc u={u} f={f} cx={x + 3.3} cy={y + 4} r="2.9" m={m} ring={false} /><Disc u={u} f={f} cx={x + 6} cy={y + 5.2} r="2.9" m={m} ring={false} /></g>
+      return <g key={m}><Disc u={u} f={f} cx={x + 3.2} cy={y + 3.6} r="3.5" m={m} ring={false} /><Disc u={u} f={f} cx={x + 5.9} cy={y + 5.4} r="3.5" m={m} ring={false} /></g>
     })}
     {[[12, 62, -14, 2], [126, 36, 11, 5]].map(([x, y, rot, n], i) => <g key={i} transform={`rotate(${rot} ${x + 12} ${y + 5})`}>
       <Shadow u={u} cx={x + 13} cy={y + 12} rx="12" o={0.4} />
@@ -165,7 +165,7 @@ const aaduPuli: Cover = (u, f) => {
     })}
     {[[apex[0], apex[1]], [at(36)[1], 36], [at(58)[3], 58]].map(([x, y], i) => <g key={i}>
       <Disc u={u} f={f} cx={x} cy={y} r="5.4" m="orange" ring={false} />
-      <path d={`M${x - 3.6} ${y - 2.4} L${x - 1.2} ${y - 1} M${x + 3.6} ${y - 2.4} L${x + 1.2} ${y - 1} M${x - 3.4} ${y + 2.2} L${x - 1.1} ${y + 1} M${x + 3.4} ${y + 2.2} L${x + 1.1} ${y + 1}`} stroke="#3a1c04" strokeWidth="1.2" strokeLinecap="round" />
+      <path d={`M${x - 3.4} ${y - 3.2} Q${x - 1.6} ${y} ${x - 3.4} ${y + 3.2} M${x + 3.4} ${y - 3.2} Q${x + 1.6} ${y} ${x + 3.4} ${y + 3.2} M${x} ${y - 5} V${y - 2.2} M${x} ${y + 2.2} V${y + 5}`} stroke="#3a1c04" strokeWidth="1.3" strokeLinecap="round" fill="none" />
     </g>)}
   </g>
 }
