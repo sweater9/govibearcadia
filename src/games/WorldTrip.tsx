@@ -32,12 +32,12 @@ function Board({ state, selected, onSelect, status, name }: { state: State; sele
       const here = state.players.flatMap((p, pi) => (p.position === i ? [pi] : []))
       return <li key={i} style={{ gridRow: row + 1, gridColumn: col + 1, display: 'contents' }}>
         <button type="button" className="wt-cell" style={{ gridRow: row + 1, gridColumn: col + 1 }} aria-pressed={selected === i}
-          aria-label={`Space ${i + 1}, ${space.name}${holding ? `, owned by ${name(holding.owner)}${holding.centre ? ' with a visitor centre' : ''}` : ''}${here.length ? `, ${here.map(name).join(' and ')} here` : ''}`}
+          aria-label={`Space ${i + 1}, ${space.name}${holding ? `, owned by ${name(holding.owner)}${holding.centre ? ' with a visitor centre' : ''}, visitors pay ${money(feeAt(state, i))}` : ''}${here.length ? `, ${here.map(name).join(' and ')} here` : ''}`}
           onClick={() => onSelect(i)}>
           {space.kind === 'city' ? <span className="wt-band" style={{ background: GROUP_COLOURS[space.group] }} /> : <span className="wt-band" style={{ background: 'transparent' }} />}
           {space.kind === 'city' ? <LandmarkArt kind={space.landmark} decorative /> : null}
           <span className={space.kind === 'airport' || space.kind === 'service' || space.kind === 'card' || space.kind === 'fee' ? 'wt-icon' : 'wt-code'}>{code(space)}</span>
-          {holding ? <span className="wt-owner" style={{ background: PLAYER_COLOURS[holding.owner] }}>{holding.centre ? '◆' : ''}{holding.owner + 1}</span> : <span className="wt-owner" />}
+          {holding ? <span className="wt-owner" style={{ background: PLAYER_COLOURS[holding.owner] }} title={`Owner: ${name(holding.owner)}. Visitors pay ${money(feeAt(state, i))}`}>{holding.centre ? '◆' : ''}{holding.owner + 1}<b className="wt-rent">{holding.mortgaged ? '–' : feeAt(state, i)}</b></span> : <span className="wt-owner" />}
           {here.length ? <span className="wt-tokens">{here.map((pi) => <span key={pi} className="wt-token" style={{ background: PLAYER_COLOURS[pi], outline: pi === current ? '2px solid var(--text)' : 'none' }}>{pi + 1}</span>)}</span> : null}
         </button>
       </li>
@@ -55,7 +55,7 @@ function Board({ state, selected, onSelect, status, name }: { state: State; sele
 }
 
 function StopCard({ state, index, name }: { state: State; index: number; name: (i: number) => string }) {
-  if (isClaimable(BOARD[index])) return <section className="wt-card wt-card-deed" aria-label="Selected stop"><Deed state={state} index={index} name={name} /></section>
+  if (isClaimable(BOARD[index])) return <section className="wt-card wt-card-deed" aria-label="Selected stop"><Deed state={state} index={index} name={name} compact /></section>
   return <PlainStop state={state} index={index} name={name} />
 }
 
@@ -75,8 +75,8 @@ function PlainStop({ state, index, name }: { state: State; index: number; name: 
   </section>
 }
 
-/** The title deeds each player holds, one tab per player; the player whose turn it is shows first. */
-function Hand({ state, name, current }: { state: State; name: (i: number) => string; current: number }) {
+/** The stops each player holds, one tab per player and one line per stop with the fee a visitor pays now; select a line to read its full deed. */
+function Hand({ state, name, current, onSelect, selected }: { state: State; name: (i: number) => string; current: number; onSelect: (i: number) => void; selected: number }) {
   const [who, setWho] = useState<number | null>(null)
   const p = who ?? current
   const cards = state.holdings.flatMap((h, i) => (h?.owner === p ? [i] : []))
@@ -84,8 +84,16 @@ function Hand({ state, name, current }: { state: State; name: (i: number) => str
     <div className="wt-hand-tabs" role="group" aria-label="Whose cards">
       {state.players.map((pl, i) => <button key={i} type="button" aria-pressed={p === i} onClick={() => setWho(i)}>{name(i)}{pl.out ? ' (out)' : ''}</button>)}
     </div>
-    {cards.length ? <div className="wt-hand-row">{cards.map((i) => <Deed key={i} state={state} index={i} name={name} compact />)}</div>
-      : <p className="wt-hint">{name(p)} holds no property cards yet. Claim a stop to add its deed here.</p>}
+    {cards.length ? <ul className="wt-owned">{cards.map((i) => {
+      const sp = BOARD[i]
+      const h = state.holdings[i]!
+      return <li key={i}><button type="button" aria-pressed={selected === i} onClick={() => onSelect(i)}>
+        <span className="wt-dot" style={{ background: sp.kind === 'city' ? GROUP_COLOURS[sp.group] : '#7d8795' }} />
+        <span className="wt-owned-name">{sp.name}</span>
+        <span className="wt-owned-fee">{h.mortgaged ? 'mortgaged' : `${money(feeAt(state, i))} fee`}{h.centre ? ' ◆' : ''}</span>
+      </button></li>
+    })}</ul>
+      : <p className="wt-hint">{name(p)} holds no stops yet. Claim one to list it here.</p>}
   </section>
 }
 
@@ -117,7 +125,6 @@ function Manage({ state, act, name, online }: { state: State; act: (a: Action) =
     </section>
   }
   return <>
-    <div className="wt-actions"><button className="primary-btn" onClick={() => act({ type: 'end' })}>{state.again ? 'Roll again' : 'End turn'}</button></div>
     {owned.length ? <details>
       <summary>Deals, mortgages and visitor centres</summary>
       <ul className="wt-props">{owned.map((i) => {
@@ -194,11 +201,13 @@ export function Table({ state, act, name, status, canAct, thinking, extra, previ
           const { bid, order, pos } = state.auction
           const cash = state.players[order[pos]].cash
           return <>
+            <p className="wt-auction" role="note"><strong>Auction: {BOARD[state.auction.space].name}.</strong> Highest bid wins it. {bid > 0 ? `Top bid ${money(bid)}.` : 'No bids yet.'} {name(order[pos])} to bid.</p>
             <button className="primary-btn" onClick={() => run({ type: 'bid', amount: bid + AUCTION_STEP })}>Bid {money(bid + AUCTION_STEP)}</button>
             {cash >= bid + 5 * AUCTION_STEP ? <button className="secondary-btn" onClick={() => run({ type: 'bid', amount: bid + 5 * AUCTION_STEP })}>Bid {money(bid + 5 * AUCTION_STEP)}</button> : null}
-            <button className="secondary-btn" onClick={() => run({ type: 'drop' })}>Drop out</button>
+            <button className="secondary-btn" onClick={() => run({ type: 'drop' })}>Drop out (keep credits)</button>
           </>
         })() : null}
+        {!waiting && !walking && state.phase === 'manage' && !state.offer ? <button className="primary-btn" onClick={() => run({ type: 'end' })}>{state.again ? 'Roll again' : 'End turn'}</button> : null}
         {!waiting && !walking && state.phase === 'buy' && isClaimable(landed) ? <>
           <button className="primary-btn" aria-label={`Claim ${landed.name} for ${money(landed.price)}`} onClick={() => run({ type: 'buy' })}>Claim · {money(landed.price)}</button>
           <button className="secondary-btn" onClick={() => run({ type: 'skip' })}>Pass</button>
@@ -207,7 +216,7 @@ export function Table({ state, act, name, status, canAct, thinking, extra, previ
       </div>
       <div className="wt-side">
         <StopCard state={shown} index={viewIndex} name={name} />
-        {!preview ? <Hand state={shown} name={name} current={current} /> : null}
+        {!preview ? <Hand state={shown} name={name} current={current} onSelect={setPicked} selected={viewIndex} /> : null}
         {!preview && !walking && state.phase === 'manage' && !waiting ? <Manage key={state.turn} state={state} act={run} name={name} online={online} /> : null}
         {!preview ? <ul className="wt-balances" aria-label={state.phase === 'done' ? 'Final standings' : 'Player balances'}>
           {(state.phase === 'done' ? ranking : [...ranking].sort((a, b) => a.index - b.index)).map(({ index, cash, worth }) => <li key={index} data-active={state.phase !== 'done' && index === current ? 'true' : undefined}>

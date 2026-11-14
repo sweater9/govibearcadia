@@ -326,7 +326,7 @@ function roll(s: State): State {
   if (holding.owner === index) return next
   const due = feeAt(s, me.position)
   if (due === 0) return { ...next, message: `${where} It is mortgaged, so no visitor fee.` }
-  return settle(due, holding.owner, `Paid visitor fee to ${playerName(holding.owner)}:`)
+  return settle(due, holding.owner, `${playerName(index)} paid ${playerName(holding.owner)} a visitor fee of`)
 }
 
 function setHolding(s: State, space: number, holding: Holding, players: Player[], message: string, collected = s.collected): State {
