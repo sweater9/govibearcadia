@@ -3,19 +3,21 @@ import { createRandom } from '../lib/rng'
 import type { GameProps } from '../types'
 import { BOARD, CELLS, CENTRE_COST, GRID, GROUP_COLOURS, isClaimable, type Space } from './worldtrip/board'
 import { actor, chooseAction } from './worldtrip/bot'
+import { PLAYER_COLOURS } from './worldtrip/colours'
+import { Deed } from './worldtrip/Deed'
 import { LandmarkArt } from './worldtrip/Landmark'
-import { activePlayer, ALLOWANCE, applyAction, canBuildCentre, DEFAULT_TURNS, feeFor, money, newGame, standings, START_CASH, TURN_CHOICES, type Action, type State } from './worldtrip/rules'
+import { activePlayer, ALLOWANCE, applyAction, AUCTION_STEP, canBuildCentre, canMortgage, canRedeem, DEFAULT_TURNS, feeAt, HOTEL_FEE, MAX_PLAYERS, MIN_PLAYERS, money, mortgageValue, newGame, offerProblem, redeemCost, standings, START_CASH, TURN_CHOICES, type Action, type State } from './worldtrip/rules'
 import { loadMatch, saveMatch } from './worldtrip/save'
+import { statusFor } from './worldtrip/status'
 import './worldtrip/worldtrip.css'
 
 const COMPUTER_DELAY_MS = 800
-const PLAYER_COLOURS = ['#b4542c', '#2f6f9f', '#2f6b45', '#7a4fa0']
 const CODES: Record<string, string> = {
   Vancouver: 'VAN', Toronto: 'TOR', 'Mexico City': 'MEX', 'New York': 'NYC', 'San Francisco': 'SFO', Lisbon: 'LIS', Barcelona: 'BCN', Rome: 'ROM',
   Amsterdam: 'AMS', Paris: 'PAR', London: 'LON', Stockholm: 'STO', Copenhagen: 'CPH', Oslo: 'OSL', 'Cape Town': 'CPT', Nairobi: 'NBO', Dubai: 'DXB',
   Mumbai: 'BOM', Singapore: 'SIN', Bangkok: 'BKK', Tokyo: 'TYO', Sydney: 'SYD',
 }
-const code = (s: Space) => (s.kind === 'city' ? CODES[s.name] : s.kind === 'airport' ? '✈' : s.kind === 'service' ? '⇄' : s.kind === 'card' ? '?' : s.kind === 'fee' ? '$' : { 'Departure Gate': 'GATE', 'Hotel Stopover': 'STAY', 'World Festival': 'FEST', 'Scenic Stopover': 'VIEW' }[s.name] ?? '')
+const code = (s: Space) => (s.kind === 'city' ? CODES[s.name] : s.kind === 'airport' ? '✈' : s.kind === 'service' ? '⇄' : s.kind === 'card' ? (s.deck === 'fortune' ? '★' : '?') : s.kind === 'fee' ? '$' : { 'Departure Gate': 'GATE', 'Hotel Stopover': 'STAY', 'World Festival': 'FEST', 'Scenic Stopover': 'VIEW' }[s.name] ?? '')
 
 function Die({ n }: { n: number }) {
   return <span className="wt-die" data-n={n} aria-hidden="true">{Array.from({ length: n }, (_, i) => <i key={i} />)}</span>
@@ -53,6 +55,11 @@ function Board({ state, selected, onSelect, status, name }: { state: State; sele
 }
 
 function StopCard({ state, index, name }: { state: State; index: number; name: (i: number) => string }) {
+  if (isClaimable(BOARD[index])) return <section className="wt-card wt-card-deed" aria-label="Selected stop"><Deed state={state} index={index} name={name} /></section>
+  return <PlainStop state={state} index={index} name={name} />
+}
+
+function PlainStop({ state, index, name }: { state: State; index: number; name: (i: number) => string }) {
   const space = BOARD[index]
   const holding = state.holdings[index]
   return <section className="wt-card" aria-label="Selected stop" style={{ '--group': space.kind === 'city' ? GROUP_COLOURS[space.group] : '#b8780f' } as React.CSSProperties}>
@@ -60,53 +67,158 @@ function StopCard({ state, index, name }: { state: State; index: number; name: (
     <div>
       <h3>{space.name}</h3>
       <p>Space {index + 1} of {BOARD.length}{space.kind === 'city' ? ` · ${space.country}` : ''}</p>
-      {isClaimable(space) ? <p>{holding ? `Owned by ${name(holding.owner)}` : `For sale ${money(space.price)}`} · visitor fee {money(feeFor(space, !!holding?.centre))}{holding?.centre ? ' (visitor centre)' : ''}</p> : null}
+      {isClaimable(space) ? <p>{holding ? `Owned by ${name(holding.owner)}${holding.mortgaged ? ' (mortgaged)' : ''}` : `For sale ${money(space.price)}`} · visitor fee {money(feeAt(state, index))}{holding?.centre ? ' (visitor centre)' : ''}</p> : null}
       {space.kind === 'fee' ? <p>Flat fee {money(space.amount)}</p> : null}
-      {space.kind === 'card' ? <p>Draw a Travel Card with an immediate effect.</p> : null}
-      {space.kind === 'corner' ? <p>{space.name === 'Departure Gate' ? `Collect ${money(ALLOWANCE)} each lap.` : 'A free stop.'}</p> : null}
+      {space.kind === 'card' ? <p>{space.deck === 'travel' ? 'Draw a Travel Card: a small event.' : 'Draw a Fortune Card: a bigger swing, and sometimes the Hotel Stopover.'}</p> : null}
+      {space.kind === 'corner' ? <p>{space.name === 'Departure Gate' ? `Collect ${money(ALLOWANCE)} each lap.` : space.name === 'Hotel Stopover' ? `Just visiting is free. A stranded player rolls doubles to leave, or pays ${money(HOTEL_FEE)}, or after three tries must pay.` : space.name === 'Scenic Stopover' ? 'Missed flight: go to the Hotel Stopover.' : 'A free stop.'}</p> : null}
     </div>
   </section>
 }
 
-function Manage({ state, act, name }: { state: State; act: (a: Action) => void; name: (i: number) => string }) {
+/** The title deeds each player holds, one tab per player; the player whose turn it is shows first. */
+function Hand({ state, name, current }: { state: State; name: (i: number) => string; current: number }) {
+  const [who, setWho] = useState<number | null>(null)
+  const p = who ?? current
+  const cards = state.holdings.flatMap((h, i) => (h?.owner === p ? [i] : []))
+  return <section className="wt-hand" aria-label="Property cards">
+    <div className="wt-hand-tabs" role="group" aria-label="Whose cards">
+      {state.players.map((pl, i) => <button key={i} type="button" aria-pressed={p === i} onClick={() => setWho(i)}>{name(i)}{pl.out ? ' (out)' : ''}</button>)}
+    </div>
+    {cards.length ? <div className="wt-hand-row">{cards.map((i) => <Deed key={i} state={state} index={i} name={name} compact />)}</div>
+      : <p className="wt-hint">{name(p)} holds no property cards yet. Claim a stop to add its deed here.</p>}
+  </section>
+}
+
+function Manage({ state, act, name, online }: { state: State; act: (a: Action) => void; name: (i: number) => string; online?: boolean }) {
   const index = activePlayer(state)
   const owned = state.holdings.flatMap((h, i) => (h?.owner === index ? [i] : []))
+  const others = state.players.flatMap((p, i) => (i === index || p.out ? [] : [i]))
+  const [buyer, setBuyer] = useState(others[0] ?? 0)
+  const [give, setGive] = useState<number[]>([])
+  const [take, setTake] = useState<number[]>([])
+  const [cash, setCash] = useState('0')
   const [error, setError] = useState('')
+  const theirs = state.holdings.flatMap((h, i) => (h?.owner === buyer ? [i] : []))
+  const toggle = (list: number[], set: (l: number[]) => void, i: number) => set(list.includes(i) ? list.filter((x) => x !== i) : [...list, i])
+  const describe = (list: number[]) => (list.length ? list.map((i) => BOARD[i].name).join(', ') : 'nothing')
   const propose = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const f = new FormData(event.currentTarget)
-    const offer = { space: Number(f.get('space')), buyer: Number(f.get('buyer')), price: Number(f.get('price')) }
-    if (offer.price > state.players[offer.buyer].cash) { setError('That buyer does not have enough credits.'); return }
+    const offer = { buyer, give, take, cash: Number(cash) }
+    const problem = offerProblem(state, index, offer)
+    if (problem) { setError(problem); return }
     setError('')
     act({ type: 'offer', offer })
   }
   if (state.offer) {
-    const { buyer, space, price } = state.offer
+    const o = state.offer
     return <section aria-label="Pending offer">
-      <p role="status">Pass the device to {name(buyer)}. Buy {BOARD[space].name} from {name(index)} for {money(price)}?</p>
+      <p role="status">{online ? `${name(o.buyer)}, a trade is proposed.` : `Pass the device to ${name(o.buyer)}.`} {name(index)} offers {describe(o.give)}{o.cash > 0 ? ` for ${money(o.cash)}` : o.cash < 0 ? ` with ${money(-o.cash)} from them to you` : ''}, and asks for {describe(o.take)}.</p>
       <div className="wt-actions"><button className="primary-btn" onClick={() => act({ type: 'accept' })}>Accept offer</button><button className="secondary-btn" onClick={() => act({ type: 'decline' })}>Decline offer</button></div>
     </section>
   }
   return <>
-    <div className="wt-actions"><button className="primary-btn" onClick={() => act({ type: 'end' })}>End turn</button></div>
+    <div className="wt-actions"><button className="primary-btn" onClick={() => act({ type: 'end' })}>{state.again ? 'Roll again' : 'End turn'}</button></div>
     {owned.length ? <details>
-      <summary>Deals and visitor centres</summary>
+      <summary>Deals, mortgages and visitor centres</summary>
       <ul className="wt-props">{owned.map((i) => {
         const space = BOARD[i]
         const h = state.holdings[i]!
-        return <li key={i}>{space.name}{space.kind === 'city' ? (h.centre ? <span>Visitor centre built</span> :
-          <button className="secondary-btn" disabled={!canBuildCentre(state, index, i)} title="Needs every city in the colour group" onClick={() => act({ type: 'upgrade', space: i })}>Build centre · {money(CENTRE_COST[space.group])}</button>) : null}</li>
+        return <li key={i}>{space.name}{h.mortgaged ? <em> (mortgaged)</em> : null}
+          {space.kind === 'city' ? (h.centre ? <span>Visitor centre built</span> :
+            <button className="secondary-btn" disabled={!canBuildCentre(state, index, i)} title="Needs every city in the colour group, none mortgaged" onClick={() => act({ type: 'upgrade', space: i })}>Build centre · {money(CENTRE_COST[space.group])}</button>) : null}
+          {h.mortgaged ? <button className="secondary-btn" disabled={!canRedeem(state, index, i)} onClick={() => act({ type: 'redeem', space: i })}>Redeem · {money(redeemCost(space))}</button>
+            : <button className="secondary-btn" disabled={!canMortgage(state, index, i)} title="Take half the price from the bank; no fees until redeemed" onClick={() => act({ type: 'mortgage', space: i })}>Mortgage · +{money(mortgageValue(space))}</button>}
+        </li>
       })}</ul>
-      {!state.traded ? <form className="wt-form" onSubmit={propose}>
-        <label>Stop <select name="space">{owned.map((i) => <option key={i} value={i}>{BOARD[i].name}</option>)}</select></label>
-        <label>Buyer <select name="buyer">{state.players.map((_, i) => (i === index ? null : <option key={i} value={i}>{name(i)}</option>))}</select></label>
-        <label>Price (cr) <input name="price" type="number" min="1" step="1" required /></label>
-        <button className="secondary-btn">Offer sale</button>
-        {error ? <p role="alert">{error}</p> : null}
-      </form> : <p>Offer used for this turn.</p>}
     </details> : null}
+    {!state.traded && others.length ? <details>
+      <summary>Propose a trade</summary>
+      <form className="wt-form" onSubmit={propose}>
+        <label>With <select value={buyer} onChange={(e) => { setBuyer(Number(e.target.value)); setTake([]) }}>{others.map((i) => <option key={i} value={i}>{name(i)}</option>)}</select></label>
+        <fieldset><legend>You give</legend>{owned.filter((i) => !state.holdings[i]!.centre).map((i) => <label key={i}><input type="checkbox" checked={give.includes(i)} onChange={() => toggle(give, setGive, i)} /> {BOARD[i].name}</label>)}</fieldset>
+        <fieldset><legend>You ask for</legend>{theirs.filter((i) => !state.holdings[i]!.centre).map((i) => <label key={i}><input type="checkbox" checked={take.includes(i)} onChange={() => toggle(take, setTake, i)} /> {BOARD[i].name}</label>)}{theirs.length ? null : <small>They own nothing yet.</small>}</fieldset>
+        <label>Credits from them (negative: you pay) <input value={cash} onChange={(e) => setCash(e.target.value)} inputMode="numeric" pattern="-?[0-9]*" aria-label="Credits from them" /></label>
+        <button className="secondary-btn">Offer trade</button>
+        {error ? <p role="alert">{error}</p> : null}
+      </form>
+    </details> : state.traded ? <p>Trade offer used for this turn.</p> : null}
   </>
 }
+
+/** The board, the action buttons and the side panel: shared by the single-device game and online rooms. */
+export function Table({ state, act, name, status, canAct, thinking, extra, preview, online }: {
+  state: State; act: (a: Action) => void; name: (i: number) => string; status: string
+  /** Whether the person looking at this screen is the one who has to act now. */
+  canAct: boolean
+  /** What to say while someone else has to act; null for none. */
+  thinking: string | null
+  extra?: React.ReactNode
+  /** Setup screen before a match: just the empty board. */
+  preview?: boolean
+  /** Online room: each player has their own screen, so there is no device to pass. */
+  online?: boolean
+}) {
+  const [picked, setPicked] = useState<number | null>(null)
+  /** After you roll, the board still shows where you stood until you press Move and walk your piece across the squares. */
+  const [pending, setPending] = useState<{ before: State; who: number } | null>(null)
+  const [walked, setWalked] = useState<number | null>(null)
+  const current = activePlayer(state)
+  const run = (a: Action) => { setPicked(null); if (a.type === 'roll' && !preview) setPending({ before: state, who: current }); act(a) }
+  const moved = !!pending && state !== pending.before && state.turn === pending.before.turn && !!state.dice && state.players[pending.who].position !== pending.before.players[pending.who].position
+  const total = state.dice ? state.dice[0] + state.dice[1] : 0
+  useEffect(() => { if (pending && state !== pending.before && !moved) setPending(null) }, [state, pending, moved])
+  useEffect(() => {
+    if (!moved || walked === null) return
+    const timer = setTimeout(() => { if (walked >= total) { setPending(null); setWalked(null) } else setWalked(walked + 1) }, walked >= total ? 280 : 190)
+    return () => clearTimeout(timer)
+  }, [moved, walked, total])
+  const shown: State = moved && pending ? { ...pending.before, dice: state.dice, players: pending.before.players.map((p, i) => (i === pending.who && walked !== null ? { ...p, position: (p.position + walked) % BOARD.length } : p)) } : state
+  const ranking = standings(shown)
+  const viewIndex = picked ?? shown.players[current].position
+  const landed = BOARD[shown.players[current].position]
+  const waiting = !canAct
+  const walking = moved && !waiting
+  return <>
+    {!preview && state.phase !== 'done' ? <div className="wt-actions">
+      {waiting && thinking ? <p className="wt-thinking" role="status">{thinking}</p> : null}
+      {walking ? <div className="wt-move"><button className="primary-btn" disabled={walked !== null} onClick={() => setWalked(0)}>{`Move ${total} spaces`}</button></div> : null}
+      {!waiting && !walking && state.phase === 'roll' && state.players[current].inHotel ? <>
+        {state.players[current].pass ? <button className="secondary-btn" onClick={() => run({ type: 'usepass' })}>Use boarding pass</button> : null}
+        {state.players[current].cash >= HOTEL_FEE ? <button className="secondary-btn" onClick={() => run({ type: 'payout' })}>Pay {money(HOTEL_FEE)} to leave</button> : null}
+      </> : null}
+      {!waiting && !walking && state.phase === 'roll' ? <button className="primary-btn" onClick={() => run({ type: 'roll' })}>{state.players[current].inHotel ? 'Roll for doubles' : 'Roll dice'}</button> : null}
+      {!waiting && !walking && state.phase === 'auction' && state.auction ? (() => {
+        const { bid, order, pos } = state.auction
+        const cash = state.players[order[pos]].cash
+        return <>
+          <button className="primary-btn" onClick={() => run({ type: 'bid', amount: bid + AUCTION_STEP })}>Bid {money(bid + AUCTION_STEP)}</button>
+          {cash >= bid + 5 * AUCTION_STEP ? <button className="secondary-btn" onClick={() => run({ type: 'bid', amount: bid + 5 * AUCTION_STEP })}>Bid {money(bid + 5 * AUCTION_STEP)}</button> : null}
+          <button className="secondary-btn" onClick={() => run({ type: 'drop' })}>Drop out</button>
+        </>
+      })() : null}
+      {!waiting && !walking && state.phase === 'buy' && isClaimable(landed) ? <>
+        <button className="primary-btn" aria-label={`Claim ${landed.name} for ${money(landed.price)}`} onClick={() => run({ type: 'buy' })}>Claim · {money(landed.price)}</button>
+        <button className="secondary-btn" onClick={() => run({ type: 'skip' })}>Pass</button>
+      </> : null}
+    </div> : null}
+    <div className="wt-layout">
+      <Board state={shown} selected={viewIndex} onSelect={setPicked} status={walking ? `Rolled ${shown.dice?.[0]} and ${shown.dice?.[1]}. ${walked === null ? `Press Move to walk ${total} spaces.` : 'Walking…'}` : status} name={name} />
+      <div className="wt-side">
+        <StopCard state={shown} index={viewIndex} name={name} />
+        {!preview ? <Hand state={shown} name={name} current={current} /> : null}
+        {!preview && !walking && state.phase === 'manage' && !waiting ? <Manage key={state.turn} state={state} act={run} name={name} online={online} /> : null}
+        {!preview ? <ul className="wt-balances" aria-label={state.phase === 'done' ? 'Final standings' : 'Player balances'}>
+          {(state.phase === 'done' ? ranking : [...ranking].sort((a, b) => a.index - b.index)).map(({ index, cash, worth }) => <li key={index} data-active={state.phase !== 'done' && index === current ? 'true' : undefined}>
+            <span className="wt-token" style={{ background: PLAYER_COLOURS[index] }}>{index + 1}</span>
+            <span className="wt-bal"><strong>{name(index)}</strong><b>{state.players[index].out ? 'Out of the trip' : `${money(worth)} net worth`}</b><small>{state.players[index].inHotel ? 'At the Hotel Stopover · ' : ''}{state.players[index].pass ? 'Boarding pass · ' : ''}{money(cash)} credits{state.phase === 'done' ? ` · cities: ${state.collected[index].map((s) => BOARD[s].name).join(', ') || 'none'}` : ''}</small></span>
+          </li>)}
+        </ul> : null}
+        {extra}
+      </div>
+    </div>
+  </>
+}
+
 
 export function WorldTrip({ onFinish, seed }: GameProps) {
   const [match, setMatch] = useState(() => loadMatch(seed))
@@ -114,7 +226,6 @@ export function WorldTrip({ onFinish, seed }: GameProps) {
   const [computersWanted, setComputersWanted] = useState(1)
   const [turnsEach, setTurnsEach] = useState<number>(DEFAULT_TURNS)
   const [confirmRestart, setConfirmRestart] = useState(false)
-  const [picked, setPicked] = useState<number | null>(null)
   const state = match?.state
 
   function start() {
@@ -122,7 +233,6 @@ export function WorldTrip({ onFinish, seed }: GameProps) {
     saveMatch(next)
     setMatch(next)
     setConfirmRestart(false)
-    setPicked(null)
   }
   function act(action: Action) {
     if (!match) return
@@ -131,7 +241,6 @@ export function WorldTrip({ onFinish, seed }: GameProps) {
     const updated = { ...match, state: next, actions: [...match.actions, action] }
     saveMatch(updated)
     setMatch(updated)
-    setPicked(null)
     if (next.phase === 'done') {
       const ranking = standings(next)
       onFinish({ score: ranking[0].worth, won: true, durationMs: Math.max(0, Date.now() - match.startedAt), stats: { players: next.players.length, turns: next.turn, turnsEach: next.turnsEach } })
@@ -144,7 +253,6 @@ export function WorldTrip({ onFinish, seed }: GameProps) {
   const name = (i: number) => (isComputer(i) ? `Computer ${i - humans + 1}` : `Player ${i + 1}`)
   const relabel = (text: string) =>
     text.replace(/Pass the device to Player 1\./, humans === 1 ? 'Your turn.' : 'Pass the device to Player 1.').replace(/Pass the device to Player (\d)\./g, (m, n) => (isComputer(Number(n) - 1) ? '' : m)).replace(/Player (\d)/g, (m, n) => (isComputer(Number(n) - 1) ? name(Number(n) - 1) : m)).trim()
-  const current = state ? activePlayer(state) : 0
   const waiting = !!state && state.phase !== 'done' && isComputer(actor(state))
   const latest = useRef<{ act: (a: Action) => void }>({ act: () => {} })
   useEffect(() => {
@@ -157,50 +265,23 @@ export function WorldTrip({ onFinish, seed }: GameProps) {
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [match, confirmRestart])
-  const ranking = state ? standings(state) : []
-  const leaders = ranking.filter((e) => e.worth === ranking[0]?.worth)
-  const viewIndex = picked ?? (state ? state.players[current].position : 0)
-  const landed = state ? BOARD[state.players[current].position] : null
   const view = state ?? newGame(count, '', turnsEach)
-  const statusText = !state ? `Everyone starts at the Departure Gate with ${money(START_CASH)}.` : state.phase === 'done'
-    ? `${leaders.map(({ index }) => name(index)).join(' and ')} ${leaders.length > 1 ? 'share the win' : 'wins'} with ${money(leaders[0].worth)}.`
-    : `Round ${Math.floor(state.turn / state.players.length) + 1} of ${state.turnsEach} · ${name(current)}. ${state.dice ? `Rolled ${state.dice.join(' + ')}. ` : ''}${relabel(state.message)}`
+  const statusText = !state ? `Everyone starts at the Departure Gate with ${money(START_CASH)}.` : statusFor(state, name, relabel)
 
   return <div className="wt">
     {!state || state.phase === 'done' || confirmRestart ? <div className="wt-setup">
-      <label>Players <select value={count} onChange={(e) => setCount(Number(e.target.value))}>{[2, 3, 4].map((n) => <option key={n} value={n}>{n} players</option>)}</select></label>
+      <label>Players <select value={count} onChange={(e) => setCount(Number(e.target.value))}>{Array.from({ length: MAX_PLAYERS - MIN_PLAYERS + 1 }, (_, k) => k + MIN_PLAYERS).map((n) => <option key={n} value={n}>{n} players</option>)}</select></label>
       <label>Computers <select value={Math.min(computersWanted, count - 1)} onChange={(e) => setComputersWanted(Number(e.target.value))}>{Array.from({ length: count }, (_, n) => <option key={n} value={n}>{n === 0 ? 'None' : n}</option>)}</select></label>
       <label>Turns each <select value={turnsEach} onChange={(e) => setTurnsEach(Number(e.target.value))}>{TURN_CHOICES.map((n) => <option key={n} value={n}>{n}{n === DEFAULT_TURNS ? ' (standard)' : ''}</option>)}</select></label>
       <button className="primary-btn" onClick={start}>{confirmRestart ? 'Replace match' : 'Start match'}</button>
       {confirmRestart ? <button className="secondary-btn" onClick={() => setConfirmRestart(false)}>Keep playing</button> : null}
     </div> : null}
-    <div className="wt-layout">
-      <div className="wt-main">
-      <Board state={view} selected={viewIndex} onSelect={setPicked} status={statusText} name={name} />
-      {state && state.phase !== 'done' ? <div className="wt-actions">
-        {waiting ? <p className="wt-thinking" role="status">{name(actor(state))} is playing…</p> : null}
-        {!waiting && state.phase === 'roll' ? <button className="primary-btn" onClick={() => act({ type: 'roll' })}>Roll dice</button> : null}
-        {!waiting && state.phase === 'buy' && landed && isClaimable(landed) ? <>
-          <button className="primary-btn" aria-label={`Claim ${landed.name} for ${money(landed.price)}`} onClick={() => act({ type: 'buy' })}>Claim · {money(landed.price)}</button>
-          <button className="secondary-btn" onClick={() => act({ type: 'skip' })}>Pass</button>
-        </> : null}
-      </div> : null}
-      </div>
-      <div className="wt-side">
-        <StopCard state={view} index={viewIndex} name={name} />
-        {state && state.phase === 'manage' && !waiting ? <Manage key={state.turn} state={state} act={act} name={name} /> : null}
-        {state ? <ul className="wt-balances" aria-label={state.phase === 'done' ? 'Final standings' : 'Player balances'}>
-          {(state.phase === 'done' ? ranking : [...ranking].sort((a, b) => a.index - b.index)).map(({ index, cash, worth }) => <li key={index} data-active={state.phase !== 'done' && index === current ? 'true' : undefined}>
-            <span className="wt-token" style={{ background: PLAYER_COLOURS[index] }}>{index + 1}</span>
-            <span className="wt-bal"><strong>{name(index)}</strong><b>{money(worth)} net worth</b><small>{money(cash)} credits{state.phase === 'done' ? ` · cities: ${state.collected[index].map((s) => BOARD[s].name).join(', ') || 'none'}` : ''}</small></span>
-          </li>)}
-        </ul> : null}
-        {state && state.phase !== 'done' && !confirmRestart ? <button className="secondary-btn" onClick={() => setConfirmRestart(true)}>New match</button> : null}
-      </div>
-    </div>
+    {state ? <Table state={state} act={act} name={name} status={statusText} canAct={!waiting} thinking={`${name(actor(state))} is playing…`}
+      extra={state.phase !== 'done' && !confirmRestart ? <button className="secondary-btn" onClick={() => setConfirmRestart(true)}>New match</button> : null} />
+      : <Table state={view} act={act} name={name} status={statusText} canAct={false} thinking={null} preview />}
     <details><summary>How to play</summary>
       <p>Roll two dice and travel clockwise round the 40 spaces. Passing or landing on the Departure Gate earns {money(ALLOWANCE)}. Claim an unowned city, airport or travel service when you land, or pass. Landing on another player’s stop costs its visitor fee.</p>
-      <p>Own every city in a colour group to build visitor centres, which double a city’s fee. Draw Travel Cards for quick events, and pay the flat fees. Offer one stop for sale each turn; pass the device to the buyer to accept or decline. If you run short, you pay what you have and stay in the match.</p>
+      <p>Own every city in a colour group to build visitor centres, which double a city’s fee. Draw Travel Cards for quick events, and pay the flat fees. Roll doubles to take another turn, but a third double in a row, a Fortune Card, or the Scenic Stopover sends you to the Hotel Stopover: roll doubles to leave, pay 50, use a boarding pass, or pay automatically after three tries. Own the whole colour group and its fees double; airports and travel services charge more for each one an owner holds. Pass on a stop and it goes to auction: everyone bids in turn, and the last bidder left wins it. Mortgage a stop for half its price (no fees on it until you redeem it for a little more). Propose one trade a turn, swapping stops and credits; pass the device to the buyer to accept or decline. If you cannot pay, your stops are sold back to the bank at half price; if that is still not enough you are out of the trip, and the last traveller left wins.</p>
       <p>After {state?.turnsEach ?? turnsEach} turns each, the highest net worth wins: credits plus the printed value of your stops and visitor centres. Ties share the win. Select any space on the board to see its details.</p>
     </details>
   </div>

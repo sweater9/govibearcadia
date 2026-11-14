@@ -126,7 +126,7 @@ Completion: reliable cross-device access, sustainable costs, and monetization th
 | Game 21: Pallanguzhi (Ali Guli Mane) | The Karnataka seed-sowing game: relay sowing, Saada captures, a second sowing, multi-round matches with refills and piggy pits; against the computer (three levels), two players on one device, and a tutorial. Sources and the choices made are in `docs/PALLANGUZHI.md`. Online play is not built. |
 | Game 22: Carrom | Phaser (lazy-loaded) physics board, standard rules, 2 or 4 players, pass and play or the computer (three levels), touch drag-to-aim. Draft PR, not deployed. See `docs/CARROM.md`. |
 | Game 23: Taiwanese Mahjong | 16-tile Mahjong with flowers and tai scoring against three computers (Easy/Medium/Hard); engine, scoring, save/resume. Draft PR, not deployed. See `docs/TAIWANESE_MAHJONG.md`. |
-| Game 24: World Trip | Original 40-space property-trading game for 2 to 4 players on one device; numbers not yet playtested. Draft PR. See `docs/WORLD_TRIP.md`. |
+| Game 24: World Trip | Original 40-space property-trading game for 2 to 6 players, on one device or online; numbers not yet playtested. Draft PR. See `docs/WORLD_TRIP.md`. |
 | Game 25: Ludo | Four-colour race game, 2 to 4 players on one device with optional computer players. Draft PR. See `docs/LUDO.md`. Online play not built. |
 | Game 26: Indian Rummy | 13-card Indian Rummy against 1 to 3 computers on this device. Draft PR. See `docs/INDIAN_RUMMY.md`. Online play and multi-round scoring not built. |
 | Game 27: Blackjack | Single-player blackjack with play-money chips (no real value). Draft PR. See `docs/BLACKJACK.md`. Insurance, surrender and online play not built. |

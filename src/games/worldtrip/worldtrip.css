@@ -90,3 +90,45 @@
 
 /* Carbon and Ice: a navy table under the cream tiles */
 .wt-board{background:linear-gradient(145deg,#24344b,#142033);box-shadow:0 18px 40px #0000004d,inset 0 0 0 2px #6fd3ff22,0 0 0 3px #0d131d}
+
+/* An online room has the room code and a back link above the board, so on short screens the title makes way for the board. */
+@media (max-height:700px){.play-page:has(.wt-room) .room-title{display:none}}
+
+/* Title deeds: cream paper cards with a colour band, read as cards you hold */
+.wt-deed{position:relative;display:grid;gap:8px;width:100%;max-width:260px;padding:0 0 12px;border-radius:12px;overflow:hidden;background:#fbf4e4;color:#2a2118;box-shadow:0 1px 0 #fff8 inset,0 14px 28px -12px #000,0 0 0 1px #00000040;font-size:.86rem}
+.wt-deed header{position:relative;display:grid;gap:1px;padding:12px 40px 10px 14px;color:#fff;text-shadow:0 1px 2px #0006}
+.wt-deed header small{font-size:.7rem;opacity:.92}
+.wt-deed header h4{margin:0;font-family:var(--font-display);font-size:1.2rem;line-height:1.1}
+.wt-deed header span{font-size:.78rem;opacity:.92}
+.wt-deed-owner{position:absolute;top:10px;right:10px;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font-size:.8rem;color:#fff;box-shadow:0 0 0 2px #fff8}
+.wt-deed-art{margin:0 12px;border-radius:8px;overflow:hidden;box-shadow:0 0 0 1px #0002}
+.wt-deed-art svg{display:block;width:100%;height:auto}
+.wt-deed dl{margin:0 12px;display:grid;gap:2px}
+.wt-deed dl div{display:flex;justify-content:space-between;gap:10px;padding:3px 6px;border-radius:6px}
+.wt-deed dl div[data-now=true]{background:#2a21181a;font-weight:700}
+.wt-deed dt,.wt-deed dd{margin:0}
+.wt-deed footer{margin:0 12px;padding-top:8px;border-top:1px dashed #2a211866;display:grid;gap:2px}
+.wt-deed footer p{margin:0;display:flex;justify-content:space-between}
+.wt-deed-state{margin:0 12px;font-size:.78rem;color:#6a5a45;text-align:center}
+.wt-deed[data-mortgaged=true]{filter:grayscale(.85) brightness(.92)}
+.wt-deed-compact{max-width:178px;font-size:.76rem}
+.wt-deed-compact header{padding:8px 32px 7px 10px}.wt-deed-compact header h4{font-size:1rem}
+.wt-hand{display:grid;gap:8px}
+.wt-hand-tabs{display:flex;flex-wrap:wrap;gap:6px}
+.wt-hand-tabs button{padding:6px 12px;border-radius:999px;border:1px solid #ffffff24;background:#ffffff0d;color:var(--text);font:inherit;font-size:.85rem;cursor:pointer}
+.wt-hand-tabs button[aria-pressed=true]{background:var(--primary);color:var(--on-primary);border-color:transparent}
+.wt-hand-row{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x proximity}
+.wt-hand-row>*{flex:none;scroll-snap-align:start}
+.wt-move{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.wt-move .wt-die{width:44px;height:44px;animation:none}
+.wt-hint{margin:0;color:var(--text-muted);font-size:.88rem}.wt-card-deed{background:none;box-shadow:none;border-radius:0;overflow:visible}.wt-card-deed::before{display:none}.wt-card-deed .wt-deed{margin-inline:auto}
+
+/* Online lobby: who has joined, and the host's Start button. */
+.wt-lobby{display:grid;gap:12px;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--surface)}
+.wt-lobby h3{margin:0}
+.wt-lobby ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.wt-lobby li{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:var(--surface-inset);font-size:.95rem}
+.wt-lobby li[data-open="true"]{opacity:.55;border:1px dashed var(--border)}
+.wt-lobby li[data-away="true"]{opacity:.7}
+.wt-lobby .wt-token{width:24px;height:24px;font-size:.75rem;flex:none}
+.wt-lobby p{margin:0;color:var(--text-muted)}

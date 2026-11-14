@@ -1,5 +1,5 @@
 import { ArrowLeft } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { ShareButton } from '../components/ShareButton'
 import { COLS } from '../games/connect4/rules'
@@ -10,11 +10,15 @@ import { BattleshipBoard } from '../games/battleship/Board'
 import type { View as BattleshipView } from '../games/battleship/rules'
 import { TicTacToeBoard } from '../games/tictactoe/Board'
 import type { TState } from '../games/tictactoe/rules'
+import { netWorth, type State as WorldTripState } from '../games/worldtrip/rules'
+import type { WorldTripMessage } from '../games/WorldTripRoom'
 import { recordPlay } from '../lib/db'
 import { ONLINE_GAME_LIST, gameFromParam, getNick, roomSocketUrl, type OnlineGameId } from '../lib/online'
 import { isRoomCode } from '../lib/roomcode'
 
-type Connected = [boolean, boolean]
+const WorldTripRoom = lazy(() => import('../games/WorldTripRoom'))
+
+type Connected = boolean[]
 /** Connect Four sends its board flat (cells, line, moves); the other games nest it under `board`. */
 type Common = Pick<View, 'you' | 'yourColour' | 'turn' | 'winner' | 'draw' | 'round' | 'wins' | 'rematch'>
 type StateMessage = Common & Partial<Pick<View, 'cells' | 'line' | 'moves'>> & { type: 'state'; connected: Connected; board?: unknown }
@@ -30,6 +34,7 @@ function scoreOf(game: OnlineGameId, v: StateMessage): number {
   const won = v.winner === v.you
   if (game === 'tic-tac-toe') return won ? 500 + 100 * (5 - Math.ceil(moves / 2)) : v.draw ? 200 : 0
   if (game === 'battleship') return won ? Math.max(300, 1000 - 6 * moves) : 0
+  if (game === 'world-trip') return Math.max(0, netWorth(v.board as WorldTripState, v.you).worth)
   if (game === 'checkers') return won ? Math.max(400, 1000 - 4 * moves) : v.draw ? 300 : 0
   return won ? Math.max(100, 1000 - 30 * Math.ceil(moves / 2)) : v.draw ? 300 : 0
 }
@@ -39,7 +44,7 @@ const emptyBattleship = {
   board: { phase: 'placing', fleet: [], incoming: [], shots: [], sunk: [], ready: { you: false, opp: false }, left: { you: 5, opp: 5 }, moves: 0, reveal: null },
 }
 
-const COLOURS: Record<OnlineGameId, [string, string]> = { 'connect-four': ['red', 'yellow'], 'tic-tac-toe': ['X', 'O'], checkers: ['red', 'white'], battleship: ['first to shoot', 'second to shoot'] }
+const COLOURS: Record<OnlineGameId, [string, string]> = { 'connect-four': ['red', 'yellow'], 'tic-tac-toe': ['X', 'O'], checkers: ['red', 'white'], battleship: ['first to shoot', 'second to shoot'], 'world-trip': ['Player 1', 'Player 2'] }
 
 function alreadyRecorded(key: string): boolean {
   try {
@@ -90,7 +95,7 @@ export function RoomPage() {
           return
         }
         if (msg.type === 'state') setState(msg as unknown as StateMessage)
-        else if (msg.type === 'error') setNotice(msg.code === 'not-your-turn' ? 'Wait for your turn.' : msg.code === 'illegal-move' ? 'That column is full.' : msg.code === 'slow-down' ? 'Slow down a little.' : msg.code === 'wrong-phase' ? 'Not yet.' : '')
+        else if (msg.type === 'error') setNotice(msg.code === 'not-your-turn' ? 'Wait for your turn.' : msg.code === 'illegal-move' ? (game === 'connect-four' ? 'That column is full.' : 'That move is not allowed.') : msg.code === 'slow-down' ? 'Slow down a little.' : msg.code === 'wrong-phase' ? 'Not yet.' : '')
       }
       ws.onclose = (event) => {
         if (closed) return
@@ -201,7 +206,9 @@ export function RoomPage() {
             </Link>
           </div>
         ) : (
-          <div className={game === 'connect-four' ? 'c4' : game === 'tic-tac-toe' ? 'ttt' : game === 'battleship' ? 'bs' : 'ck'}>
+          game === 'world-trip' ? (
+            <Suspense fallback={<p>Loading the room…</p>}><WorldTripRoom state={state as unknown as WorldTripMessage | null} reconnecting={status === 'reconnecting'} notice={notice} send={send} /></Suspense>
+          ) : <div className={game === 'connect-four' ? 'c4' : game === 'tic-tac-toe' ? 'ttt' : game === 'battleship' ? 'bs' : 'ck'}>
             <div className="game-toolbar c4-bar">
               <div>
                 <small>Status</small>

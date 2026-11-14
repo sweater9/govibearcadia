@@ -316,7 +316,7 @@ export const registry: GameEntry[] = [
     meta: {
       id: 'world-trip',
       title: 'World Trip',
-      description: 'Claim city stops, collect visitor fees and make deals on one device for 2 to 4 players.',
+      description: 'Claim city stops, collect visitor fees and make deals on one device for 2 to 6 players, on one device or online.',
       category: 'Strategy',
       original: true,
       accent: 'from-sky-500 to-amber-500',
