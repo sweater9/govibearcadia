@@ -1,4 +1,6 @@
 import { useId, type ReactNode } from 'react'
+import { COVERS } from './covers'
+import { Defs } from './covers/parts'
 
 /**
  * 160x90 stand-ins for screenshots, one per game. Drawn with currentColor (the category colour), amber for one highlight
@@ -54,6 +56,18 @@ function sparkles(id: string) {
 /** The cover: a lit scene (gradient, glow, floor light, twinkles) behind the game's own drawing, which gets depth from a soft shadow. */
 export function Thumbnail({ id }: { id: string }) {
   const uid = useId().replace(/:/g, '')
+  const cover = COVERS[id]
+  if (cover) {
+    const paint = (name: string) => `url(#${uid}-${name})`
+    return (
+      <svg className="thumb-art thumb-cover" viewBox="0 0 160 90" aria-hidden="true" focusable="false">
+        <Defs u={uid} />
+        <rect width="160" height="90" fill={`url(#${uid}-bg)`} />
+        {cover(uid, paint)}
+        <rect width="160" height="90" fill={`url(#${uid}-vig)`} />
+      </svg>
+    )
+  }
   return (
     <svg className="thumb-art" viewBox="0 0 160 90" aria-hidden="true" focusable="false">
       <defs>
