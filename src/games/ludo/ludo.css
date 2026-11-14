@@ -1,5 +1,5 @@
 .ld{display:grid;gap:10px;justify-items:center}
-.ld-setup{display:grid;grid-template-columns:repeat(2,1fr) auto;align-items:end;gap:8px;width:100%;max-width:620px}
+.ld-setup{display:grid;grid-template-columns:repeat(3,1fr) auto;align-items:end;gap:8px;width:100%;max-width:620px}
 .ld-setup label{display:grid;gap:4px;font-size:.85rem}.ld-setup select{width:100%}
 .ld-bar{display:flex;align-items:center;gap:12px;width:100%;max-width:620px;min-height:56px}
 .ld-status{flex:1;margin:0;font-size:.95rem;line-height:1.3}
@@ -35,7 +35,7 @@
 .ld-players li[data-active=true]{border-color:#6fd3ff;background:#151c26}
 .ld-players small{color:var(--text-muted)}
 .ld-chip{width:14px;height:14px;border-radius:50%;box-shadow:0 1px 3px #00000066}
-@media(max-width:420px){.ld-setup{grid-template-columns:1fr 1fr auto;gap:6px}.ld-setup .primary-btn,.ld-setup .secondary-btn{padding-inline:12px;white-space:nowrap}.ld-die{width:40px;height:40px;padding:6px}.ld-bar{gap:8px}.ld-players small{display:none}}
+@media(max-width:420px){.ld-setup{grid-template-columns:repeat(3,1fr);gap:6px}.ld-setup .primary-btn,.ld-setup .secondary-btn{grid-column:1/-1;padding-inline:12px;white-space:nowrap}.ld-die{width:40px;height:40px;padding:6px}.ld-bar{gap:8px}.ld-players small{display:none}}
 @media(prefers-reduced-motion:reduce){.ld-die,.ld-token{animation:none!important;transition:none!important}}
 
 /* ---- visual polish ---- */

@@ -1,7 +1,8 @@
+import type { Level } from './bot'
 import { applyAction, newGame, type Action, type State } from './rules'
 
 const KEY = 'govibearcadia.ludo.v1'
-export type Match = { state: State; actions: Action[]; startedAt: number; computers: number }
+export type Match = { state: State; actions: Action[]; startedAt: number; computers: number; level: Level }
 
 function isAction(value: unknown): value is Action {
   if (!value || typeof value !== 'object') return false
@@ -23,15 +24,16 @@ export function loadMatch(seed?: string): Match | null {
       if (next === state) return null
       state = next
     }
-    return { state, actions: data.actions, startedAt: data.startedAt, computers: data.computers }
+    const level: Level = data.level === 'easy' || data.level === 'hard' ? data.level : 'normal'
+    return { state, actions: data.actions, startedAt: data.startedAt, computers: data.computers, level }
   } catch {
     return null
   }
 }
 
-export function saveMatch({ state, actions, startedAt, computers }: Match) {
+export function saveMatch({ state, actions, startedAt, computers, level }: Match) {
   try {
-    localStorage.setItem(KEY, JSON.stringify({ count: state.seats.length, computers, seed: state.seed, actions, startedAt }))
+    localStorage.setItem(KEY, JSON.stringify({ count: state.seats.length, computers, seed: state.seed, actions, startedAt, level }))
   } catch {
     /* the match stays playable when storage is unavailable */
   }
