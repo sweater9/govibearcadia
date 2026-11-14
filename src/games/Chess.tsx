@@ -178,7 +178,7 @@ export function Chess({ onFinish, seed }: GameProps) {
         {over && (
           <div className="ch-over" role="status">
             <strong>{result?.won ? 'You win!' : resigned ? 'You resigned' : st === 'checkmate' ? 'Checkmate' : 'Draw'}</strong>
-            <span>{banner}</span>
+            {!resigned && <span>{banner}</span>}
             <button type="button" className="primary-btn" onClick={() => setStarted(false)}>New game</button>
           </div>
         )}

@@ -57,7 +57,7 @@ test('resigning saves a loss and New game returns to the setup', async ({ page }
   await page.locator(sq(52)).click() // e2
   await page.locator(sq(36)).click() // e4
   await page.getByRole('button', { name: 'Resign' }).click()
-  await expect(page.getByText('You resigned')).toBeVisible()
+  await expect(page.locator('.ch-over strong')).toHaveText('You resigned')
   await expectRows(page, 'history', 1)
   expect((await readTable(page, 'history'))[0]).toMatchObject({ gameId: 'chess', won: false, score: 0 })
   await page.locator('.ch-over').getByRole('button', { name: 'New game' }).click()
