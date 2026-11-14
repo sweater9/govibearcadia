@@ -1,9 +1,10 @@
 import { isLimit, replay, DEFAULT_LIMIT, type Pool } from './pool'
+import type { Level } from './bot'
 import { type Action, type State } from './rules'
 
 const KEY = 'govibearcadia.rummy.v1'
 /** `pool` is the pool before the current deal; `seats[i]` is the seat holding hand i; `past` holds the actions of the deals already played. */
-export type Match = { seed: string; pool: Pool; seats: number[]; state: State; actions: Action[]; past: Action[][]; startedAt: number; layout: number[][] }
+export type Match = { seed: string; pool: Pool; seats: number[]; state: State; actions: Action[]; past: Action[][]; startedAt: number; layout: number[][]; level: Level }
 
 const isId = (v: unknown): v is number => Number.isInteger(v) && (v as number) >= 0 && (v as number) < 106
 const isAction = (v: unknown): v is Action => {
@@ -29,15 +30,16 @@ export function loadMatch(seed?: string): Match | null {
     const played = replay(data.seed, data.players, limit, deals as Action[][])
     if (!played) return null
     const layout: number[][] = Array.isArray(data.layout) && data.layout.length <= 14 && data.layout.every((g: unknown) => Array.isArray(g) && g.length <= 14 && g.every(isId)) ? data.layout : []
-    return { seed: data.seed, ...played, startedAt: data.startedAt, layout }
+    const level: Level = data.level === 'easy' || data.level === 'hard' ? data.level : 'normal'
+    return { seed: data.seed, ...played, startedAt: data.startedAt, layout, level }
   } catch {
     return null
   }
 }
 
-export function saveMatch({ seed, pool, actions, past, startedAt, layout }: Match) {
+export function saveMatch({ seed, pool, actions, past, startedAt, layout, level }: Match) {
   try {
-    localStorage.setItem(KEY, JSON.stringify({ players: pool.totals.length, seed, limit: pool.limit, deals: [...past, actions], startedAt, layout }))
+    localStorage.setItem(KEY, JSON.stringify({ players: pool.totals.length, seed, limit: pool.limit, deals: [...past, actions], startedAt, layout, level }))
   } catch {
     /* the game stays playable when storage is unavailable */
   }

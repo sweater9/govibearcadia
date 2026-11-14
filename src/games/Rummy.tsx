@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createRandom } from '../lib/rng'
 import type { GameProps } from '../types'
-import { chooseAction } from './rummy/bot'
+import { chooseAction, LEVELS, type Level } from './rummy/bot'
 import { POOL_LIMITS, DEFAULT_LIMIT, matchResult, newPool, settle, startDeal } from './rummy/pool'
 import { FIRST_DROP, MIDDLE_DROP, SUITS, WRONG_SHOW, applyAction, bestPlan, card, cardName, declareError, meldKind, rankLabel, type Action, type State } from './rummy/rules'
 import { loadMatch, saveMatch, type Match } from './rummy/save'
@@ -35,12 +35,13 @@ export function Rummy({ onFinish, seed }: GameProps) {
   const [match, setMatch] = useState<Match | null>(() => loadMatch(seed))
   const [opponents, setOpponents] = useState(1)
   const [limit, setLimit] = useState<number>(DEFAULT_LIMIT)
+  const [levelWanted, setLevelWanted] = useState<Level>('normal')
   const [selected, setSelected] = useState<number[]>([])
   const [note, setNote] = useState('')
   const latest = useRef<{ act: (a: Action) => void }>({ act: () => {} })
   const state: State | undefined = match?.state
 
-  function begin(pool: ReturnType<typeof newPool>, base: Pick<Match, 'seed' | 'past' | 'startedAt'>) {
+  function begin(pool: ReturnType<typeof newPool>, base: Pick<Match, 'seed' | 'past' | 'startedAt' | 'level'>) {
     const dealt = startDeal(pool, base.seed)
     const next: Match = { ...base, pool, seats: dealt.seats, state: dealt.state, actions: [], layout: [] }
     saveMatch(next)
@@ -49,7 +50,7 @@ export function Rummy({ onFinish, seed }: GameProps) {
     setNote('')
   }
   function start() {
-    begin(newPool(opponents + 1, limit), { seed: seed ?? String(createRandom()()), past: [], startedAt: Date.now() })
+    begin(newPool(opponents + 1, limit), { seed: seed ?? String(createRandom()()), past: [], startedAt: Date.now(), level: levelWanted })
   }
   /** The pool as it stands once the current deal (if it is finished) has been counted. */
   const settled = match && state?.phase === 'done' ? settle(match.pool, match.seats, match.state) : match?.pool
@@ -57,7 +58,7 @@ export function Rummy({ onFinish, seed }: GameProps) {
   const poolOver = !!match && state?.phase === 'done' && !!result?.over
   function nextDeal() {
     if (!match || !settled || match.state.phase !== 'done' || poolOver) return
-    begin(settled, { seed: match.seed, past: [...match.past, match.actions], startedAt: match.startedAt })
+    begin(settled, { seed: match.seed, past: [...match.past, match.actions], startedAt: match.startedAt, level: match.level })
   }
   function act(action: Action, layout?: number[][]) {
     if (!match) return
@@ -96,7 +97,7 @@ export function Rummy({ onFinish, seed }: GameProps) {
   const human = state?.turn === 0 && state.phase !== 'done'
   useEffect(() => {
     if (!state || state.phase === 'done' || state.turn === 0) return
-    const timer = setTimeout(() => latest.current.act(chooseAction(state)), STEP_MS)
+    const timer = setTimeout(() => latest.current.act(chooseAction(state, match?.level)), STEP_MS)
     return () => clearTimeout(timer)
   }, [match]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -179,6 +180,7 @@ export function Rummy({ onFinish, seed }: GameProps) {
     {!state || poolOver ? <div className="rm-setup">
       <label>Opponents <select value={opponents} onChange={(e) => setOpponents(Number(e.target.value))}>{[1, 2, 3].map((n) => <option key={n} value={n}>{n} computer{n > 1 ? 's' : ''}</option>)}</select></label>
       <label>Pool <select value={limit} onChange={(e) => setLimit(Number(e.target.value))}>{POOL_LIMITS.map((n) => <option key={n} value={n}>{n} points{n === DEFAULT_LIMIT ? ' (standard)' : ''}</option>)}</select></label>
+      <label>Computer level <select value={levelWanted} onChange={(e) => setLevelWanted(e.target.value as Level)}>{LEVELS.map((l) => <option key={l} value={l}>{l[0].toUpperCase() + l.slice(1)}</option>)}</select></label>
       <button className="primary-btn" onClick={start}>{poolOver ? 'Play again' : 'Start game'}</button>
     </div> : done ? <div className="rm-setup"><button className="primary-btn" onClick={nextDeal}>Next deal</button></div> : null}
     <div className="rm-centre">

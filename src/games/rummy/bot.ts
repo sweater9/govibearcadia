@@ -14,19 +14,28 @@ function bestDiscard(hand: number[], wild: number, forbidden: number | null) {
   return best
 }
 
-/** Deterministic computer player: takes the top discard only when it lowers its cost, declares when it can. */
-export function chooseAction(s: State): Action {
+function easyDiscard(hand: number[], wild: number, forbidden: number | null) {
+  const pick = hand.filter((id) => id !== forbidden).sort((a, b) => cardPoints(b, wild) - cardPoints(a, wild) || a - b)[0] ?? hand[0]
+  return { card: pick, cost: cost(hand.filter((x) => x !== pick), wild) }
+}
+
+export type Level = 'easy' | 'normal' | 'hard'
+export const LEVELS: Level[] = ['easy', 'normal', 'hard']
+
+/** Deterministic computer player. Easy always draws from the stock and throws its highest loose card without looking at its melds; normal takes the top discard only when it lowers its cost by 3 or more; hard takes it for any gain and reaches for cards that complete a run. All levels declare when they can, and none sees another hand. */
+export function chooseAction(s: State, level: Level = 'normal'): Action {
   const hand = s.hands[s.turn]
   if (s.phase === 'draw') {
+    if (level === 'easy') return { type: 'draw', from: s.stock.length ? 'stock' : 'discard' }
     const top = s.discard[s.discard.length - 1]
     if (top !== undefined) {
       const now = cost(hand, s.wild)
       const withTop = bestDiscard([...hand, top], s.wild, top)
-      if (withTop.cost + 3 <= now) return { type: 'draw', from: 'discard' }
+      if (withTop.cost + (level === 'hard' ? 1 : 3) <= now) return { type: 'draw', from: 'discard' }
     }
     return { type: 'draw', from: s.stock.length ? 'stock' : 'discard' }
   }
-  const pick = bestDiscard(hand, s.wild, s.taken)
+  const pick = level === 'easy' ? easyDiscard(hand, s.wild, s.taken) : bestDiscard(hand, s.wild, s.taken)
   const rest = hand.filter((id) => id !== pick.card)
   const plan = bestPlan(rest, s.wild)
   if (plan.complete && plan.points === 0) {
