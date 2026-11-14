@@ -877,3 +877,4 @@ main{overflow-x:clip}
 .mj-backs{display:flex;flex-wrap:wrap;gap:2px;margin:6px 0 2px}
 .mj-backs i{width:11px;height:16px;border-radius:2px;background:linear-gradient(180deg,#2f9a72,#1f7a5a);box-shadow:0 1px 0 #0c3d2c,inset 0 0 0 1px #ffffff26}
 @media(max-width:700px){.mj-tile{width:calc((100vw - 64px)/9 - 3px);max-width:44px;height:46px}.mj-small{width:20px;height:28px}}
+@media(max-width:700px){.mj-backs{gap:1px;margin:4px 0 0}.mj-backs i{width:6px;height:11px;border-radius:1px}}
