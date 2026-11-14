@@ -173,6 +173,18 @@ export const registry: GameEntry[] = [
   },
   {
     meta: {
+      id: 'nonogram',
+      title: 'Nonogram',
+      description: 'Picture puzzles: the numbers give the runs of filled squares in each row and column. Reveal the hidden picture.',
+      category: 'Logic',
+      accent: 'from-sky-400 to-indigo-600',
+      glyph: '▩',
+      estimated: '3–15 min',
+    },
+    Component: lazy(() => import('./Nonogram').then((m) => ({ default: m.Nonogram }))),
+  },
+  {
+    meta: {
       id: 'sudoku-master',
       title: 'Sudoku Master',
       description: 'Fill the grid so every row, column and box holds 1 to 9.',

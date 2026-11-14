@@ -29,6 +29,7 @@ const PLAY_AREA = {
   'taiwanese-mahjong': '.mj-setup',
   'world-trip': '.wt-board',
   klondike: '.kl-board',
+  nonogram: '.ng-board',
   ludo: '.ld-board',
   'indian-rummy': '.rm-hand',
   blackjack: '.bj-table',

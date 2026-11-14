@@ -243,7 +243,25 @@ const vibeline: Cover = (u) => {
   </g>
 }
 
+/** Nonogram: a heart appearing in a grid, with run-length clues along the top and left. */
+const nonogram: Cover = () => {
+  const heart = ['01010', '11111', '11111', '01110', '00100']
+  const rows = ['1 1', '5', '5', '3', '1']
+  const cols = ['2', '4', '4', '4', '2']
+  const x0 = 62
+  const y0 = 26
+  const c = 11
+  return <g>
+    <rect width="160" height="90" fill="#101a29" />
+    {heart.map((row, r) => [...row].map((v, i) => <rect key={r + '-' + i} x={x0 + i * c} y={y0 + r * c} width={c - 1} height={c - 1} rx="1.5" fill={v === '1' ? '#7fd8ff' : '#1b2a3f'} />))}
+    {rows.map((t, r) => <text key={'r' + r} x={x0 - 4} y={y0 + r * c + 8} textAnchor="end" fontSize="7.5" fontWeight="700" fill="#9fd8f2" fontFamily="Inter, system-ui, sans-serif">{t}</text>)}
+    {cols.map((t, i) => <text key={'c' + i} x={x0 + i * c + 5} y={y0 - 4} textAnchor="middle" fontSize="7.5" fontWeight="700" fill="#9fd8f2" fontFamily="Inter, system-ui, sans-serif">{t}</text>)}
+    <path d={`M${x0 + 5 * c / 2} ${y0 + 5 * c + 2}`} />
+  </g>
+}
+
 export const PUZZLE_COVERS: Record<string, Cover> = {
+  nonogram,
   'neon-merge': neonMerge, 'memory-grid': memoryGrid, minesweeper, 'color-sort': colorSort, 'daily-word': dailyWord,
   'sudoku-master': sudoku, twofold, carve, vibeline,
 }
