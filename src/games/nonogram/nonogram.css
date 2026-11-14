@@ -17,7 +17,7 @@
 .ng-cell[data-v='1']{background:linear-gradient(145deg,#7fd8ff,#3f9fd0);box-shadow:inset 0 0 0 1px #ffffff55}
 .ng-cell[data-v='2']::after{content:'×';position:absolute;inset:0;display:grid;place-items:center;color:#5d738d;font-size:calc(var(--c) * .6)}
 .ng-cell:focus-visible{outline:2px solid #fff;outline-offset:-2px;z-index:1}
-.ng-over{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(5,16,20,.82);border-radius:inherit;text-align:center;color:#e9f6ff}
+.ng-over{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(8,18,26,.96);border-radius:inherit;text-align:center;color:#e9f6ff}
 .ng-over strong{font-size:1.5rem}
 .ng-help{margin:0;color:#8ea2ba;font-size:.82rem;text-align:center}
 @media (max-height:820px){.play-page:has(.ng) .play-head{margin-bottom:0}.play-page:has(.ng) h1{font-size:1.05rem;line-height:1.2;margin:0}.play-page:has(.ng) .eyebrow{display:none}.ng-help{display:none}.ng{gap:8px}}
