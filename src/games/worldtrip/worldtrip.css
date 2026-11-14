@@ -4,6 +4,7 @@
 .wt-actions{justify-content:center;margin:4px 0}
 .wt-actions{min-height:46px}.wt-actions button{min-height:46px;padding:8px 18px;font-size:1rem}
 .wt-layout{display:flex;flex-direction:column;align-items:center;gap:10px}
+.wt-main{width:100%;max-width:620px;display:flex;flex-direction:column;align-items:center}
 .wt-board{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));grid-template-rows:repeat(11,minmax(0,1fr));gap:1px;width:min(100%,calc(100svh - 372px),620px);aspect-ratio:1;margin:4px auto;padding:3px;border:1px solid var(--border);border-radius:12px;background:var(--surface-inset);list-style:none;box-sizing:border-box}
 .wt-cell{position:relative;display:flex;flex-direction:column;justify-content:space-between;align-items:center;min-width:0;min-height:0;padding:0;border:1px solid var(--border);border-radius:3px;background:var(--surface);color:var(--text);font:inherit;cursor:pointer;overflow:hidden;line-height:1}
 .wt-cell[aria-pressed=true]{outline:2px solid var(--primary);outline-offset:-1px}
@@ -30,7 +31,7 @@
 .wt summary{cursor:pointer;padding-block:5px}
 .wt button:disabled{opacity:.55;cursor:default}
 .wt:is(button,summary,input,select):focus-visible{outline:2px solid currentColor;outline-offset:2px}
-@media(min-width:900px){.wt-layout{flex-direction:row;align-items:flex-start;justify-content:center}.wt-board{margin:0}.wt-side{max-width:340px}.wt-card{grid-template-columns:1fr}}
+@media(min-width:900px){.wt-layout{flex-direction:row;align-items:flex-start;justify-content:center}.wt-main{width:auto;flex:none}.wt-board{margin:0}.wt-side{max-width:340px}.wt-card{grid-template-columns:1fr}}
 @media(max-width:420px){.wt-card{grid-template-columns:96px 1fr}.wt-actions button{flex:1 1 40%}}
 .wt-actions button{white-space:nowrap}@media(max-width:420px){.wt-actions button{padding:8px 12px;flex:1 1 auto}}
 .wt-setup{display:grid;grid-template-columns:repeat(3,1fr) auto;align-items:end;gap:8px;margin-bottom:4px}

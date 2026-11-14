@@ -106,11 +106,6 @@ export function Ludo({ onFinish, seed }: GameProps) {
       <button className="primary-btn" onClick={start}>{confirmRestart ? 'Replace match' : state?.phase === 'done' ? 'Play again' : 'Start match'}</button>
       {confirmRestart ? <button className="secondary-btn" onClick={() => setConfirmRestart(false)}>Keep playing</button> : null}
     </div> : null}
-    <div className="ld-bar">
-      {state && state.dice !== null ? <Die n={state.dice} spin={state.rolls} /> : <span className="ld-die ld-die-empty" aria-hidden="true" />}
-      <p className={`ld-status${state?.phase === 'done' ? (state.winner! < humans ? ' win-message' : ' game-over') : ''}`} role="status" aria-live="polite">{statusText}</p>
-      {state && state.phase === 'roll' && !computerTurn ? <button className="primary-btn" onClick={() => act({ type: 'roll' })}>Roll dice</button> : null}
-    </div>
     <div className="ld-board" role="group" aria-label="Ludo board" style={{ '--turn': turnSeat.hex } as React.CSSProperties}>
       <div className="ld-grid" aria-hidden="true">
         {KINDS.flatMap((row, r) => row.map((k, c) => <i key={`${r}-${c}`} className={`ld-c ld-${k.cls}`} data-star={k.star ? '' : undefined} style={k.seat !== undefined ? { '--seat': SEATS[k.seat].hex, '--soft': SEATS[k.seat].soft } as React.CSSProperties : undefined} />))}
@@ -131,6 +126,11 @@ export function Ludo({ onFinish, seed }: GameProps) {
             onClick={() => act({ type: 'move', token: t.token })}><span /></button>
         })}
       </div>
+    </div>
+    <div className="ld-bar">
+      {state && state.dice !== null ? <Die n={state.dice} spin={state.rolls} /> : <span className="ld-die ld-die-empty" aria-hidden="true" />}
+      <p className={`ld-status${state?.phase === 'done' ? (state.winner! < humans ? ' win-message' : ' game-over') : ''}`} role="status" aria-live="polite">{statusText}</p>
+      {state && state.phase === 'roll' && !computerTurn ? <button className="primary-btn" onClick={() => act({ type: 'roll' })}>Roll dice</button> : null}
     </div>
     <ul className="ld-players" aria-label={state?.phase === 'done' ? 'Final result' : 'Players'}>
       {view.seats.map((seat, slot) => <li key={seat} data-active={state && state.phase !== 'done' && slot === view.turn ? 'true' : undefined}>

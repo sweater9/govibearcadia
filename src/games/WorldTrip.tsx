@@ -174,16 +174,18 @@ export function WorldTrip({ onFinish, seed }: GameProps) {
       <button className="primary-btn" onClick={start}>{confirmRestart ? 'Replace match' : 'Start match'}</button>
       {confirmRestart ? <button className="secondary-btn" onClick={() => setConfirmRestart(false)}>Keep playing</button> : null}
     </div> : null}
-    {state && state.phase !== 'done' ? <div className="wt-actions">
-      {waiting ? <p className="wt-thinking" role="status">{name(actor(state))} is playing…</p> : null}
-      {!waiting && state.phase === 'roll' ? <button className="primary-btn" onClick={() => act({ type: 'roll' })}>Roll dice</button> : null}
-      {!waiting && state.phase === 'buy' && landed && isClaimable(landed) ? <>
-        <button className="primary-btn" aria-label={`Claim ${landed.name} for ${money(landed.price)}`} onClick={() => act({ type: 'buy' })}>Claim · {money(landed.price)}</button>
-        <button className="secondary-btn" onClick={() => act({ type: 'skip' })}>Pass</button>
-      </> : null}
-    </div> : null}
     <div className="wt-layout">
+      <div className="wt-main">
       <Board state={view} selected={viewIndex} onSelect={setPicked} status={statusText} name={name} />
+      {state && state.phase !== 'done' ? <div className="wt-actions">
+        {waiting ? <p className="wt-thinking" role="status">{name(actor(state))} is playing…</p> : null}
+        {!waiting && state.phase === 'roll' ? <button className="primary-btn" onClick={() => act({ type: 'roll' })}>Roll dice</button> : null}
+        {!waiting && state.phase === 'buy' && landed && isClaimable(landed) ? <>
+          <button className="primary-btn" aria-label={`Claim ${landed.name} for ${money(landed.price)}`} onClick={() => act({ type: 'buy' })}>Claim · {money(landed.price)}</button>
+          <button className="secondary-btn" onClick={() => act({ type: 'skip' })}>Pass</button>
+        </> : null}
+      </div> : null}
+      </div>
       <div className="wt-side">
         <StopCard state={view} index={viewIndex} name={name} />
         {state && state.phase === 'manage' && !waiting ? <Manage key={state.turn} state={state} act={act} name={name} /> : null}
