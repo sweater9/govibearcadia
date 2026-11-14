@@ -176,3 +176,11 @@
 .wt-auction{padding:5px 10px;font-size:.82rem;line-height:1.3}
 @media(max-height:700px) and (min-width:561px){.wt-board{width:min(100%,calc(100svh - 332px),680px)}}
 @media(max-width:560px){.wt-board{width:min(calc(100vw - 8px),calc(100svh - 330px),620px);margin-inline:calc(50% - min(calc(100vw - 8px),calc(100svh - 330px),620px)/2)}}
+
+/* Travellers on the board are pawns; the player whose turn it is stands a little taller. */
+.wt-cell .wt-tokens{filter:drop-shadow(0 1px 1.5px #000c);gap:0;bottom:1px}
+.wt-cell .wt-token{width:clamp(9px,2.5vw,16px);height:clamp(13px,3.5vw,23px);border:0;border-radius:0;box-shadow:none;font-size:0;
+  background-image:linear-gradient(100deg,#ffffff70,#fff0 42%,#00000066)!important;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 32'%3E%3Ccircle cx='12' cy='8' r='5.6'/%3E%3Cpath d='M12 13.2c-3.200 0-5 1.600-5 3.600 0 1.400.9 2.400 1.900 3.100C7.200 22.200 5.600 25.600 4.600 29.600h14.800c-1-4-2.600-7.400-4.300-9.700 1-.7 1.900-1.700 1.900-3.100 0-2-1.800-3.600-5-3.600z'/%3E%3Crect x='3.600' y='28' width='16.800' height='3.400' rx='1.700'/%3E%3C/svg%3E") center/100% 100% no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 32'%3E%3Ccircle cx='12' cy='8' r='5.6'/%3E%3Cpath d='M12 13.2c-3.200 0-5 1.600-5 3.600 0 1.400.9 2.400 1.900 3.100C7.200 22.200 5.600 25.600 4.600 29.600h14.800c-1-4-2.600-7.400-4.300-9.700 1-.7 1.900-1.700 1.900-3.100 0-2-1.800-3.600-5-3.600z'/%3E%3Crect x='3.600' y='28' width='16.800' height='3.400' rx='1.700'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+.wt-cell .wt-token[style*="solid"]{transform:scale(1.3);transform-origin:50% 100%}
