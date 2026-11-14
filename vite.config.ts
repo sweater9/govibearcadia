@@ -29,8 +29,8 @@ export default defineConfig({
         name: 'GoVibeArcadia',
         short_name: 'Arcadia',
         description: SITE_DESCRIPTION,
-        theme_color: '#faf3e8',
-        background_color: '#faf3e8',
+        theme_color: '#0d131d',
+        background_color: '#0d131d',
         display: 'standalone',
         start_url: '/',
         icons: [

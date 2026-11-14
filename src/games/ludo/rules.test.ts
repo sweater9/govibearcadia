@@ -144,11 +144,32 @@ describe('whole matches', () => {
     const store = new Map<string, string>()
     Object.defineProperty(globalThis, 'localStorage', { value: { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v), removeItem: (k: string) => void store.delete(k) }, configurable: true })
     const { s, actions } = playOut('save', 3)
-    saveMatch({ state: s, actions, startedAt: 9, computers: 2 })
+    saveMatch({ state: s, actions, startedAt: 9, computers: 2, level: 'hard' })
     const back = loadMatch()
     expect(back?.state).toEqual(s)
     expect(back?.computers).toBe(2)
+    expect(back?.level).toBe('hard')
     store.set('govibearcadia.ludo.v1', '{"count":2}')
     expect(loadMatch()).toBeNull()
+  })
+})
+
+describe('computer levels', () => {
+  const level = (l: 'easy' | 'normal' | 'hard', seed: string) => {
+    let s = newGame(2, seed)
+    for (let i = 0; i < 600 && s.phase !== 'done'; i++) s = applyAction(s, chooseAction(s, l))
+    return s
+  }
+  it.each(['easy', 'normal', 'hard'] as const)('%s always plays a legal game to the end and replays identically', (l) => {
+    const a = level(l, 'levels-1')
+    const b = level(l, 'levels-1')
+    expect(a.phase).toBe('done')
+    expect(b).toEqual(a)
+  })
+  it('an old save without a level loads as normal', () => {
+    const store = new Map<string, string>()
+    Object.defineProperty(globalThis, 'localStorage', { value: { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v), removeItem: (k: string) => void store.delete(k) }, configurable: true })
+    store.set('govibearcadia.ludo.v1', JSON.stringify({ count: 2, computers: 1, seed: 'old', actions: [], startedAt: 1 }))
+    expect(loadMatch()?.level).toBe('normal')
   })
 })

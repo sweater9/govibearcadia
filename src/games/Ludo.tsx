@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createRandom } from '../lib/rng'
 import type { GameProps } from '../types'
 import { GRID, HOME_COLUMN, RING, YARD, cellOf, isSafeRing, startIndex } from './ludo/board'
-import { chooseAction } from './ludo/bot'
+import { chooseAction, LEVELS, type Level } from './ludo/bot'
 import { applyAction, homeCount, legalMoves, newGame, type Action, type State } from './ludo/rules'
 import { loadMatch, saveMatch } from './ludo/save'
 import './ludo/ludo.css'
@@ -38,6 +38,7 @@ export function Ludo({ onFinish, seed }: GameProps) {
   const [match, setMatch] = useState(() => loadMatch(seed))
   const [count, setCount] = useState(2)
   const [computersWanted, setComputersWanted] = useState(1)
+  const [levelWanted, setLevelWanted] = useState<Level>('normal')
   const [confirmRestart, setConfirmRestart] = useState(false)
   const state = match?.state
   const computers = match?.computers ?? 0
@@ -47,7 +48,7 @@ export function Ludo({ onFinish, seed }: GameProps) {
   const latest = useRef<{ act: (a: Action) => void }>({ act: () => {} })
 
   function start() {
-    const next = { state: newGame(count, seed ?? String(createRandom()())), actions: [], startedAt: Date.now(), computers: Math.min(computersWanted, count - 1) }
+    const next = { state: newGame(count, seed ?? String(createRandom()())), actions: [], startedAt: Date.now(), computers: Math.min(computersWanted, count - 1), level: levelWanted }
     saveMatch(next)
     setMatch(next)
     setConfirmRestart(false)
@@ -81,7 +82,7 @@ export function Ludo({ onFinish, seed }: GameProps) {
     if (!state || state.phase === 'done' || confirmRestart) return
     const auto = isComputer(state.turn) || (state.phase === 'move' && moves.length === 1)
     if (!auto) return
-    const timer = setTimeout(() => latest.current.act(isComputer(state.turn) ? chooseAction(state) : { type: 'move', token: moves[0] }), isComputer(state.turn) ? COMPUTER_MS : AUTO_MS)
+    const timer = setTimeout(() => latest.current.act(isComputer(state.turn) ? chooseAction(state, match?.level) : { type: 'move', token: moves[0] }), isComputer(state.turn) ? COMPUTER_MS : AUTO_MS)
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [match, confirmRestart])
@@ -103,14 +104,10 @@ export function Ludo({ onFinish, seed }: GameProps) {
     {!state || state.phase === 'done' || confirmRestart ? <div className="ld-setup">
       <label>Players <select value={count} onChange={(e) => setCount(Number(e.target.value))}>{[2, 3, 4].map((n) => <option key={n} value={n}>{n} players</option>)}</select></label>
       <label>Computers <select value={Math.min(computersWanted, count - 1)} onChange={(e) => setComputersWanted(Number(e.target.value))}>{Array.from({ length: count }, (_, n) => <option key={n} value={n}>{n === 0 ? 'None' : n}</option>)}</select></label>
+      <label>Computer level <select value={levelWanted} onChange={(e) => setLevelWanted(e.target.value as Level)}>{LEVELS.map((l) => <option key={l} value={l}>{l[0].toUpperCase() + l.slice(1)}</option>)}</select></label>
       <button className="primary-btn" onClick={start}>{confirmRestart ? 'Replace match' : state?.phase === 'done' ? 'Play again' : 'Start match'}</button>
       {confirmRestart ? <button className="secondary-btn" onClick={() => setConfirmRestart(false)}>Keep playing</button> : null}
     </div> : null}
-    <div className="ld-bar">
-      {state && state.dice !== null ? <Die n={state.dice} spin={state.rolls} /> : <span className="ld-die ld-die-empty" aria-hidden="true" />}
-      <p className={`ld-status${state?.phase === 'done' ? (state.winner! < humans ? ' win-message' : ' game-over') : ''}`} role="status" aria-live="polite">{statusText}</p>
-      {state && state.phase === 'roll' && !computerTurn ? <button className="primary-btn" onClick={() => act({ type: 'roll' })}>Roll dice</button> : null}
-    </div>
     <div className="ld-board" role="group" aria-label="Ludo board" style={{ '--turn': turnSeat.hex } as React.CSSProperties}>
       <div className="ld-grid" aria-hidden="true">
         {KINDS.flatMap((row, r) => row.map((k, c) => <i key={`${r}-${c}`} className={`ld-c ld-${k.cls}`} data-star={k.star ? '' : undefined} style={k.seat !== undefined ? { '--seat': SEATS[k.seat].hex, '--soft': SEATS[k.seat].soft } as React.CSSProperties : undefined} />))}
@@ -131,6 +128,11 @@ export function Ludo({ onFinish, seed }: GameProps) {
             onClick={() => act({ type: 'move', token: t.token })}><span /></button>
         })}
       </div>
+    </div>
+    <div className="ld-bar">
+      {state && state.dice !== null ? <Die n={state.dice} spin={state.rolls} /> : <span className="ld-die ld-die-empty" aria-hidden="true" />}
+      <p className={`ld-status${state?.phase === 'done' ? (state.winner! < humans ? ' win-message' : ' game-over') : ''}`} role="status" aria-live="polite">{statusText}</p>
+      {state && state.phase === 'roll' && !computerTurn ? <button className="primary-btn" onClick={() => act({ type: 'roll' })}>Roll dice</button> : null}
     </div>
     <ul className="ld-players" aria-label={state?.phase === 'done' ? 'Final result' : 'Players'}>
       {view.seats.map((seat, slot) => <li key={seat} data-active={state && state.phase !== 'done' && slot === view.turn ? 'true' : undefined}>
