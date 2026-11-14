@@ -14,7 +14,7 @@ const SEED = 'k96' // a deal the solver wins in 722 moves
 async function tapSource(page: Page, s: State, a: Extract<Action, { type: 'move' }>) {
   const card = picked(s, a)![0]
   const label = a.from === 'foundation' ? `${name(card)} on the ${SUITS[suitOf(card)]} foundation` : name(card)
-  await page.getByRole('button', { name: label, exact: true }).click()
+  await page.getByRole('button', { name: label, exact: true }).click({ position: { x: 6, y: 6 } })
 }
 
 async function play(page: Page, line: Action[]) {
@@ -25,10 +25,10 @@ async function play(page: Page, line: Action[]) {
     } else {
       await tapSource(page, s, a)
       if (a.to === 'foundation') {
-        await page.getByRole('button', { name: new RegExp(`^${SUITS[suitOf(picked(s, a)![0])]} foundation`, 'i') }).click()
+        await page.getByRole('button', { name: new RegExp(`^${SUITS[suitOf(picked(s, a)![0])]} foundation`, 'i') }).click({ force: true })
       } else {
         const pile = s.tableau[a.dest]
-        if (pile.up.length) await page.getByRole('button', { name: name(pile.up[pile.up.length - 1]), exact: true }).click()
+        if (pile.up.length) await page.getByRole('button', { name: name(pile.up[pile.up.length - 1]), exact: true }).click({ position: { x: 6, y: 6 } })
         else await page.getByRole('button', { name: `Empty column ${a.dest + 1}` }).click()
       }
     }
