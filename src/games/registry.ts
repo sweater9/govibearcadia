@@ -197,6 +197,18 @@ export const registry: GameEntry[] = [
   },
   {
     meta: {
+      id: 'lane-hopper',
+      title: 'Lane Hopper',
+      description: 'Hop across endless roads, dodge the traffic and keep moving before the eagle spots you.',
+      category: 'Arcade',
+      accent: 'from-emerald-400 to-sky-500',
+      glyph: '🐸',
+      estimated: '1–5 min',
+    },
+    Component: lazy(() => import('./LaneHopper').then((m) => ({ default: m.LaneHopper }))),
+  },
+  {
+    meta: {
       id: 'sudoku-master',
       title: 'Sudoku Master',
       description: 'Fill the grid so every row, column and box holds 1 to 9.',

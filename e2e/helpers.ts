@@ -32,6 +32,7 @@ export const GAMES = [
   { id: 'poker', title: 'Poker', category: 'Strategy', chunk: 'Poker' },
   { id: 'klondike', title: 'Klondike Solitaire', category: 'Cards', chunk: 'Klondike' },
   { id: 'nonogram', title: 'Nonogram', category: 'Logic', chunk: 'Nonogram' },
+  { id: 'lane-hopper', title: 'Lane Hopper', category: 'Arcade', chunk: 'LaneHopper' },
   { id: 'traffic-dodger', title: 'Traffic Dodger', category: 'Arcade', chunk: 'TrafficDodger' },
   { id: 'call-break', title: 'Call Break', category: 'Cards', chunk: 'CallBreak' },
   { id: 'chess', title: 'Chess', category: 'Strategy', chunk: 'Chess' },
