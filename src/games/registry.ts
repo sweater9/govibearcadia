@@ -351,6 +351,18 @@ export const registry: GameEntry[] = [
   },
   {
     meta: {
+      id: 'klondike',
+      title: 'Klondike Solitaire',
+      description: 'The classic patience game: build four suit piles from ace to king. Draw one or three, with undo and auto-finish.',
+      category: 'Cards',
+      accent: 'from-emerald-700 to-teal-500',
+      glyph: '♠',
+      estimated: '5–15 min',
+    },
+    Component: lazy(() => import('./Klondike').then((m) => ({ default: m.Klondike }))),
+  },
+  {
+    meta: {
       id: 'blackjack',
       title: 'Blackjack',
       description: 'Beat the dealer to 21 with play-money chips: hit, stand, double down and split. Chips have no real value.',

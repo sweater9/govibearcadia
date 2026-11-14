@@ -90,4 +90,18 @@ const poker: Cover = (u, f) => <g>
   </g>
 </g>
 
-export const CARD_COVERS: Record<string, Cover> = { 'indian-rummy': rummy, blackjack, poker }
+/** Klondike: a tableau of fanned columns and an ace heading for its pile. */
+const klondike: Cover = (u, f) => <g>
+  <rect width="160" height="90" fill={f('felt')} />
+  <ellipse cx="80" cy="45" rx="76" ry="38" fill="none" stroke="#fff" strokeOpacity=".08" strokeWidth="1" />
+  <Card u={u} x={12} y={10} w={22} h={31} back back2="#2457d6" />
+  <Card u={u} x={104} y={10} w={22} h={31} rank="A" suit="S" />
+  <Card u={u} x={130} y={10} w={22} h={31} rank="A" suit="H" />
+  {[0, 1, 2, 3].map((i) => <Card key={'a' + i} u={u} x={14 + i * 26} y={44 + i * 3} w={22} h={31} back back2="#2457d6" />)}
+  <Card u={u} x={14} y={50} w={22} h={31} rank="K" suit="D" />
+  <Card u={u} x={40} y={53} w={22} h={31} rank="Q" suit="S" rot={-3} />
+  <Card u={u} x={66} y={56} w={22} h={31} rank="J" suit="H" />
+  <Card u={u} x={92} y={59} w={22} h={31} rank="10" suit="C" />
+</g>
+
+export const CARD_COVERS: Record<string, Cover> = { 'indian-rummy': rummy, blackjack, poker, klondike }
