@@ -28,6 +28,7 @@ const PLAY_AREA = {
   carrom: '.cm-setup',
   'taiwanese-mahjong': '.mj-setup',
   'world-trip': '.wt-board',
+  nonogram: '.ng-board',
   ludo: '.ld-board',
   'indian-rummy': '.rm-hand',
   blackjack: '.bj-table',
