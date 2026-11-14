@@ -173,6 +173,18 @@ export const registry: GameEntry[] = [
   },
   {
     meta: {
+      id: 'traffic-dodger',
+      title: 'Traffic Dodger',
+      description: 'Weave through oncoming traffic on a four-lane road. It gets faster the longer you last.',
+      category: 'Arcade',
+      accent: 'from-sky-400 to-fuchsia-500',
+      glyph: '🚗',
+      estimated: '1–5 min',
+    },
+    Component: lazy(() => import('./TrafficDodger').then((m) => ({ default: m.TrafficDodger }))),
+  },
+  {
+    meta: {
       id: 'sudoku-master',
       title: 'Sudoku Master',
       description: 'Fill the grid so every row, column and box holds 1 to 9.',
