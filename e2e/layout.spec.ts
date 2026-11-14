@@ -28,6 +28,7 @@ const PLAY_AREA = {
   carrom: '.cm-setup',
   'taiwanese-mahjong': '.mj-setup',
   'world-trip': '.wt-board',
+  'stack-tower': '.stk-drop',
   klondike: '.kl-board',
   nonogram: '.ng-board',
   'traffic-dodger': '.tr-pad',

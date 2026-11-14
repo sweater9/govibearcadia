@@ -176,7 +176,16 @@ const trafficDodger: Cover = (u, f) => {
   </g>
 }
 
+/** Stack Tower: a tower of colourful slabs, a sliding block above and a trimmed sliver falling away. */
+const stackTower: Cover = () => <g>
+  <rect width="160" height="90" fill="#0f1a2e" />
+  {[0, 1, 2, 3, 4, 5].map((i) => <rect key={i} x={50 + (i % 3) * 3} y={76 - i * 11} width={60 - i * 3} height="10" rx="2" fill={`hsl(${200 + i * 22} 80% 60%)`} />)}
+  <rect x="82" y="3" width="42" height="10" rx="2" fill="hsl(330 80% 66%)" opacity=".95" />
+  <rect x="124" y="30" width="8" height="10" rx="2" fill="hsl(300 70% 60%)" opacity=".6" transform="rotate(18 128 35)" />
+</g>
+
 export const ARCADE_COVERS: Record<string, Cover> = {
+  'stack-tower': stackTower,
   'traffic-dodger': trafficDodger,
   'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'gravity-flip': gravityFlip,
 }
