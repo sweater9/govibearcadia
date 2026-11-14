@@ -381,6 +381,15 @@ export const registry: GameEntry[] = [
       estimated: '5–15 min',
     },
     Component: lazy(() => import('./Klondike').then((m) => ({ default: m.Klondike }))),
+      id: 'call-break',
+      title: 'Call Break',
+      description: 'The trick-taking classic from Nepal and India: bid your tricks, spades are always trump, five rounds against three computers.',
+      category: 'Cards',
+      accent: 'from-slate-600 to-sky-500',
+      glyph: '♠',
+      estimated: '15–25 min',
+    },
+    Component: lazy(() => import('./CallBreak').then((m) => ({ default: m.CallBreak }))),
   },
   {
     meta: {
