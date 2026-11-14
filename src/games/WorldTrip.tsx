@@ -179,30 +179,32 @@ export function Table({ state, act, name, status, canAct, thinking, extra, previ
   const waiting = !canAct
   const walking = moved && !waiting
   return <>
-    {!preview && state.phase !== 'done' ? <div className="wt-actions">
-      {waiting && thinking ? <p className="wt-thinking" role="status">{thinking}</p> : null}
-      {walking ? <div className="wt-move"><button className="primary-btn" disabled={walked !== null} onClick={() => setWalked(0)}>{`Move ${total} spaces`}</button></div> : null}
-      {!waiting && !walking && state.phase === 'roll' && state.players[current].inHotel ? <>
-        {state.players[current].pass ? <button className="secondary-btn" onClick={() => run({ type: 'usepass' })}>Use boarding pass</button> : null}
-        {state.players[current].cash >= HOTEL_FEE ? <button className="secondary-btn" onClick={() => run({ type: 'payout' })}>Pay {money(HOTEL_FEE)} to leave</button> : null}
-      </> : null}
-      {!waiting && !walking && state.phase === 'roll' ? <button className="primary-btn" onClick={() => run({ type: 'roll' })}>{state.players[current].inHotel ? 'Roll for doubles' : 'Roll dice'}</button> : null}
-      {!waiting && !walking && state.phase === 'auction' && state.auction ? (() => {
-        const { bid, order, pos } = state.auction
-        const cash = state.players[order[pos]].cash
-        return <>
-          <button className="primary-btn" onClick={() => run({ type: 'bid', amount: bid + AUCTION_STEP })}>Bid {money(bid + AUCTION_STEP)}</button>
-          {cash >= bid + 5 * AUCTION_STEP ? <button className="secondary-btn" onClick={() => run({ type: 'bid', amount: bid + 5 * AUCTION_STEP })}>Bid {money(bid + 5 * AUCTION_STEP)}</button> : null}
-          <button className="secondary-btn" onClick={() => run({ type: 'drop' })}>Drop out</button>
-        </>
-      })() : null}
-      {!waiting && !walking && state.phase === 'buy' && isClaimable(landed) ? <>
-        <button className="primary-btn" aria-label={`Claim ${landed.name} for ${money(landed.price)}`} onClick={() => run({ type: 'buy' })}>Claim · {money(landed.price)}</button>
-        <button className="secondary-btn" onClick={() => run({ type: 'skip' })}>Pass</button>
-      </> : null}
-    </div> : null}
     <div className="wt-layout">
-      <Board state={shown} selected={viewIndex} onSelect={setPicked} status={walking ? `Rolled ${shown.dice?.[0]} and ${shown.dice?.[1]}. ${walked === null ? `Press Move to walk ${total} spaces.` : 'Walking…'}` : status} name={name} />
+      <div className="wt-main">
+        <Board state={shown} selected={viewIndex} onSelect={setPicked} status={walking ? `Rolled ${shown.dice?.[0]} and ${shown.dice?.[1]}. ${walked === null ? `Press Move to walk ${total} spaces.` : 'Walking…'}` : status} name={name} />
+      {!preview && state.phase !== 'done' ? <div className="wt-actions">
+        {waiting && thinking ? <p className="wt-thinking" role="status">{thinking}</p> : null}
+        {walking ? <div className="wt-move"><button className="primary-btn" disabled={walked !== null} onClick={() => setWalked(0)}>{`Move ${total} spaces`}</button></div> : null}
+        {!waiting && !walking && state.phase === 'roll' && state.players[current].inHotel ? <>
+          {state.players[current].pass ? <button className="secondary-btn" onClick={() => run({ type: 'usepass' })}>Use boarding pass</button> : null}
+          {state.players[current].cash >= HOTEL_FEE ? <button className="secondary-btn" onClick={() => run({ type: 'payout' })}>Pay {money(HOTEL_FEE)} to leave</button> : null}
+        </> : null}
+        {!waiting && !walking && state.phase === 'roll' ? <button className="primary-btn" onClick={() => run({ type: 'roll' })}>{state.players[current].inHotel ? 'Roll for doubles' : 'Roll dice'}</button> : null}
+        {!waiting && !walking && state.phase === 'auction' && state.auction ? (() => {
+          const { bid, order, pos } = state.auction
+          const cash = state.players[order[pos]].cash
+          return <>
+            <button className="primary-btn" onClick={() => run({ type: 'bid', amount: bid + AUCTION_STEP })}>Bid {money(bid + AUCTION_STEP)}</button>
+            {cash >= bid + 5 * AUCTION_STEP ? <button className="secondary-btn" onClick={() => run({ type: 'bid', amount: bid + 5 * AUCTION_STEP })}>Bid {money(bid + 5 * AUCTION_STEP)}</button> : null}
+            <button className="secondary-btn" onClick={() => run({ type: 'drop' })}>Drop out</button>
+          </>
+        })() : null}
+        {!waiting && !walking && state.phase === 'buy' && isClaimable(landed) ? <>
+          <button className="primary-btn" aria-label={`Claim ${landed.name} for ${money(landed.price)}`} onClick={() => run({ type: 'buy' })}>Claim · {money(landed.price)}</button>
+          <button className="secondary-btn" onClick={() => run({ type: 'skip' })}>Pass</button>
+        </> : null}
+      </div> : null}
+      </div>
       <div className="wt-side">
         <StopCard state={shown} index={viewIndex} name={name} />
         {!preview ? <Hand state={shown} name={name} current={current} /> : null}
