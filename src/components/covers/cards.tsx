@@ -104,7 +104,6 @@ const klondike: Cover = (u, f) => <g>
   <Card u={u} x={92} y={59} w={22} h={31} rank="10" suit="C" />
 </g>
 
-export const CARD_COVERS: Record<string, Cover> = { 'indian-rummy': rummy, blackjack, poker, klondike }
 /** Call Break: a hand of spades beating a trick, the trump suit front and centre. */
 const callBreak: Cover = (u, f) => <g>
   <rect width="160" height="90" fill={f('feltN')} />
@@ -115,4 +114,4 @@ const callBreak: Cover = (u, f) => <g>
   {[['A', 'S'], ['K', 'S'], ['Q', 'S'], ['J', 'S'], ['8', 'S']].map(([r, s], i) => <Card key={r} u={u} x={22 + i * 24} y={52} w={24} h={34} rank={r} suit={s as Suit} rot={(i - 2) * 4} />)}
 </g>
 
-export const CARD_COVERS: Record<string, Cover> = { 'indian-rummy': rummy, blackjack, poker, 'call-break': callBreak }
+export const CARD_COVERS: Record<string, Cover> = { 'indian-rummy': rummy, blackjack, poker, klondike, 'call-break': callBreak }

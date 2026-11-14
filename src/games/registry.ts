@@ -182,6 +182,9 @@ export const registry: GameEntry[] = [
       estimated: '3–15 min',
     },
     Component: lazy(() => import('./Nonogram').then((m) => ({ default: m.Nonogram }))),
+  },
+  {
+    meta: {
       id: 'traffic-dodger',
       title: 'Traffic Dodger',
       description: 'Weave through oncoming traffic on a four-lane road. It gets faster the longer you last.',
@@ -381,6 +384,9 @@ export const registry: GameEntry[] = [
       estimated: '5–15 min',
     },
     Component: lazy(() => import('./Klondike').then((m) => ({ default: m.Klondike }))),
+  },
+  {
+    meta: {
       id: 'call-break',
       title: 'Call Break',
       description: 'The trick-taking classic from Nepal and India: bid your tricks, spades are always trump, five rounds against three computers.',
@@ -390,6 +396,9 @@ export const registry: GameEntry[] = [
       estimated: '15–25 min',
     },
     Component: lazy(() => import('./CallBreak').then((m) => ({ default: m.CallBreak }))),
+  },
+  {
+    meta: {
       id: 'chess',
       title: 'Chess',
       description: 'The full game of chess against the computer: castling, en passant, promotion, three levels. Play White or Black.',
