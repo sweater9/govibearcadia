@@ -347,7 +347,33 @@ const mahjong: Cover = (u, f) => {
   </g>
 }
 
+/** Chess: a checkered board, a king and a pawn built from simple shapes, a rook on the far side. */
+const chess: Cover = () => {
+  const sq = 15
+  const x0 = 20
+  const y0 = 8
+  const piece = (cx: number, base: number, kind: 'king' | 'pawn' | 'rook', light: boolean) => {
+    const c = light ? '#fffdf6' : '#141b26'
+    const e = light ? '#16202e' : '#9fd8f2'
+    return <g key={kind + cx} fill={c} stroke={e} strokeWidth=".8">
+      <ellipse cx={cx} cy={base + 1} rx="8" ry="2.4" fill="#000" opacity=".3" stroke="none" />
+      {kind === 'pawn' && <><circle cx={cx} cy={base - 15} r="3.6" /><path d={`M${cx - 3} ${base - 11}h6l2.6 11h-11.2z`} /><rect x={cx - 5.5} y={base - 1.5} width="11" height="2.6" rx="1" /></>}
+      {kind === 'rook' && <><path d={`M${cx - 6.7} ${base - 22}h3v3h2.2v-3h3v3h2.2v-3h3v7h-13.4z`} /><rect x={cx - 4.4} y={base - 15} width="8.8" height="12" /><rect x={cx - 6} y={base - 3} width="12" height="3.2" rx="1" /></>}
+      {kind === 'king' && <><rect x={cx - 1} y={base - 26} width="2" height="7" /><rect x={cx - 3} y={base - 24} width="6" height="2" /><path d={`M${cx - 4.6} ${base - 19}q4.6-3 9.2 0l2.4 14h-14z`} /><rect x={cx - 7} y={base - 4} width="14" height="4" rx="1.2" /></>}
+    </g>
+  }
+  return <g>
+    <rect width="160" height="90" fill="#0f1622" />
+    {Array.from({ length: 8 }, (_, r) => Array.from({ length: 8 }, (_, c) => <rect key={r + '-' + c} x={x0 + c * sq - 0} y={y0 + r * 10} width={sq} height="10" fill={(r + c) % 2 ? '#4b6a8a' : '#b9cfe0'} opacity=".9" />))}
+    {piece(66, 62, 'pawn', true)}
+    {piece(96, 70, 'king', true)}
+    {piece(52, 42, 'rook', false)}
+    {piece(112, 46, 'pawn', false)}
+  </g>
+}
+
 export const BOARD_COVERS: Record<string, Cover> = {
+  chess,
   'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
   pallanguzhi, carrom, ludo, 'world-trip': worldTrip, 'taiwanese-mahjong': mahjong,
 }

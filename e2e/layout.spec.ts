@@ -32,6 +32,7 @@ const PLAY_AREA = {
   nonogram: '.ng-board',
   'traffic-dodger': '.tr-pad',
   'call-break': '.cb-hand',
+  chess: '.ch-setup',
   ludo: '.ld-board',
   'indian-rummy': '.rm-hand',
   blackjack: '.bj-table',

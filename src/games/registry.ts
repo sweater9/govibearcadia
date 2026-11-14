@@ -390,6 +390,15 @@ export const registry: GameEntry[] = [
       estimated: '15–25 min',
     },
     Component: lazy(() => import('./CallBreak').then((m) => ({ default: m.CallBreak }))),
+      id: 'chess',
+      title: 'Chess',
+      description: 'The full game of chess against the computer: castling, en passant, promotion, three levels. Play White or Black.',
+      category: 'Strategy',
+      accent: 'from-slate-700 to-amber-400',
+      glyph: '♞',
+      estimated: '10–40 min',
+    },
+    Component: lazy(() => import('./Chess').then((m) => ({ default: m.Chess }))),
   },
   {
     meta: {
