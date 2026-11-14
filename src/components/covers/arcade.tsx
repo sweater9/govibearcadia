@@ -176,7 +176,18 @@ const trafficDodger: Cover = (u, f) => {
   </g>
 }
 
+/** Mole Mash: a lawn of nine holes with a mole, a golden star and a bomb popping up. */
+const moleMash: Cover = (u, f) => <g>
+  <rect width="160" height="90" fill="#1c4a2a" />
+  {[0, 1, 2].flatMap((r) => [0, 1, 2].map((c) => <ellipse key={`${r}${c}`} cx={32 + c * 48} cy={20 + r * 26} rx="15" ry="7" fill="#0b1410" />))}
+  <path d="M65 40a15 13 0 0 1 30 0z" fill={f('orange')} /><circle cx="73" cy="32" r="2" fill="#0b1410" /><circle cx="87" cy="32" r="2" fill="#0b1410" /><ellipse cx="80" cy="37" rx="4" ry="2.6" fill="#f4b3a0" />
+  <path d="M104 66l3 7 7 .4-5.5 4.6 2 7-6.5-4-6.5 4 2-7-5.5-4.6 7-.4z" fill={f('yellow')} transform="translate(-20 -16)" />
+  <circle cx="128" cy="62" r="8" fill="#222a35" /><path d="M132 55l4-5" stroke="#ffb454" strokeWidth="2" />
+  <ellipse cx="80" cy="80" rx="12" ry="3" fill="#000" opacity=".25" filter={`url(#${u}-soft)`} />
+</g>
+
 export const ARCADE_COVERS: Record<string, Cover> = {
+  'mole-mash': moleMash,
   'traffic-dodger': trafficDodger,
   'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'gravity-flip': gravityFlip,
 }

@@ -31,6 +31,7 @@ const PLAY_AREA = {
   klondike: '.kl-board',
   nonogram: '.ng-board',
   'traffic-dodger': '.tr-pad',
+  'mole-mash': '.mm-board',
   'call-break': '.cb-hand',
   chess: '.ch-setup',
   ludo: '.ld-board',
