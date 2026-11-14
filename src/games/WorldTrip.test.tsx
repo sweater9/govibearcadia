@@ -31,7 +31,7 @@ describe('World Trip UI', () => {
       if (move) { fireEvent.click(move); act(() => { vi.advanceTimersByTime(4000) }) }
       const pass = screen.queryByRole('button', { name: 'Pass' })
       if (pass) fireEvent.click(pass)
-      const drop = screen.queryByRole('button', { name: 'Drop out' })
+      const drop = screen.queryByRole('button', { name: /^Drop out/ })
       if (drop) fireEvent.click(drop)
       const end = screen.queryByRole('button', { name: /^(End turn|Roll again)$/ })
       if (end) fireEvent.click(end)
