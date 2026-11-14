@@ -5,6 +5,7 @@ import { chooseClaim, chooseTurnAction, LEVELS, type Level } from './mahjong/ai'
 import { describeConfig, isStandard, loadRules, normaliseConfig, OPTIONS, saveRules, STAKES } from './mahjong/config'
 import { DEFAULT_CONFIG, act, kongChoices, newMatch, selfDrawScore, startNextHand, windOf, type Config, type Decision, type Event, type State } from './mahjong/rules'
 import { clearSaved, loadSaved, save, type Saved } from './mahjong/save'
+import { TileFace } from './mahjong/TileFace'
 import { isDragon, isFlower, isHonour, rankOf, suitOf, tileName, tileShort } from './mahjong/tiles'
 
 const WINDS = ['East', 'South', 'West', 'North']
@@ -13,7 +14,7 @@ const COMPUTER_MS = 650
 
 function Tile({ t, small, selected, onClick, label, tag }: { t: number; small?: boolean; selected?: boolean; onClick?: () => void; label?: string; tag?: string }) {
   const cls = `mj-tile${small ? ' mj-small' : ''}${selected ? ' mj-sel' : ''} ${isFlower(t) ? 'mj-f' : isHonour(t) ? (isDragon(t) ? `mj-dr${t - 31}` : 'mj-w') : `mj-s${suitOf(t)}`}${tag ? ` ${tag}` : ''}`
-  const body = isFlower(t) || isHonour(t) ? tileShort(t) : <>{rankOf(t)}<small>{['C', 'D', 'B'][suitOf(t)]}</small></>
+  const body = <TileFace t={t} />
   return onClick ? (
     <button type="button" className={cls} onClick={onClick} aria-label={label ?? tileName(t)} aria-pressed={selected}>{body}</button>
   ) : (
@@ -184,6 +185,7 @@ export function Mahjong({ onFinish, seed }: GameProps) {
           <div key={i} className={`mj-opp${state.turn === i && state.phase === 'discard' ? ' mj-turn' : ''}`}>
             <div className="mj-opp-head"><strong>{NAMES[i]}</strong> <span>{WINDS[windOf(state, i)]}{state.dealer === i ? ' · dealer' : ''}</span></div>
             <div className="mj-opp-sub"><span data-testid={`mj-score-${i}`}>{state.scores[i]}</span> pts · {state.seats[i].hand.length} tiles · {state.seats[i].flowers.length} flowers</div>
+            <div className="mj-backs" aria-hidden="true">{Array.from({ length: state.seats[i].hand.length }, (_, k) => <i key={k} />)}</div>
             <div className="mj-melds">{state.seats[i].melds.map((m, k) => <span key={k} className="mj-meld">{m.kind}{m.kind === 'chow' ? ` ${tileShort(m.tile)}` : ` ${tileShort(m.tile)}`}</span>)}</div>
           </div>
         ))}
