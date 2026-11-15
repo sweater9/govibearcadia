@@ -196,6 +196,17 @@ const laneHopper: Cover = (u, f) => <g>
   <circle cx="80" cy="75" r="8" fill={f('green')} /><circle cx="76" cy="72" r="2" fill="#fff" /><circle cx="84" cy="72" r="2" fill="#fff" />
 </g>
 
+/** Pinball: a table with three pop bumpers, two flippers and a ball mid-flight. */
+const pinball: Cover = (u, f) => <g>
+  <rect width="160" height="90" fill="#150f2a" />
+  <path d="M20 6 H140 V84 H20 Z" fill="#1d1540" stroke="#7fd8ff" strokeWidth="1.4" />
+  {[[60, 28], [100, 28], [80, 46]].map(([x, y], i) => <g key={i}><circle cx={x} cy={y} r="9" fill="#2a1740" stroke="#ff6b8b" strokeWidth="2" /><circle cx={x} cy={y} r="3.5" fill={f('red')} /></g>)}
+  {[52, 80, 108].map((x) => <circle key={x} cx={x} cy="14" r="3" fill={f('gold')} />)}
+  <path d="M60 78 L74 72 M100 78 L86 72" stroke="#ffc247" strokeWidth="4" strokeLinecap="round" />
+  <circle cx="120" cy="58" r="3.4" fill="#f1f6ff" />
+  <ellipse cx="80" cy="86" rx="40" ry="3" fill="#000" opacity=".3" filter={`url(#${u}-soft)`} />
+</g>
+
 /** Mole Mash: a lawn of nine holes with a mole, a golden star and a bomb popping up. */
 const moleMash: Cover = (u, f) => <g>
   <rect width="160" height="90" fill="#1c4a2a" />
@@ -209,6 +220,7 @@ const moleMash: Cover = (u, f) => <g>
 export const ARCADE_COVERS: Record<string, Cover> = {
   'stack-tower': stackTower,
   'lane-hopper': laneHopper,
+  pinball,
   'mole-mash': moleMash,
   'traffic-dodger': trafficDodger,
   'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'gravity-flip': gravityFlip,
