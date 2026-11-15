@@ -175,6 +175,15 @@ export const registry: GameEntry[] = [
       estimated: '10–20 min',
     },
     Component: lazy(() => import('./Scopa').then((m) => ({ default: m.Scopa }))),
+      id: 'shogi',
+      title: 'Shogi',
+      description: 'Japanese chess: promote pieces and drop your captures back onto the board.',
+      category: 'Strategy',
+      accent: 'from-amber-500 to-red-600',
+      glyph: '☖',
+      estimated: '15–40 min',
+    },
+    Component: lazy(() => import('./Shogi').then((m) => ({ default: m.Shogi }))),
   },
   {
     meta: {

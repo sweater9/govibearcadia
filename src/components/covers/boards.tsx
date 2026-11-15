@@ -154,6 +154,30 @@ const quoridor: Cover = (u, f) => {
     {wallsV.map(([r, c]) => <rect key={`v${r}${c}`} x={x0 + (c + 1) * s - 1.2} y={y0 + r * s * 0.98 + 0.4} width="2.4" height={2 * s * 0.98 - 0.8} rx="1.1" fill={f('gold')} stroke="#7a4d00" strokeWidth=".4" />)}
     <Disc u={u} f={f} cx={x0 + 4.5 * s} cy={y0 + 7.5 * s * 0.98} r="3.4" m="red" />
     <Disc u={u} f={f} cx={x0 + 3.5 * s} cy={y0 + 1.5 * s * 0.98} r="3.4" m="blue" />
+/** Shogi: the wooden board with a few tiles, one promoted in red, and a captured tile in hand. */
+const shogi: Cover = (u) => {
+  const s = 8.6
+  const x0 = 80 - 4.5 * s
+  const y0 = 2.5
+  const tile = (c: number, r: number, label: string, red = false, down = false) => {
+    const cx = x0 + c * s + s / 2
+    const cy = y0 + r * s + s / 2
+    return <g key={`${c}-${r}`} transform={`translate(${cx} ${cy}) ${down ? 'rotate(180)' : ''}`}>
+      <path d="M0 -3.9 L3.3 -2.4 L3.9 3.9 L-3.9 3.9 L-3.3 -2.4Z" fill="#f0d49a" stroke="#6b4513" strokeWidth=".5" />
+      <text x="0" y="2.4" textAnchor="middle" fontSize="5.4" fontFamily="'Noto Serif JP','Yu Mincho',serif" fontWeight="700" fill={red ? '#b3201a' : '#231607'}>{label}</text>
+    </g>
+  }
+  return <g>
+    <rect width="160" height="90" fill="#171321" />
+    <Shadow u={u} cx={80} cy={88} rx={44} ry={2.5} o={0.5} />
+    <rect x={x0} y={y0} width={9 * s} height={9 * s} fill="#c99b52" />
+    <g stroke="#5b3a14" strokeWidth=".4">
+      {Array.from({ length: 10 }, (_, i) => <path key={i} d={`M${x0 + i * s} ${y0} V${y0 + 9 * s} M${x0} ${y0 + i * s} H${x0 + 9 * s}`} />)}
+    </g>
+    <rect x={x0} y={y0} width={9 * s} height={9 * s} fill="none" stroke="#5b3a14" strokeWidth="1" />
+    {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((c) => tile(c, 6, '歩'))}
+    {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((c) => tile(c, 2, '歩', false, true))}
+    {tile(4, 8, '玉')}{tile(4, 0, '王', false, true)}{tile(1, 7, '角')}{tile(7, 7, '飛')}{tile(2, 4, '龍', true)}{tile(6, 3, 'と', true, true)}
   </g>
 }
 
@@ -448,5 +472,6 @@ export const BOARD_COVERS: Record<string, Cover> = {
   'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, 'chinese-checkers': chineseCheckers, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
   'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, go, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
   'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, quoridor, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
+  'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, shogi, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
   pallanguzhi, carrom, ludo, 'world-trip': worldTrip, 'taiwanese-mahjong': mahjong,
 }

@@ -16,6 +16,7 @@ const PLAY_AREA = {
   'chinese-checkers': '.cc-board',
   go: '.go-board',
   quoridor: '.qr-board',
+  shogi: '.sg-play',
   battleship: '.bs-board',
   'daily-word': '.wordle',
   'brick-breaker': '.brk-field',
