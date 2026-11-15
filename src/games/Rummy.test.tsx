@@ -1,5 +1,5 @@
 import { StrictMode } from 'react'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Rummy } from './Rummy'
 import { nearlyWon } from './rummy/endgame'
@@ -57,5 +57,10 @@ describe('Rummy', () => {
     expect(onFinish.mock.calls[0][0]).toMatchObject({ won: true })
     expect(screen.getByRole('button', { name: 'Play again' })).toBeVisible()
     expect(screen.getByRole('status')).toHaveTextContent(/You win the pool/)
+    // The scoreboard below shows every player's points for the deal, total and place.
+    const board = screen.getByRole('table', { name: 'Scoreboard' })
+    expect(within(board).getByRole('row', { name: /You/ })).toHaveTextContent(/1st/)
+    expect(within(board).getAllByRole('row')).toHaveLength(3) // header + two players
+    expect(within(board).getByRole('row', { name: /Computer 1/ })).toHaveTextContent(/2nd/)
   })
 })

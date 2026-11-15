@@ -140,3 +140,41 @@ describe('dropping and wrong declarations', () => {
     expect(s.scores).toEqual([80, 0])
   })
 })
+
+describe('what a rival scores when someone else declares', () => {
+  // Wild joker is a 10. suit 0 spades, 1 hearts, 2 diamonds, 3 clubs.
+  const hand = [c(12, 0), c(12, 1), c(12, 2), c(12, 3), c(7, 3), c(8, 3), c(9, 3), c(3, 0), c(5, 0), c(3, 1), c(6, 2), c(3, 3), c(4, 3)]
+  const queens = [c(12, 0), c(12, 1), c(12, 2), c(12, 3)]
+  const pure = [c(7, 3), c(8, 3), c(9, 3)]
+
+  it('a pure sequence and a set, with no second sequence, score only the remaining cards (3+5+3+6+3+4 = 24)', () => {
+    expect(penaltyPoints(hand, 10, [queens, pure])).toBe(24)
+  })
+  it('the cards in a set are not counted against you once you hold a pure sequence', () => {
+    expect(penaltyPoints(hand, 10, [pure])).toBe(64) // only the pure sequence grouped: the queens now count
+    expect(penaltyPoints(hand, 10, [queens, pure])).toBeLessThan(penaltyPoints(hand, 10, [pure]))
+  })
+  it('without a pure sequence every card counts, capped at 80', () => {
+    expect(penaltyPoints(hand, 10, [queens])).toBe(Math.min(80, 40 + 7 + 8 + 9 + 24))
+  })
+  it('groups that are not valid melds, or that reuse a card, count as loose', () => {
+    expect(penaltyPoints(hand, 10, [queens, pure, [c(3, 0), c(5, 0), c(6, 2)]])).toBe(24)
+    expect(penaltyPoints(hand, 10, [queens, pure, [c(12, 0), c(3, 0), c(3, 1)]])).toBe(24)
+  })
+  it('with no arrangement, the best possible grouping is used (the three 3s also make a set: 5+6+4 = 15)', () => {
+    expect(penaltyPoints(hand, 10)).toBe(15)
+  })
+  it('a declaration records a rival\'s own grouping, which decides their points', () => {
+    const winner = [c(4, 1), c(5, 1), c(6, 1), c(7, 0), c(8, 0), c(9, 0), c(13, 0), c(13, 1), c(13, 2), c(2, 0), c(2, 1), c(2, 2), c(2, 3), c(1, 0)]
+    const base = { ...newGame(2, 'layout-points'), turn: 1, phase: 'discard' as const, taken: null, wild: 10 }
+    const s: State = { ...base, hands: [hand, winner] }
+    const declare = { type: 'declare' as const, card: c(1, 0), groups: [[c(4, 1), c(5, 1), c(6, 1)], [c(7, 0), c(8, 0), c(9, 0)], [c(13, 0), c(13, 1), c(13, 2)], [c(2, 0), c(2, 1), c(2, 2), c(2, 3)]] }
+    expect(declareError(winner, declare.card, declare.groups, 10)).toBeNull()
+    const own = applyAction(s, { ...declare, layouts: { 0: [queens, pure] } })
+    const best = applyAction(s, declare)
+    expect(own.phase).toBe('done')
+    expect(own.winner).toBe(1)
+    expect(own.scores).toEqual([24, 0])
+    expect(best.scores).toEqual([15, 0])
+  })
+})

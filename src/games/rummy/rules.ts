@@ -46,7 +46,8 @@ export type State = {
 export type Action =
   | { type: 'draw'; from: 'stock' | 'discard' }
   | { type: 'discard'; card: number }
-  | { type: 'declare'; card: number; groups: number[][] }
+  /** `layouts` (seat -> groups) is how a rival had arranged their hand when this declaration ended the deal; it decides their points. */
+  | { type: 'declare'; card: number; groups: number[][]; layouts?: Record<number, number[][]> }
   | { type: 'drop' }
   | { type: 'wrong-show' }
 
@@ -184,10 +185,31 @@ export function bestPlan(ids: number[], wild: number, penalty = { pure: 30, seco
   return { groups, loose, points: handPoints(loose, wild), pure: pure === 1, runs, complete: pure === 1 && runs >= 2 }
 }
 
-/** What a player scores when someone else declares: everything counts unless a pure sequence and a second sequence exist. */
-export function penaltyPoints(ids: number[], wild: number): number {
-  const plan = bestPlan(ids, wild, { pure: 1000, second: 1000 })
-  const raw = plan.complete ? plan.points : handPoints(ids, wild)
+/**
+ * What a player scores when someone else declares. With a pure sequence in hand, only the cards outside every valid group
+ * count (A, K, Q, J = 10, other cards face value, jokers and wild-rank cards 0), so a pure sequence plus a set scores just the
+ * remaining cards even without a second sequence. With no pure sequence every card counts. Capped at 80.
+ *
+ * `arranged` is the player's own grouping when they had one: groups that are not valid melds, or that reuse a card, count as
+ * loose. Without it the best possible grouping is used.
+ */
+export function penaltyPoints(ids: number[], wild: number, arranged?: number[][]): number {
+  let raw: number
+  if (arranged) {
+    const used = new Set<number>()
+    let pure = false
+    for (const group of arranged) {
+      if (group.length < 3 || group.some((id) => !ids.includes(id) || used.has(id)) || new Set(group).size !== group.length) continue
+      const kind = meldKind(group, wild)
+      if (!kind) continue
+      group.forEach((id) => used.add(id))
+      if (kind === 'pure') pure = true
+    }
+    raw = pure ? handPoints(ids.filter((id) => !used.has(id)), wild) : handPoints(ids, wild)
+  } else {
+    const plan = bestPlan(ids, wild, { pure: 1000, second: 0 })
+    raw = plan.pure ? plan.points : handPoints(ids, wild)
+  }
   return Math.min(MAX_POINTS, raw)
 }
 
@@ -214,8 +236,8 @@ function reshuffleIfEmpty(s: State): State {
 /** The next player who is still in the deal. */
 const nextSeat = (s: State, from: number) => { let n = (from + 1) % s.players; for (let i = 0; i < s.players && s.out[n] !== null; i++) n = (n + 1) % s.players; return n }
 
-function finish(s: State, winner: number | null, message: string): State {
-  const scores = s.hands.map((h, p) => (p === winner ? 0 : s.out[p] ?? penaltyPoints(h, s.wild)))
+function finish(s: State, winner: number | null, message: string, layouts?: Record<number, number[][]>): State {
+  const scores = s.hands.map((h, p) => (p === winner ? 0 : s.out[p] ?? penaltyPoints(h, s.wild, layouts?.[p])))
   const lowest = winner ?? scores.indexOf(Math.min(...scores))
   return { ...s, phase: 'done', winner: lowest, scores, message }
 }
@@ -255,7 +277,7 @@ export function applyAction(state: State, action: Action): State {
   if (action.card === s.taken) return state
   if (declareError(hand, action.card, action.groups, s.wild) !== null) return state
   const next = { ...withHand(s, hand.filter((id) => id !== action.card)), discard: [...s.discard, action.card] }
-  return finish(next, s.turn, 'Valid declaration.')
+  return finish(next, s.turn, 'Valid declaration.', action.layouts)
 }
 
 function withHand(s: State, hand: number[]): State {

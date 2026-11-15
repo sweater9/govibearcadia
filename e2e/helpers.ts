@@ -1,44 +1,8 @@
 import { expect, type Page } from '@playwright/test'
+import { readCatalog } from './catalog'
 
-export const GAMES = [
-  { id: 'neon-merge', title: 'Neon Merge', category: 'Puzzle', chunk: 'NeonMerge' },
-  { id: 'memory-grid', title: 'Memory Grid', category: 'Focus', chunk: 'MemoryGrid' },
-  { id: 'pulse-tap', title: 'Pulse Tap', category: 'Arcade', chunk: 'PulseTap' },
-  { id: 'minesweeper', title: 'Minesweeper', category: 'Logic', chunk: 'Minesweeper' },
-  { id: 'neon-snake', title: 'Neon Snake', category: 'Retro', chunk: 'NeonSnake' },
-  { id: 'color-sort', title: 'Color Sort', category: 'Puzzle', chunk: 'ColorSort' },
-  { id: 'connect-four', title: 'Connect Four', category: 'Strategy', chunk: 'ConnectFour' },
-  { id: 'tic-tac-toe', title: 'Tic-Tac-Toe', category: 'Strategy', chunk: 'TicTacToe' },
-  { id: 'checkers', title: 'Checkers', category: 'Strategy', chunk: 'Checkers' },
-  { id: 'battleship', title: 'Battleship', category: 'Strategy', chunk: 'Battleship' },
-  { id: 'daily-word', title: 'Daily Word', category: 'Word', chunk: 'DailyWord' },
-  { id: 'brick-breaker', title: 'Brick Breaker', category: 'Arcade', chunk: 'BrickBreaker' },
-  { id: 'neon-pong', title: 'Neon Pong', category: 'Arcade', chunk: 'NeonPong' },
-  { id: 'sudoku-master', title: 'Sudoku Master', category: 'Logic', chunk: 'SudokuMaster' },
-  { id: 'space-defender', title: 'Space Defender', category: 'Arcade', chunk: 'SpaceDefender' },
-  { id: 'gravity-flip', title: 'Gravity Flip', category: 'Puzzle', chunk: 'GravityFlip' },
-  { id: 'vibeline', title: 'VibeLine', category: 'Puzzle', chunk: 'VibeLine' },
-  { id: 'twofold', title: 'Twofold', category: 'Logic', chunk: 'Twofold' },
-  { id: 'carve', title: 'Carve', category: 'Logic', chunk: 'Carve' },
-  { id: 'ghata-bara', title: 'Ghata Bara', category: 'Strategy', chunk: 'GhataBara' },
-  { id: 'aadu-puli-attam', title: 'Aadu Puli Attam', category: 'Strategy', chunk: 'AaduPuliAttam' },
-  { id: 'pallanguzhi', title: 'Pallanguzhi', category: 'Strategy', chunk: 'Pallanguzhi' },
-  { id: 'carrom', title: 'Carrom', category: 'Arcade', chunk: 'Carrom' },
-  { id: 'taiwanese-mahjong', title: 'Taiwanese Mahjong', category: 'Strategy', chunk: 'Mahjong' },
-  { id: 'world-trip', title: 'World Trip', category: 'Strategy', chunk: 'WorldTrip' },
-  { id: 'ludo', title: 'Ludo', category: 'Strategy', chunk: 'Ludo' },
-  { id: 'indian-rummy', title: 'Indian Rummy', category: 'Strategy', chunk: 'Rummy' },
-  { id: 'blackjack', title: 'Blackjack', category: 'Strategy', chunk: 'Blackjack' },
-  { id: 'poker', title: 'Poker', category: 'Strategy', chunk: 'Poker' },
-  { id: 'stack-tower', title: 'Stack Tower', category: 'Arcade', chunk: 'StackTower' },
-  { id: 'klondike', title: 'Klondike Solitaire', category: 'Cards', chunk: 'Klondike' },
-  { id: 'nonogram', title: 'Nonogram', category: 'Logic', chunk: 'Nonogram' },
-  { id: 'lane-hopper', title: 'Lane Hopper', category: 'Arcade', chunk: 'LaneHopper' },
-  { id: 'mole-mash', title: 'Mole Mash', category: 'Arcade', chunk: 'MoleMash' },
-  { id: 'traffic-dodger', title: 'Traffic Dodger', category: 'Arcade', chunk: 'TrafficDodger' },
-  { id: 'call-break', title: 'Call Break', category: 'Cards', chunk: 'CallBreak' },
-  { id: 'chess', title: 'Chess', category: 'Strategy', chunk: 'Chess' },
-] as const
+/** Every game, read from the catalogue files in game order. Do not list games here; add a catalogue file. */
+export const GAMES = readCatalog()
 
 type Row = Record<string, unknown>
 

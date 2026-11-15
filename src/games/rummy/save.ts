@@ -13,7 +13,9 @@ const isAction = (v: unknown): v is Action => {
   if (a.type === 'draw') return a.from === 'stock' || a.from === 'discard'
   if (a.type === 'discard') return isId(a.card)
   if (a.type === 'drop' || a.type === 'wrong-show') return true
-  return a.type === 'declare' && isId(a.card) && Array.isArray(a.groups) && a.groups.every((g) => Array.isArray(g) && g.every(isId))
+  const groupsOk = (gs: unknown) => Array.isArray(gs) && gs.length <= 14 && gs.every((g) => Array.isArray(g) && g.length <= 14 && g.every(isId))
+  const layoutsOk = a.type === 'declare' && (a.layouts === undefined || (typeof a.layouts === 'object' && a.layouts !== null && Object.values(a.layouts).every(groupsOk)))
+  return a.type === 'declare' && isId(a.card) && groupsOk(a.groups) && layoutsOk
 }
 
 /** A saved pool is its seed, size, limit and every deal's action list; loading replays them, so a damaged save is rejected rather than trusted. */
