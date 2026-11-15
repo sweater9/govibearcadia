@@ -18,6 +18,7 @@ const PLAY_AREA = {
   'neon-pong': '.pong-field',
   'sudoku-master': '.sdk',
   'space-defender': '.sd-field',
+  'asteroid-assault': '.aa-field',
   'gravity-flip': '.gf',
   vibeline: '.vl',
   twofold: '.tf',

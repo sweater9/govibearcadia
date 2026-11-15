@@ -15,6 +15,7 @@ export const GAMES = [
   { id: 'brick-breaker', title: 'Brick Breaker', category: 'Arcade', chunk: 'BrickBreaker' },
   { id: 'neon-pong', title: 'Neon Pong', category: 'Arcade', chunk: 'NeonPong' },
   { id: 'sudoku-master', title: 'Sudoku Master', category: 'Logic', chunk: 'SudokuMaster' },
+  { id: 'asteroid-assault', title: 'Asteroid Assault', category: 'Arcade', chunk: 'AsteroidAssault' },
   { id: 'space-defender', title: 'Space Defender', category: 'Arcade', chunk: 'SpaceDefender' },
   { id: 'gravity-flip', title: 'Gravity Flip', category: 'Puzzle', chunk: 'GravityFlip' },
   { id: 'vibeline', title: 'VibeLine', category: 'Puzzle', chunk: 'VibeLine' },
