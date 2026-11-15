@@ -157,6 +157,15 @@ export const registry: GameEntry[] = [
       estimated: '8–15 min',
     },
     Component: lazy(() => import('./Quoridor').then((m) => ({ default: m.Quoridor }))),
+      id: 'durak',
+      title: 'Durak',
+      description: 'Beat every attack or take the cards. The last player holding cards is the durak.',
+      category: 'Cards',
+      accent: 'from-sky-400 to-fuchsia-500',
+      glyph: '♠',
+      estimated: '8–15 min',
+    },
+    Component: lazy(() => import('./Durak').then((m) => ({ default: m.Durak }))),
   },
   {
     meta: {

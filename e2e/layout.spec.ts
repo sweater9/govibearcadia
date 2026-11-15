@@ -46,6 +46,7 @@ const PLAY_AREA = {
   'indian-rummy': '.rm-hand',
   blackjack: '.bj-table',
   cribbage: '.cb-felt',
+  durak: '.du-felt',
   poker: '.pk-table',
 } as const
 
