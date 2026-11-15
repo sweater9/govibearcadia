@@ -1,46 +1,8 @@
 import { expect, test, type Page } from '@playwright/test'
-import { hitTarget } from './helpers'
+import { GAMES, hitTarget } from './helpers'
 
-/** The element a player actually looks at and interacts with, per game. */
-const PLAY_AREA = {
-  'neon-merge': '.merge-board',
-  'memory-grid': '.memory-grid',
-  'pulse-tap': '.pulse-field',
-  minesweeper: '.mines-grid',
-  'neon-snake': '.snake-board',
-  'color-sort': '.csort-tubes',
-  'connect-four': '.c4-board',
-  'tic-tac-toe': '.ttt-board',
-  checkers: '.ck-board',
-  battleship: '.bs-board',
-  'daily-word': '.wordle',
-  'brick-breaker': '.brk-field',
-  'neon-pong': '.pong-field',
-  'sudoku-master': '.sdk',
-  'space-defender': '.sd-field',
-  'gravity-flip': '.gf',
-  vibeline: '.vl',
-  twofold: '.tf',
-  carve: '.cv',
-  'ghata-bara': '.gb-board',
-  'aadu-puli-attam': '.ap-board',
-  pallanguzhi: '.pg-table',
-  carrom: '.cm-setup',
-  'taiwanese-mahjong': '.mj-setup',
-  'world-trip': '.wt-board',
-  'stack-tower': '.stk-drop',
-  klondike: '.kl-board',
-  nonogram: '.ng-board',
-  'traffic-dodger': '.tr-pad',
-  'lane-hopper': '.hp-pad',
-  'mole-mash': '.mm-board',
-  'call-break': '.cb-hand',
-  chess: '.ch-setup',
-  ludo: '.ld-board',
-  'indian-rummy': '.rm-hand',
-  blackjack: '.bj-table',
-  poker: '.pk-table',
-} as const
+/** The element a player actually looks at and interacts with, per game: the `playArea` in each catalogue file. */
+const PLAY_AREA: Record<string, string> = Object.fromEntries(GAMES.map((g) => [g.id, g.playArea]))
 
 type Box = { top: number; bottom: number }
 
