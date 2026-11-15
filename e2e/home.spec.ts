@@ -50,6 +50,7 @@ test('the app makes no third-party requests', async ({ page }) => {
 })
 
 test('pages fit the viewport without sideways scrolling', async ({ page }) => {
+  test.setTimeout(180_000) // visits the home page and every game page
   for (const path of ['/', ...GAMES.map((g) => `/play/${g.id}`)]) {
     await page.goto(path)
     await page.waitForLoadState('networkidle')
