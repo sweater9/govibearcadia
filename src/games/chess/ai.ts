@@ -1,4 +1,5 @@
 import type { Random } from '../../lib/rng'
+import { searchMove, type SearchGame } from '../../lib/search'
 import { applyFast, attacked, inCheck, legalMoves, type Move, type State } from './rules'
 
 export type Level = 'easy' | 'normal' | 'hard'
@@ -53,20 +54,15 @@ function quiesce(s: State, alpha: number, beta: number, depth: number, b: Budget
   return alpha
 }
 
-function negamax(s: State, depth: number, alpha: number, beta: number, ply: number, b: Budget, quiet: boolean): number {
-  b.nodes++
-  const moves = legalMoves(s)
-  if (!moves.length) return inCheck(s) ? -MATE + ply : 0
-  if (depth === 0) return quiet ? quiesce(s, alpha, beta, 4, b) : evaluate(s)
-  let best = -Infinity
-  for (const m of order(s, moves)) {
-    const score = -negamax(applyFast(s, m), depth - 1, -beta, -alpha, ply + 1, b, quiet)
-    if (score > best) best = score
-    if (best > alpha) alpha = best
-    if (alpha >= beta) break
-  }
-  return best
-}
+/** Chess for the shared search: legal moves, the same ordering and evaluation as always, mate scored by distance, and (when `quiet`) captures searched past the horizon. */
+const chessGame = (quiet: boolean): SearchGame<State, Move> => ({
+  moves: legalMoves,
+  apply: applyFast,
+  evaluate,
+  noMoves: (s, ply) => (inCheck(s) ? -MATE + ply : 0),
+  order,
+  leaf: quiet ? (s, alpha, beta) => quiesce(s, alpha, beta, 4, { nodes: 0 }) : undefined,
+})
 
 const SETTINGS: Record<Level, { depth: number; quiet: boolean; slack: number }> = {
   easy: { depth: 1, quiet: false, slack: 60 },
@@ -76,13 +72,8 @@ const SETTINGS: Record<Level, { depth: number; quiet: boolean; slack: number }> 
 
 /** Pick a move. Easy looks one move ahead and sometimes plays a near-best alternative; normal and hard search two and three moves deep and always take the best. */
 export function chooseMove(s: State, level: Level, random: Random): Move | null {
-  const moves = legalMoves(s)
-  if (!moves.length) return null
   const { depth, quiet, slack } = SETTINGS[level]
-  const scored = order(s, moves).map((m) => ({ m, score: -negamax(applyFast(s, m), depth - 1, -Infinity, Infinity, 1, { nodes: 0 }, quiet) }))
-  const top = Math.max(...scored.map((x) => x.score))
-  const pool = scored.filter((x) => x.score >= top - slack)
-  return pool[Math.floor(random() * pool.length)].m
+  return searchMove(chessGame(quiet), s, depth, slack, random)
 }
 
 export { attacked }
