@@ -112,6 +112,18 @@ export const registry: GameEntry[] = [
   },
   {
     meta: {
+      id: 'shogi',
+      title: 'Shogi',
+      description: 'Japanese chess: promote pieces and drop your captures back onto the board.',
+      category: 'Strategy',
+      accent: 'from-amber-500 to-red-600',
+      glyph: '☖',
+      estimated: '15–40 min',
+    },
+    Component: lazy(() => import('./Shogi').then((m) => ({ default: m.Shogi }))),
+  },
+  {
+    meta: {
       id: 'checkers',
       title: 'Checkers',
       description: 'Jump, capture and crown kings against the computer, or a friend online.',
