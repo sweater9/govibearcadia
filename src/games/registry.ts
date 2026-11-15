@@ -121,6 +121,15 @@ export const registry: GameEntry[] = [
       estimated: '8–15 min',
     },
     Component: lazy(() => import('./Morris').then((m) => ({ default: m.NineMensMorris }))),
+      id: 'cribbage',
+      title: 'Cribbage',
+      description: 'Peg to 31, count fifteens, pairs and runs, and race the computer to 121.',
+      category: 'Cards',
+      accent: 'from-emerald-400 to-amber-500',
+      glyph: '♣',
+      estimated: '10–20 min',
+    },
+    Component: lazy(() => import('./Cribbage').then((m) => ({ default: m.Cribbage }))),
   },
   {
     meta: {

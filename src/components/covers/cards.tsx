@@ -72,6 +72,20 @@ const blackjack: Cover = (u, f) => <g>
   <Chips u={u} f={f} cx={138} base={84} n={4} m="ink" />
 </g>
 
+/** Cribbage: a fifteen on the felt and a peg board with two pegs racing to the hole at the end. */
+const cribbage: Cover = (u, f) => <g>
+  <rect width="160" height="90" fill={f('felt')} />
+  <rect x="16" y="8" width="128" height="22" rx="5" fill={f('woodD')} stroke="#3d2412" strokeWidth=".8" />
+  {[0, 1].map((row) => Array.from({ length: 21 }, (_, i) => <circle key={`${row}-${i}`} cx={24 + i * 5.8} cy={14 + row * 10} r="1.3" fill="#1a0f07" />))}
+  <circle cx={24 + 13 * 5.8} cy="14" r="2.3" fill={f('red')} />
+  <circle cx={24 + 9 * 5.8} cy="24" r="2.3" fill={f('blue')} />
+  <circle cx="141" cy="19" r="2.6" fill="#1a0f07" stroke={f('gold')} strokeWidth=".8" />
+  <Card u={u} x={36} y={40} w={32} h={46} rot={-10} rank="5" suit="H" />
+  <Card u={u} x={56} y={38} w={32} h={46} rot={-2} rank="5" suit="S" />
+  <Card u={u} x={76} y={38} w={32} h={46} rot={6} rank="5" suit="D" />
+  <Card u={u} x={96} y={40} w={32} h={46} rot={13} rank="J" suit="C" />
+</g>
+
 /** Poker: a heart flush on the board, a pair of hole cards, chips and the dealer button. */
 const poker: Cover = (u, f) => <g>
   <rect width="160" height="90" fill={f('feltN')} />
@@ -114,4 +128,4 @@ const callBreak: Cover = (u, f) => <g>
   {[['A', 'S'], ['K', 'S'], ['Q', 'S'], ['J', 'S'], ['8', 'S']].map(([r, s], i) => <Card key={r} u={u} x={22 + i * 24} y={52} w={24} h={34} rank={r} suit={s as Suit} rot={(i - 2) * 4} />)}
 </g>
 
-export const CARD_COVERS: Record<string, Cover> = { 'indian-rummy': rummy, blackjack, poker, klondike, 'call-break': callBreak }
+export const CARD_COVERS: Record<string, Cover> = { 'indian-rummy': rummy, blackjack, cribbage, poker, klondike, 'call-break': callBreak }

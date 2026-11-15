@@ -40,6 +40,7 @@ const PLAY_AREA = {
   ludo: '.ld-board',
   'indian-rummy': '.rm-hand',
   blackjack: '.bj-table',
+  cribbage: '.cb-felt',
   poker: '.pk-table',
 } as const
 
