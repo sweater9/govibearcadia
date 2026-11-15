@@ -14,6 +14,7 @@ export const GAMES = [
   { id: 'go', title: 'Go', category: 'Strategy', chunk: 'Go' },
   { id: 'quoridor', title: 'Quoridor', category: 'Strategy', chunk: 'Quoridor' },
   { id: 'durak', title: 'Durak', category: 'Cards', chunk: 'Durak' },
+  { id: 'scopa', title: 'Scopa', category: 'Cards', chunk: 'Scopa' },
   { id: 'checkers', title: 'Checkers', category: 'Strategy', chunk: 'Checkers' },
   { id: 'nine-mens-morris', title: "Nine Men's Morris", category: 'Strategy', chunk: 'Morris' },
   { id: 'battleship', title: 'Battleship', category: 'Strategy', chunk: 'Battleship' },

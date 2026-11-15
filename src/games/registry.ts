@@ -166,6 +166,15 @@ export const registry: GameEntry[] = [
       estimated: '8–15 min',
     },
     Component: lazy(() => import('./Durak').then((m) => ({ default: m.Durak }))),
+      id: 'scopa',
+      title: 'Scopa',
+      description: 'Capture by value or by sum, sweep the table for a scopa, and race the computer to 11.',
+      category: 'Cards',
+      accent: 'from-yellow-400 to-red-500',
+      glyph: '♦',
+      estimated: '10–20 min',
+    },
+    Component: lazy(() => import('./Scopa').then((m) => ({ default: m.Scopa }))),
   },
   {
     meta: {

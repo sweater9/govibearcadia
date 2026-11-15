@@ -47,6 +47,7 @@ const PLAY_AREA = {
   blackjack: '.bj-table',
   cribbage: '.cb-felt',
   durak: '.du-felt',
+  scopa: '.sc-felt',
   poker: '.pk-table',
 } as const
 
