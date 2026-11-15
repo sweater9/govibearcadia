@@ -1,0 +1,21 @@
+.qr{max-width:clamp(280px,calc(100svh - 360px),560px);margin:auto}
+.qr-opts{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.85rem;margin-top:6px}
+.qr-opts label{display:inline-flex!important;flex-direction:row!important;gap:6px;align-items:center;margin:0}
+.qr-opts select{background:#111721;color:inherit;border:1px solid #384860;border-radius:8px;padding:4px 8px;width:auto;min-height:0}
+.qr-opts button{padding:4px 10px;border-radius:8px;border:1px solid #384860;background:#111721;color:inherit;cursor:pointer}
+.qr-opts button[aria-pressed="true"]{border-color:#ffc247;background:#2a2410}
+.qr-stats{display:flex;justify-content:space-between;font-size:.8rem;margin-top:6px}
+.qr-stats span[data-turn]{color:#ffc247;font-weight:700}
+.qr-board{display:grid;grid-template-columns:repeat(8,1fr .2fr) 1fr;grid-template-rows:repeat(8,1fr .2fr) 1fr;aspect-ratio:1;margin-top:8px;padding:6px;border-radius:10px;background:#0f1520;box-shadow:0 0 0 3px #2a3752;touch-action:manipulation}
+.qr-cell{border:0;padding:0;border-radius:6px;background:#1c2638;display:grid;place-items:center;cursor:default;position:relative}
+.qr-cell[data-go]{cursor:pointer;background:#2b3a58}
+.qr-cell[data-go]::after{content:"";width:34%;aspect-ratio:1;border-radius:50%;background:#ffc247cc}
+.qr-cell:focus-visible,.qr-anchor:focus-visible{outline:3px solid #ffc247;outline-offset:1px;z-index:3}
+.qr-pawn{width:70%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 36% 30%,#ff9a8f,#e23b36 55%,#a01a1a);box-shadow:inset 0 -3px 5px #00000055,0 2px 4px #000000aa;z-index:1}
+.qr-pawn[data-p="2"]{background:radial-gradient(circle at 36% 30%,#bfe6ff,#3d8be0 55%,#1d4c8f)}
+.qr-wall{background:#e8b04a;border-radius:3px;box-shadow:0 0 0 1px #7a4d00;z-index:2;pointer-events:none}
+.qr-wall[data-preview]{background:#ffd66b99;box-shadow:0 0 0 2px #ffd66b}
+.qr-wall[data-preview="bad"]{background:#ff5c7a88;box-shadow:0 0 0 2px #ff5c7a}
+.qr-anchor{border:0;padding:0;background:#ffffff14;border-radius:50%;cursor:pointer;z-index:2}
+.qr-anchor:hover{background:#ffc24788}
+@media(max-height:760px){.qr{max-width:clamp(280px,calc(100svh - 380px),560px)}}
