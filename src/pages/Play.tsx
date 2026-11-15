@@ -12,6 +12,7 @@ import { GameRow } from '../components/GameRow'
 import { games } from '../data/games'
 import { lockScreen, unlockScreen } from '../lib/screenLock'
 import { ShareButton } from '../components/ShareButton'
+import { bestAfter } from '../lib/bests'
 import { challengePath, parseChallenge, randomSeed, shareChallenge, verdict, verdictText } from '../lib/challenge'
 import { getNick } from '../lib/online'
 import { usePageMeta } from '../lib/pageMeta'
@@ -38,8 +39,21 @@ export function Play() {
   const [dailyWin, setDailyWin] = useState<GameResult | null>(null)
   const [coinsWon, setCoinsWon] = useState(0)
   const [lastRun, setLastRun] = useState<{ score: number; won: boolean } | null>(null)
+  // The stored best for this game. `null` until it has loaded, so an early finish never announces a wrong "new best".
+  const [best, setBest] = useState<{ highScore: number; plays: number } | null>(null)
+  const [newBest, setNewBest] = useState(false)
 
   useEffect(() => setLastRun(null), [seed, gameId])
+  useEffect(() => {
+    setBest(null)
+    setNewBest(false)
+    if (!gameId) return
+    let live = true
+    void db.progress.get(gameId).then((p) => live && setBest({ highScore: p?.highScore ?? 0, plays: p?.plays ?? 0 }))
+    return () => {
+      live = false
+    }
+  }, [gameId])
 
   // The lock never outlives the game page, and leaving full screen by the browser's own gesture unlocks too.
   useEffect(() => {
@@ -65,11 +79,16 @@ export function Play() {
   const finish = useCallback(
     (result: GameResult) => {
       if (gameId) void recordPlay(gameId, result, daily)
+      if (best) {
+        const update = bestAfter(best, result.score)
+        setBest({ highScore: update.best, plays: best.plays + 1 })
+        setNewBest(update.isNew)
+      }
       if (daily && result.won) setDailyWin(result)
       setLastRun({ score: result.score, won: !!result.won })
       setCoinsWon(coinsFor({ won: result.won, daily }))
     },
-    [gameId, daily],
+    [gameId, daily, best],
   )
 
   if (!entry) return <Navigate to="/" replace />
@@ -122,6 +141,11 @@ export function Play() {
           </Suspense>
         </GameBoundary>
       </section>
+      {best && best.highScore > 0 ? (
+        <p className={`personal-best${newBest ? ' is-new' : ''}`} aria-live="polite">
+          {newBest ? `New best! ${best.highScore.toLocaleString()}` : `Your best: ${best.highScore.toLocaleString()}`}
+        </p>
+      ) : null}
       {coinsWon > 0 ? <p className="coin-earned" aria-live="polite">+{coinsWon} coins earned</p> : null}
       {meta.challenge && lastRun && seed ? (
         <div className="challenge-panel" aria-label="Challenge a friend">
