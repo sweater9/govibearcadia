@@ -184,8 +184,21 @@ const stackTower: Cover = () => <g>
   <rect x="124" y="30" width="8" height="10" rx="2" fill="hsl(300 70% 60%)" opacity=".6" transform="rotate(18 128 35)" />
 </g>
 
+/** Lane Hopper: a frog about to cross a night road between two cars, with grass verges. */
+const laneHopper: Cover = (u, f) => <g>
+  <rect width="160" height="90" fill="#17382c" />
+  <rect y="22" width="160" height="46" fill="#1c2633" />
+  <path d="M0 45H160" stroke="#7fd8ff" strokeOpacity=".5" strokeWidth="1.2" strokeDasharray="7 6" />
+  <rect x="14" y="27" width="34" height="14" rx="5" fill="#ff7a59" /><rect x="104" y="27" width="34" height="14" rx="5" fill="#ffd166" />
+  <rect x="58" y="49" width="30" height="14" rx="5" fill="#9b8cff" />
+  <circle cx="22" cy="10" r="7" fill="#2f9e6a" /><circle cx="130" cy="12" r="7" fill="#2f9e6a" />
+  <ellipse cx="80" cy="80" rx="9" ry="3" fill="#000" opacity=".35" filter={`url(#${u}-soft)`} />
+  <circle cx="80" cy="75" r="8" fill={f('green')} /><circle cx="76" cy="72" r="2" fill="#fff" /><circle cx="84" cy="72" r="2" fill="#fff" />
+</g>
+
 export const ARCADE_COVERS: Record<string, Cover> = {
   'stack-tower': stackTower,
+  'lane-hopper': laneHopper,
   'traffic-dodger': trafficDodger,
   'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'gravity-flip': gravityFlip,
 }
