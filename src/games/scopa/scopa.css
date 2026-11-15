@@ -26,4 +26,5 @@ button.sc-card:disabled{cursor:default;opacity:.55}
 .sc-sum th:first-child,.sc-sum td:first-child{text-align:left}
 .sc-sum td[data-win]{color:#ffd66b;font-weight:800}
 @media(max-height:760px){.sc-felt{gap:4px;padding:6px}.sc{--cw:clamp(34px,9.5vw,50px);gap:5px}}
+@media(max-height:680px){.sc{--cw:clamp(30px,8.5vw,44px)}}
 @media(prefers-reduced-motion:reduce){button.sc-card{transition:none!important}}
