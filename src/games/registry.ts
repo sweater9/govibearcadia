@@ -139,6 +139,15 @@ export const registry: GameEntry[] = [
       estimated: '10–20 min',
     },
     Component: lazy(() => import('./ChineseCheckers').then((m) => ({ default: m.ChineseCheckers }))),
+      id: 'go',
+      title: 'Go',
+      description: 'Surround stones and territory on a 9×9 or 13×13 board against the computer.',
+      category: 'Strategy',
+      accent: 'from-amber-300 to-stone-500',
+      glyph: '⚫',
+      estimated: '10–25 min',
+    },
+    Component: lazy(() => import('./Go').then((m) => ({ default: m.Go }))),
   },
   {
     meta: {
