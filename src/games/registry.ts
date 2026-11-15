@@ -112,6 +112,18 @@ export const registry: GameEntry[] = [
   },
   {
     meta: {
+      id: 'durak',
+      title: 'Durak',
+      description: 'Beat every attack or take the cards. The last player holding cards is the durak.',
+      category: 'Cards',
+      accent: 'from-sky-400 to-fuchsia-500',
+      glyph: '♠',
+      estimated: '8–15 min',
+    },
+    Component: lazy(() => import('./Durak').then((m) => ({ default: m.Durak }))),
+  },
+  {
+    meta: {
       id: 'checkers',
       title: 'Checkers',
       description: 'Jump, capture and crown kings against the computer, or a friend online.',

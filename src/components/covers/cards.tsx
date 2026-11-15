@@ -72,6 +72,18 @@ const blackjack: Cover = (u, f) => <g>
   <Chips u={u} f={f} cx={138} base={84} n={4} m="ink" />
 </g>
 
+/** Durak: a defence in progress, the trump card tucked under the deck. */
+const durak: Cover = (u) => <g>
+  <rect width="160" height="90" fill="#16324d" />
+  <Card u={u} x={18} y={46} w={26} h={38} back rot={-4} />
+  <Card u={u} x={24} y={44} w={26} h={38} back rot={-1} />
+  <Card u={u} x={32} y={28} w={26} h={38} rot={90} rank="A" suit="H" />
+  <Card u={u} x={58} y={14} w={34} h={48} rot={-4} rank="9" suit="S" />
+  <Card u={u} x={66} y={20} w={34} h={48} rot={5} rank="J" suit="S" />
+  <Card u={u} x={102} y={14} w={34} h={48} rot={-4} rank="7" suit="C" />
+  <Card u={u} x={110} y={20} w={34} h={48} rot={5} rank="7" suit="H" />
+</g>
+
 /** Poker: a heart flush on the board, a pair of hole cards, chips and the dealer button. */
 const poker: Cover = (u, f) => <g>
   <rect width="160" height="90" fill={f('feltN')} />
@@ -114,4 +126,4 @@ const callBreak: Cover = (u, f) => <g>
   {[['A', 'S'], ['K', 'S'], ['Q', 'S'], ['J', 'S'], ['8', 'S']].map(([r, s], i) => <Card key={r} u={u} x={22 + i * 24} y={52} w={24} h={34} rank={r} suit={s as Suit} rot={(i - 2) * 4} />)}
 </g>
 
-export const CARD_COVERS: Record<string, Cover> = { 'indian-rummy': rummy, blackjack, poker, klondike, 'call-break': callBreak }
+export const CARD_COVERS: Record<string, Cover> = { 'indian-rummy': rummy, blackjack, durak, poker, klondike, 'call-break': callBreak }
