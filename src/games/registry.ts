@@ -221,6 +221,18 @@ export const registry: GameEntry[] = [
   },
   {
     meta: {
+      id: 'mole-mash',
+      title: 'Mole Mash',
+      description: 'Whack the moles before they duck. Stars score big, bombs cost you. 45 seconds, and it speeds up.',
+      category: 'Arcade',
+      accent: 'from-amber-400 to-lime-500',
+      glyph: '🐹',
+      estimated: '1 min',
+    },
+    Component: lazy(() => import('./MoleMash').then((m) => ({ default: m.MoleMash }))),
+  },
+  {
+    meta: {
       id: 'sudoku-master',
       title: 'Sudoku Master',
       description: 'Fill the grid so every row, column and box holds 1 to 9.',
