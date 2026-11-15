@@ -1,3 +1,4 @@
+import '../games/morris/morris.css'
 import { ArrowLeft } from 'lucide-react'
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
@@ -6,6 +7,8 @@ import { COLS } from '../games/connect4/rules'
 import type { View } from '../games/connect4/online'
 import { CheckersBoard } from '../games/checkers/Board'
 import { interact, legalSteps as legalStepsFor, newGame as newCheckers, type CState } from '../games/checkers/rules'
+import { MorrisBoard } from '../games/morris/Board'
+import { interact as morrisInteract, millPoints, newGame as newMorris, phase as morrisPhase, removable as morrisRemovable, slideTargets, type MState } from '../games/morris/rules'
 import { BattleshipBoard } from '../games/battleship/Board'
 import type { View as BattleshipView } from '../games/battleship/rules'
 import { TicTacToeBoard } from '../games/tictactoe/Board'
@@ -35,6 +38,7 @@ function scoreOf(game: OnlineGameId, v: StateMessage): number {
   if (game === 'tic-tac-toe') return won ? 500 + 100 * (5 - Math.ceil(moves / 2)) : v.draw ? 200 : 0
   if (game === 'battleship') return won ? Math.max(300, 1000 - 6 * moves) : 0
   if (game === 'world-trip') return Math.max(0, netWorth(v.board as WorldTripState, v.you).worth)
+  if (game === 'nine-mens-morris') return won ? Math.max(400, 1000 - 4 * moves) : v.draw ? 300 : 0
   if (game === 'checkers') return won ? Math.max(400, 1000 - 4 * moves) : v.draw ? 300 : 0
   return won ? Math.max(100, 1000 - 30 * Math.ceil(moves / 2)) : v.draw ? 300 : 0
 }
@@ -44,7 +48,7 @@ const emptyBattleship = {
   board: { phase: 'placing', fleet: [], incoming: [], shots: [], sunk: [], ready: { you: false, opp: false }, left: { you: 5, opp: 5 }, moves: 0, reveal: null },
 }
 
-const COLOURS: Record<OnlineGameId, [string, string]> = { 'connect-four': ['red', 'yellow'], 'tic-tac-toe': ['X', 'O'], checkers: ['red', 'white'], battleship: ['first to shoot', 'second to shoot'], 'world-trip': ['Player 1', 'Player 2'] }
+const COLOURS: Record<OnlineGameId, [string, string]> = { 'connect-four': ['red', 'yellow'], 'tic-tac-toe': ['X', 'O'], checkers: ['red', 'white'], 'nine-mens-morris': ['red', 'blue'], battleship: ['first to shoot', 'second to shoot'], 'world-trip': ['Player 1', 'Player 2'] }
 
 function alreadyRecorded(key: string): boolean {
   try {
@@ -151,6 +155,12 @@ export function RoomPage() {
     if (from !== null) for (const m of legalStepsFor(checkers)) if (m.from === from) targets.add(m.to)
   }
 
+  const morris = (game === 'nine-mens-morris' && state?.board ? (state.board as MState) : newMorris()) as MState
+  const morrisYou = (state?.yourColour ?? 1) as 1 | 2
+  const morrisTurn = !!state && state.turn === state.you && !state.draw
+  const morrisTargets = morrisTurn ? slideTargets(morris, picked) : new Set<number>()
+  const morrisTake = new Set(morrisTurn && morrisPhase(morris) === 'remove' ? morrisRemovable(morris) : [])
+
   if (!valid) return <Navigate to="/online" replace />
 
   const over = !!state && state.turn === null
@@ -208,7 +218,7 @@ export function RoomPage() {
         ) : (
           game === 'world-trip' ? (
             <Suspense fallback={<p>Loading the room…</p>}><WorldTripRoom state={state as unknown as WorldTripMessage | null} reconnecting={status === 'reconnecting'} notice={notice} send={send} /></Suspense>
-          ) : <div className={game === 'connect-four' ? 'c4' : game === 'tic-tac-toe' ? 'ttt' : game === 'battleship' ? 'bs' : 'ck'}>
+          ) : <div className={game === 'connect-four' ? 'c4' : game === 'tic-tac-toe' ? 'ttt' : game === 'battleship' ? 'bs' : game === 'nine-mens-morris' ? 'nm' : 'ck'}>
             <div className="game-toolbar c4-bar">
               <div>
                 <small>Status</small>
@@ -253,6 +263,21 @@ export function RoomPage() {
                 onFire={(cell) => send({ type: 'move', cell })}
                 onShuffle={() => send({ type: 'shuffle' })}
                 onReady={() => send({ type: 'ready' })}
+              />
+            ) : game === 'nine-mens-morris' ? (
+              <MorrisBoard
+                cells={morris.cells}
+                selected={morrisTurn ? picked : null}
+                targets={morrisTargets}
+                removable={morrisTake}
+                mills={millPoints(morris.cells)}
+                names={['red', 'blue']}
+                disabled={!morrisTurn || over || !oppHere}
+                onPoint={(p) => {
+                  const r = morrisInteract(morris, morrisYou, picked, p)
+                  setPicked(r.select)
+                  if (r.ply) send({ type: 'move', ...(r.ply.type === 'remove' ? { at: r.ply.at } : r.ply.type === 'slide' ? { from: r.ply.from, to: r.ply.to } : { to: r.ply.to }) })
+                }}
               />
             ) : (
               <CheckersBoard

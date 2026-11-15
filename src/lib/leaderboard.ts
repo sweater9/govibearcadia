@@ -35,7 +35,7 @@ export const randomNick = (random: Random = Math.random): Nick => ({
 })
 
 /** Games that can be ranked: the ones with online rooms. */
-export const RANKED_GAMES = ['connect-four', 'tic-tac-toe', 'checkers', 'battleship'] as const
+export const RANKED_GAMES = ['connect-four', 'tic-tac-toe', 'checkers', 'nine-mens-morris', 'battleship'] as const
 export const isRankedGame = (v: unknown): v is (typeof RANKED_GAMES)[number] => RANKED_GAMES.includes(v as never)
 
 /** The UTC day, `YYYY-MM-DD`. */

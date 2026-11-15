@@ -35,7 +35,7 @@ describe('time keys', () => {
 
 describe('ranked games', () => {
   it('are exactly the games with online rooms', () => {
-    for (const g of ['connect-four', 'tic-tac-toe', 'checkers', 'battleship']) expect(isRankedGame(g)).toBe(true)
+    for (const g of ['connect-four', 'tic-tac-toe', 'checkers', 'nine-mens-morris', 'battleship']) expect(isRankedGame(g)).toBe(true)
     for (const g of ['neon-pong', 'all', '', null]) expect(isRankedGame(g)).toBe(false)
   })
 })

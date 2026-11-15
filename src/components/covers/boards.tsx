@@ -87,6 +87,34 @@ const checkers: Cover = (u, f) => {
   </g>
 }
 
+/** Nine Men's Morris: three nested squares, a mill of amber men about to be completed. */
+const ninemens: Cover = (u, f) => {
+  const s = 12
+  const x0 = 80 - 3 * s
+  const y0 = 45 - 3 * s
+  const P = (p: number): [number, number] => {
+    const r = Math.floor(p / 8)
+    const i = p % 8
+    const lo = r
+    const hi = 6 - r
+    return [x0 + [lo, 3, hi, hi, hi, 3, lo, lo][i] * s, y0 + [lo, lo, lo, 3, hi, hi, hi, 3][i] * s]
+  }
+  const amber = [0, 1, 2, 11]
+  const blue = [6, 9, 12, 21]
+  return <g>
+    <rect width="160" height="90" fill="#171321" />
+    <Shadow u={u} cx={80} cy={87} rx={50} ry={3} o={0.5} />
+    <g fill="none" stroke={f('woodD')} strokeWidth="1.6" strokeLinejoin="round">
+      {[0, 1, 2].map((r) => <rect key={r} x={x0 + r * s} y={y0 + r * s} width={(6 - 2 * r) * s} height={(6 - 2 * r) * s} />)}
+      <path d={`M80 ${y0} V${y0 + 2 * s} M80 ${y0 + 4 * s} V${y0 + 6 * s} M${x0} 45 H${x0 + 2 * s} M${x0 + 4 * s} 45 H${x0 + 6 * s}`} />
+    </g>
+    {[...amber, ...blue].map((p) => {
+      const [x, y] = P(p)
+      return <Disc key={p} u={u} f={f} cx={x} cy={y} r="4.6" m={amber.includes(p) ? 'red' : 'ink'} />
+    })}
+  </g>
+}
+
 /** Battleship: a warship on the grid with hits and misses marked. */
 const battleship: Cover = (u, f) => <g>
   <rect width="160" height="90" fill={f('sea')} />
@@ -374,6 +402,6 @@ const chess: Cover = () => {
 
 export const BOARD_COVERS: Record<string, Cover> = {
   chess,
-  'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
+  'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, 'nine-mens-morris': ninemens, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
   pallanguzhi, carrom, ludo, 'world-trip': worldTrip, 'taiwanese-mahjong': mahjong,
 }

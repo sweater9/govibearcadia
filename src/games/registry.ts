@@ -112,6 +112,18 @@ export const registry: GameEntry[] = [
   },
   {
     meta: {
+      id: 'nine-mens-morris',
+      title: "Nine Men's Morris",
+      description: 'Form mills, remove men and fly home. Play the computer, a friend here, or a friend online.',
+      category: 'Strategy',
+      accent: 'from-amber-400 to-rose-500',
+      glyph: '◎',
+      estimated: '8–15 min',
+    },
+    Component: lazy(() => import('./Morris').then((m) => ({ default: m.NineMensMorris }))),
+  },
+  {
+    meta: {
       id: 'checkers',
       title: 'Checkers',
       description: 'Jump, capture and crown kings against the computer, or a friend online.',

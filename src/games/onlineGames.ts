@@ -7,6 +7,7 @@ import * as c4 from './connect4/online'
 import * as bs from './battleship/rules'
 import * as ck from './checkers/rules'
 import * as ttt from './tictactoe/rules'
+import * as nm from './morris/rules'
 import * as wt from './worldtrip/online'
 
 export type Message = Record<string, unknown>
@@ -58,6 +59,15 @@ const checkers = fromKit<ck.CState>({
   isState: ck.isState,
 })
 
+const morris = fromKit<nm.MState>({
+  initial: nm.newGame,
+  turn: (s) => s.turn,
+  winner: (s) => s.winner,
+  draw: (s) => s.draw,
+  play: nm.play,
+  isState: nm.isState,
+})
+
 const connectFour: OnlineGame = {
   newRoom: c4.newRoom,
   move: (room, seat, m) => c4.applyMove(room as c4.Room, seat as Seat, m.col),
@@ -88,5 +98,5 @@ const worldTrip: OnlineGame = {
   act: (room, seat, m, ctx) => (m.type === 'start' ? wt.startTrip(room as wt.Room, seat, ctx) : wt.removeAbsent(room as wt.Room, seat, m, ctx)),
 }
 
-export const ONLINE_GAMES: Record<string, OnlineGame> = { 'connect-four': connectFour, 'tic-tac-toe': tictactoe, checkers, battleship, 'world-trip': worldTrip }
+export const ONLINE_GAMES: Record<string, OnlineGame> = { 'connect-four': connectFour, 'tic-tac-toe': tictactoe, checkers, 'nine-mens-morris': morris, battleship, 'world-trip': worldTrip }
 export const ONLINE_GAME_IDS = Object.keys(ONLINE_GAMES)
