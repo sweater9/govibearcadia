@@ -102,18 +102,6 @@ function Pixels({ rows, x, y, s, fill }: { rows: string[]; x: number; y: number;
 }
 
 /** Space Defender: a wave of invaders, one hit, and the cannon firing from behind the shields. */
-/** Asteroid Assault: a small ship among drifting rocks, a bullet on its way. */
-const asteroidAssault: Cover = (u, f) => <g>
-  <rect width="160" height="90" fill="#080b14" />
-  <circle cx="30" cy="24" r="13" fill="#2a3550" stroke="#9fb4d8" strokeWidth="1" />
-  <circle cx="124" cy="62" r="16" fill="#33405f" stroke="#9fb4d8" strokeWidth="1" />
-  <circle cx="132" cy="20" r="6" fill="#3c4b70" stroke="#9fb4d8" strokeWidth="1" />
-  <circle cx="22" cy="70" r="5" fill="#3c4b70" stroke="#9fb4d8" strokeWidth="1" />
-  <g transform="translate(76 52) rotate(30)"><path d="M0 -9 L6 6 L0 2.4 L-6 6 Z" fill="#ecf3fd" stroke={f('gold')} strokeWidth="1" /></g>
-  <circle cx="92" cy="36" r="1.6" fill={f('gold')} />
-  <circle cx="99" cy="30" r="1.6" fill={f('gold')} />
-</g>
-
 const spaceDefender: Cover = (u, f) => {
   const cols = ['#ff6b8a', '#ffb04d', '#7be0a6']
   return <g>
@@ -208,6 +196,29 @@ const laneHopper: Cover = (u, f) => <g>
   <circle cx="80" cy="75" r="8" fill={f('green')} /><circle cx="76" cy="72" r="2" fill="#fff" /><circle cx="84" cy="72" r="2" fill="#fff" />
 </g>
 
+/** Mole Mash: a lawn of nine holes with a mole, a golden star and a bomb popping up. */
+const moleMash: Cover = (u, f) => <g>
+  <rect width="160" height="90" fill="#1c4a2a" />
+  {[0, 1, 2].flatMap((r) => [0, 1, 2].map((c) => <ellipse key={`${r}${c}`} cx={32 + c * 48} cy={20 + r * 26} rx="15" ry="7" fill="#0b1410" />))}
+  <path d="M65 40a15 13 0 0 1 30 0z" fill={f('orange')} /><circle cx="73" cy="32" r="2" fill="#0b1410" /><circle cx="87" cy="32" r="2" fill="#0b1410" /><ellipse cx="80" cy="37" rx="4" ry="2.6" fill="#f4b3a0" />
+  <path d="M104 66l3 7 7 .4-5.5 4.6 2 7-6.5-4-6.5 4 2-7-5.5-4.6 7-.4z" fill={f('yellow')} transform="translate(-20 -16)" />
+  <circle cx="128" cy="62" r="8" fill="#222a35" /><path d="M132 55l4-5" stroke="#ffb454" strokeWidth="2" />
+  <ellipse cx="80" cy="80" rx="12" ry="3" fill="#000" opacity=".25" filter={`url(#${u}-soft)`} />
+</g>
+
+/** Space Defender: a wave of invaders, one hit, and the cannon firing from behind the shields. */
+/** Asteroid Assault: a small ship among drifting rocks, a bullet on its way. */
+const asteroidAssault: Cover = (u, f) => <g>
+  <rect width="160" height="90" fill="#080b14" />
+  <circle cx="30" cy="24" r="13" fill="#2a3550" stroke="#9fb4d8" strokeWidth="1" />
+  <circle cx="124" cy="62" r="16" fill="#33405f" stroke="#9fb4d8" strokeWidth="1" />
+  <circle cx="132" cy="20" r="6" fill="#3c4b70" stroke="#9fb4d8" strokeWidth="1" />
+  <circle cx="22" cy="70" r="5" fill="#3c4b70" stroke="#9fb4d8" strokeWidth="1" />
+  <g transform="translate(76 52) rotate(30)"><path d="M0 -9 L6 6 L0 2.4 L-6 6 Z" fill="#ecf3fd" stroke={f('gold')} strokeWidth="1" /></g>
+  <circle cx="92" cy="36" r="1.6" fill={f('gold')} />
+  <circle cx="99" cy="30" r="1.6" fill={f('gold')} />
+</g>
+
 /** Pinball: a table with three pop bumpers, two flippers and a ball mid-flight. */
 const pinball: Cover = (u, f) => <g>
   <rect width="160" height="90" fill="#150f2a" />
@@ -219,21 +230,9 @@ const pinball: Cover = (u, f) => <g>
   <ellipse cx="80" cy="86" rx="40" ry="3" fill="#000" opacity=".3" filter={`url(#${u}-soft)`} />
 </g>
 
-/** Mole Mash: a lawn of nine holes with a mole, a golden star and a bomb popping up. */
-const moleMash: Cover = (u, f) => <g>
-  <rect width="160" height="90" fill="#1c4a2a" />
-  {[0, 1, 2].flatMap((r) => [0, 1, 2].map((c) => <ellipse key={`${r}${c}`} cx={32 + c * 48} cy={20 + r * 26} rx="15" ry="7" fill="#0b1410" />))}
-  <path d="M65 40a15 13 0 0 1 30 0z" fill={f('orange')} /><circle cx="73" cy="32" r="2" fill="#0b1410" /><circle cx="87" cy="32" r="2" fill="#0b1410" /><ellipse cx="80" cy="37" rx="4" ry="2.6" fill="#f4b3a0" />
-  <path d="M104 66l3 7 7 .4-5.5 4.6 2 7-6.5-4-6.5 4 2-7-5.5-4.6 7-.4z" fill={f('yellow')} transform="translate(-20 -16)" />
-  <circle cx="128" cy="62" r="8" fill="#222a35" /><path d="M132 55l4-5" stroke="#ffb454" strokeWidth="2" />
-  <ellipse cx="80" cy="80" rx="12" ry="3" fill="#000" opacity=".25" filter={`url(#${u}-soft)`} />
-</g>
-
 export const ARCADE_COVERS: Record<string, Cover> = {
   'stack-tower': stackTower,
   'lane-hopper': laneHopper,
-  pinball,
   'mole-mash': moleMash,
   'traffic-dodger': trafficDodger,
-  'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'asteroid-assault': asteroidAssault, 'gravity-flip': gravityFlip,
-}
+  'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'gravity-flip': gravityFlip, 'asteroid-assault': asteroidAssault, pinball }

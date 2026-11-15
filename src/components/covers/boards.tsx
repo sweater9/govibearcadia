@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 import { Die, Disc, font, Shadow, type Paint } from './parts'
-import { POINTS, TIP } from '../../games/chinese/rules'
 
 export type Cover = (u: string, f: Paint) => ReactNode
+import { POINTS, TIP } from '../../games/chinese/rules'
 
 /** Connect Four: the blue frame with a red diagonal four about to win. */
 const connectFour: Cover = (u, f) => {
@@ -85,99 +85,6 @@ const checkers: Cover = (u, f) => {
     <g transform={`translate(${x0 + 4 * s + s / 2} ${y0 + 3 * s + s / 2})`} fill={f('gold')} stroke="#7a4d00" strokeWidth=".5">
       <path d="M-3.4 2 L-4 -2.2 L-1.8 -0.3 L0 -3.2 L1.8 -0.3 L4 -2.2 L3.4 2Z" />
     </g>
-  </g>
-}
-
-/** Nine Men's Morris: three nested squares, a mill of amber men about to be completed. */
-const ninemens: Cover = (u, f) => {
-  const s = 12
-  const x0 = 80 - 3 * s
-  const y0 = 45 - 3 * s
-  const P = (p: number): [number, number] => {
-    const r = Math.floor(p / 8)
-    const i = p % 8
-    const lo = r
-    const hi = 6 - r
-    return [x0 + [lo, 3, hi, hi, hi, 3, lo, lo][i] * s, y0 + [lo, lo, lo, 3, hi, hi, hi, 3][i] * s]
-  }
-  const amber = [0, 1, 2, 11]
-  const blue = [6, 9, 12, 21]
-  return <g>
-    <rect width="160" height="90" fill="#171321" />
-    <Shadow u={u} cx={80} cy={87} rx={50} ry={3} o={0.5} />
-    <g fill="none" stroke={f('woodD')} strokeWidth="1.6" strokeLinejoin="round">
-      {[0, 1, 2].map((r) => <rect key={r} x={x0 + r * s} y={y0 + r * s} width={(6 - 2 * r) * s} height={(6 - 2 * r) * s} />)}
-      <path d={`M80 ${y0} V${y0 + 2 * s} M80 ${y0 + 4 * s} V${y0 + 6 * s} M${x0} 45 H${x0 + 2 * s} M${x0 + 4 * s} 45 H${x0 + 6 * s}`} />
-    </g>
-    {[...amber, ...blue].map((p) => {
-      const [x, y] = P(p)
-      return <Disc key={p} u={u} f={f} cx={x} cy={y} r="4.6" m={amber.includes(p) ? 'red' : 'ink'} />
-/** Chinese Checkers: the star with a red tip and a blue tip facing each other. */
-const chineseCheckers: Cover = (u, f) => {
-  const px = (p: readonly number[]) => Math.sqrt(3) * (p[0] + p[2] / 2)
-  const py = (p: readonly number[]) => 1.5 * p[2]
-  const s = 3.1
-  return <g>
-    <rect width="160" height="90" fill="#141a2b" />
-    <Shadow u={u} cx={80} cy={88} rx={46} ry={3} o={0.5} />
-    {POINTS.map((p, i) => {
-      const tip = TIP[i]
-      const fill = tip === 4 ? f('red') : tip === 1 ? f('blue') : tip === 0 ? f('gold') : tip === 3 ? '#3fae5a' : '#2a3550'
-      return <circle key={i} cx={80 + px(p) * s * 0.74} cy={45 + py(p) * s * 0.54} r={tip >= 0 ? 2.1 : 1.5} fill={fill} />
-    })}
-/** Go: a kaya board with a handful of black and white stones and a capture in progress. */
-const go: Cover = (u, f) => {
-  const s = 9.4
-  const x0 = 80 - 4 * s
-  const y0 = 45 - 4 * s
-  const stones: [number, number, 'ink' | 'ivory'][] = [[2, 2, 'ink'], [3, 2, 'ivory'], [4, 2, 'ivory'], [3, 3, 'ink'], [4, 3, 'ink'], [5, 3, 'ivory'], [2, 4, 'ivory'], [3, 4, 'ivory'], [4, 4, 'ink'], [5, 4, 'ink'], [4, 5, 'ivory'], [5, 5, 'ink'], [6, 4, 'ivory']]
-  return <g>
-    <rect width="160" height="90" fill="#17120d" />
-    <Shadow u={u} cx={80} cy={88} rx={46} ry={3} o={0.5} />
-    <rect x={x0 - 6} y={y0 - 6} width={8 * s + 12} height={8 * s + 12} rx="3" fill="#d6a45a" />
-    <g stroke="#4a3515" strokeWidth=".5">
-      {Array.from({ length: 9 }, (_, i) => <path key={i} d={`M${x0 + i * s} ${y0} V${y0 + 8 * s} M${x0} ${y0 + i * s} H${x0 + 8 * s}`} />)}
-    </g>
-    {stones.map(([x, y, m]) => <Disc key={`${x}${y}`} u={u} f={f} cx={x0 + x * s} cy={y0 + y * s} r="4.3" m={m} />)}
-/** Quoridor: a 9x9 board, a few walls and two pawns racing past each other. */
-const quoridor: Cover = (u, f) => {
-  const s = 8.6
-  const x0 = 80 - 4.5 * s
-  const y0 = 3
-  const wallsH = [[2, 2], [4, 5], [6, 1]]
-  const wallsV = [[3, 4], [1, 6]]
-  return <g>
-    <rect width="160" height="90" fill="#101722" />
-    <Shadow u={u} cx={80} cy={88} rx={44} ry={3} o={0.5} />
-    {Array.from({ length: 81 }, (_, i) => <rect key={i} x={x0 + (i % 9) * s + 0.6} y={y0 + Math.floor(i / 9) * s * 0.98 + 0.6} width={s - 1.2} height={s * 0.98 - 1.2} rx="1.4" fill={f('woodD')} opacity=".85" />)}
-    {wallsH.map(([r, c]) => <rect key={`h${r}${c}`} x={x0 + c * s + 0.4} y={y0 + (r + 1) * s * 0.98 - 1.2} width={2 * s - 0.8} height="2.4" rx="1.1" fill={f('gold')} stroke="#7a4d00" strokeWidth=".4" />)}
-    {wallsV.map(([r, c]) => <rect key={`v${r}${c}`} x={x0 + (c + 1) * s - 1.2} y={y0 + r * s * 0.98 + 0.4} width="2.4" height={2 * s * 0.98 - 0.8} rx="1.1" fill={f('gold')} stroke="#7a4d00" strokeWidth=".4" />)}
-    <Disc u={u} f={f} cx={x0 + 4.5 * s} cy={y0 + 7.5 * s * 0.98} r="3.4" m="red" />
-    <Disc u={u} f={f} cx={x0 + 3.5 * s} cy={y0 + 1.5 * s * 0.98} r="3.4" m="blue" />
-/** Shogi: the wooden board with a few tiles, one promoted in red, and a captured tile in hand. */
-const shogi: Cover = (u) => {
-  const s = 8.6
-  const x0 = 80 - 4.5 * s
-  const y0 = 2.5
-  const tile = (c: number, r: number, label: string, red = false, down = false) => {
-    const cx = x0 + c * s + s / 2
-    const cy = y0 + r * s + s / 2
-    return <g key={`${c}-${r}`} transform={`translate(${cx} ${cy}) ${down ? 'rotate(180)' : ''}`}>
-      <path d="M0 -3.9 L3.3 -2.4 L3.9 3.9 L-3.9 3.9 L-3.3 -2.4Z" fill="#f0d49a" stroke="#6b4513" strokeWidth=".5" />
-      <text x="0" y="2.4" textAnchor="middle" fontSize="5.4" fontFamily="'Noto Serif JP','Yu Mincho',serif" fontWeight="700" fill={red ? '#b3201a' : '#231607'}>{label}</text>
-    </g>
-  }
-  return <g>
-    <rect width="160" height="90" fill="#171321" />
-    <Shadow u={u} cx={80} cy={88} rx={44} ry={2.5} o={0.5} />
-    <rect x={x0} y={y0} width={9 * s} height={9 * s} fill="#c99b52" />
-    <g stroke="#5b3a14" strokeWidth=".4">
-      {Array.from({ length: 10 }, (_, i) => <path key={i} d={`M${x0 + i * s} ${y0} V${y0 + 9 * s} M${x0} ${y0 + i * s} H${x0 + 9 * s}`} />)}
-    </g>
-    <rect x={x0} y={y0} width={9 * s} height={9 * s} fill="none" stroke="#5b3a14" strokeWidth="1" />
-    {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((c) => tile(c, 6, '歩'))}
-    {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((c) => tile(c, 2, '歩', false, true))}
-    {tile(4, 8, '玉')}{tile(4, 0, '王', false, true)}{tile(1, 7, '角')}{tile(7, 7, '飛')}{tile(2, 4, '龍', true)}{tile(6, 3, 'と', true, true)}
   </g>
 }
 
@@ -466,12 +373,113 @@ const chess: Cover = () => {
   </g>
 }
 
+/** Nine Men's Morris: three nested squares, a mill of amber men about to be completed. */
+const ninemens: Cover = (u, f) => {
+  const s = 12
+  const x0 = 80 - 3 * s
+  const y0 = 45 - 3 * s
+  const P = (p: number): [number, number] => {
+    const r = Math.floor(p / 8)
+    const i = p % 8
+    const lo = r
+    const hi = 6 - r
+    return [x0 + [lo, 3, hi, hi, hi, 3, lo, lo][i] * s, y0 + [lo, lo, lo, 3, hi, hi, hi, 3][i] * s]
+  }
+  const amber = [0, 1, 2, 11]
+  const blue = [6, 9, 12, 21]
+  return <g>
+    <rect width="160" height="90" fill="#171321" />
+    <Shadow u={u} cx={80} cy={87} rx={50} ry={3} o={0.5} />
+    <g fill="none" stroke={f('woodD')} strokeWidth="1.6" strokeLinejoin="round">
+      {[0, 1, 2].map((r) => <rect key={r} x={x0 + r * s} y={y0 + r * s} width={(6 - 2 * r) * s} height={(6 - 2 * r) * s} />)}
+      <path d={`M80 ${y0} V${y0 + 2 * s} M80 ${y0 + 4 * s} V${y0 + 6 * s} M${x0} 45 H${x0 + 2 * s} M${x0 + 4 * s} 45 H${x0 + 6 * s}`} />
+    </g>
+    {[...amber, ...blue].map((p) => {
+      const [x, y] = P(p)
+      return <Disc key={p} u={u} f={f} cx={x} cy={y} r="4.6" m={amber.includes(p) ? 'red' : 'ink'} />
+    })}
+  </g>
+}
+
+/** Chinese Checkers: the star with a red tip and a blue tip facing each other. */
+const chineseCheckers: Cover = (u, f) => {
+  const px = (p: readonly number[]) => Math.sqrt(3) * (p[0] + p[2] / 2)
+  const py = (p: readonly number[]) => 1.5 * p[2]
+  const s = 3.1
+  return <g>
+    <rect width="160" height="90" fill="#141a2b" />
+    <Shadow u={u} cx={80} cy={88} rx={46} ry={3} o={0.5} />
+    {POINTS.map((p, i) => {
+      const tip = TIP[i]
+      const fill = tip === 4 ? f('red') : tip === 1 ? f('blue') : tip === 0 ? f('gold') : tip === 3 ? '#3fae5a' : '#2a3550'
+      return <circle key={i} cx={80 + px(p) * s * 0.74} cy={45 + py(p) * s * 0.54} r={tip >= 0 ? 2.1 : 1.5} fill={fill} />
+    })}
+  </g>
+}
+
+/** Go: a kaya board with a handful of black and white stones and a capture in progress. */
+const go: Cover = (u, f) => {
+  const s = 9.4
+  const x0 = 80 - 4 * s
+  const y0 = 45 - 4 * s
+  const stones: [number, number, 'ink' | 'ivory'][] = [[2, 2, 'ink'], [3, 2, 'ivory'], [4, 2, 'ivory'], [3, 3, 'ink'], [4, 3, 'ink'], [5, 3, 'ivory'], [2, 4, 'ivory'], [3, 4, 'ivory'], [4, 4, 'ink'], [5, 4, 'ink'], [4, 5, 'ivory'], [5, 5, 'ink'], [6, 4, 'ivory']]
+  return <g>
+    <rect width="160" height="90" fill="#17120d" />
+    <Shadow u={u} cx={80} cy={88} rx={46} ry={3} o={0.5} />
+    <rect x={x0 - 6} y={y0 - 6} width={8 * s + 12} height={8 * s + 12} rx="3" fill="#d6a45a" />
+    <g stroke="#4a3515" strokeWidth=".5">
+      {Array.from({ length: 9 }, (_, i) => <path key={i} d={`M${x0 + i * s} ${y0} V${y0 + 8 * s} M${x0} ${y0 + i * s} H${x0 + 8 * s}`} />)}
+    </g>
+    {stones.map(([x, y, m]) => <Disc key={`${x}${y}`} u={u} f={f} cx={x0 + x * s} cy={y0 + y * s} r="4.3" m={m} />)}
+  </g>
+}
+
+/** Quoridor: a 9x9 board, a few walls and two pawns racing past each other. */
+const quoridor: Cover = (u, f) => {
+  const s = 8.6
+  const x0 = 80 - 4.5 * s
+  const y0 = 3
+  const wallsH = [[2, 2], [4, 5], [6, 1]]
+  const wallsV = [[3, 4], [1, 6]]
+  return <g>
+    <rect width="160" height="90" fill="#101722" />
+    <Shadow u={u} cx={80} cy={88} rx={44} ry={3} o={0.5} />
+    {Array.from({ length: 81 }, (_, i) => <rect key={i} x={x0 + (i % 9) * s + 0.6} y={y0 + Math.floor(i / 9) * s * 0.98 + 0.6} width={s - 1.2} height={s * 0.98 - 1.2} rx="1.4" fill={f('woodD')} opacity=".85" />)}
+    {wallsH.map(([r, c]) => <rect key={`h${r}${c}`} x={x0 + c * s + 0.4} y={y0 + (r + 1) * s * 0.98 - 1.2} width={2 * s - 0.8} height="2.4" rx="1.1" fill={f('gold')} stroke="#7a4d00" strokeWidth=".4" />)}
+    {wallsV.map(([r, c]) => <rect key={`v${r}${c}`} x={x0 + (c + 1) * s - 1.2} y={y0 + r * s * 0.98 + 0.4} width="2.4" height={2 * s * 0.98 - 0.8} rx="1.1" fill={f('gold')} stroke="#7a4d00" strokeWidth=".4" />)}
+    <Disc u={u} f={f} cx={x0 + 4.5 * s} cy={y0 + 7.5 * s * 0.98} r="3.4" m="red" />
+    <Disc u={u} f={f} cx={x0 + 3.5 * s} cy={y0 + 1.5 * s * 0.98} r="3.4" m="blue" />
+  </g>
+}
+
+/** Shogi: the wooden board with a few tiles, one promoted in red, and a captured tile in hand. */
+const shogi: Cover = (u) => {
+  const s = 8.6
+  const x0 = 80 - 4.5 * s
+  const y0 = 2.5
+  const tile = (c: number, r: number, label: string, red = false, down = false) => {
+    const cx = x0 + c * s + s / 2
+    const cy = y0 + r * s + s / 2
+    return <g key={`${c}-${r}`} transform={`translate(${cx} ${cy}) ${down ? 'rotate(180)' : ''}`}>
+      <path d="M0 -3.9 L3.3 -2.4 L3.9 3.9 L-3.9 3.9 L-3.3 -2.4Z" fill="#f0d49a" stroke="#6b4513" strokeWidth=".5" />
+      <text x="0" y="2.4" textAnchor="middle" fontSize="5.4" fontFamily="'Noto Serif JP','Yu Mincho',serif" fontWeight="700" fill={red ? '#b3201a' : '#231607'}>{label}</text>
+    </g>
+  }
+  return <g>
+    <rect width="160" height="90" fill="#171321" />
+    <Shadow u={u} cx={80} cy={88} rx={44} ry={2.5} o={0.5} />
+    <rect x={x0} y={y0} width={9 * s} height={9 * s} fill="#c99b52" />
+    <g stroke="#5b3a14" strokeWidth=".4">
+      {Array.from({ length: 10 }, (_, i) => <path key={i} d={`M${x0 + i * s} ${y0} V${y0 + 9 * s} M${x0} ${y0 + i * s} H${x0 + 9 * s}`} />)}
+    </g>
+    <rect x={x0} y={y0} width={9 * s} height={9 * s} fill="none" stroke="#5b3a14" strokeWidth="1" />
+    {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((c) => tile(c, 6, '歩'))}
+    {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((c) => tile(c, 2, '歩', false, true))}
+    {tile(4, 8, '玉')}{tile(4, 0, '王', false, true)}{tile(1, 7, '角')}{tile(7, 7, '飛')}{tile(2, 4, '龍', true)}{tile(6, 3, 'と', true, true)}
+  </g>
+}
+
 export const BOARD_COVERS: Record<string, Cover> = {
   chess,
-  'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, 'nine-mens-morris': ninemens, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
-  'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, 'chinese-checkers': chineseCheckers, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
-  'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, go, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
-  'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, quoridor, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
-  'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, shogi, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
-  pallanguzhi, carrom, ludo, 'world-trip': worldTrip, 'taiwanese-mahjong': mahjong,
-}
+  'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
+  pallanguzhi, carrom, ludo, 'world-trip': worldTrip, 'taiwanese-mahjong': mahjong, 'nine-mens-morris': ninemens, 'chinese-checkers': chineseCheckers, go, quoridor, shogi }
