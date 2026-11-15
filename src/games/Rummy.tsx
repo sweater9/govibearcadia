@@ -60,10 +60,13 @@ export function Rummy({ onFinish, seed }: GameProps) {
     if (!match || !settled || match.state.phase !== 'done' || poolOver) return
     begin(settled, { seed: match.seed, past: [...match.past, match.actions], startedAt: match.startedAt, level: match.level })
   }
-  function act(action: Action, layout?: number[][]) {
+  function act(given: Action, layout?: number[][]) {
     if (!match) return
     const who = match.state.turn
     const seat = match.seats[who]
+    // When a computer declares, your own grouping decides your points; it is saved with the action so a reload scores the same.
+    const humanAt = match.seats.indexOf(0)
+    const action: Action = given.type === 'declare' && seat !== 0 && humanAt >= 0 && match.layout.length ? { ...given, layouts: { [humanAt]: match.layout } } : given
     const next = applyAction(match.state, action)
     if (next === match.state) return
     const updated: Match = { ...match, state: next, actions: [...match.actions, action], layout: layout ?? match.layout }
@@ -219,7 +222,7 @@ export function Rummy({ onFinish, seed }: GameProps) {
     {state && !done && human && state.phase === 'discard' && declareProblem ? <p className="rm-hint" aria-live="polite">Declare: {declareProblem}</p> : null}
     <details className="rm-how"><summary>How to play</summary>
       <p>Each player gets 13 cards. On your turn draw one card (from the stock or the top discard), then discard one. Group your cards into sequences (3 or more in a row of one suit; the ace is low or high) and sets (3 or 4 of a rank in different suits). Jokers (★ and the wild rank shown on the table) can stand in for any card.</p>
-      <p>To win, declare with at least two sequences, one of them pure (no joker), and every other card in a sequence or set. The card you throw away when declaring is not counted. A rival scores their loose cards (A, K, Q, J = 10, jokers 0), capped at 80; with no pure sequence plus a second sequence every card counts. You can drop out of a deal for 20 points before your first draw or 40 after it, and a wrong declaration costs 80 and puts you out of the deal.</p>
+      <p>To win, declare with at least two sequences, one of them pure (no joker), and every other card in a sequence or set. The card you throw away when declaring is not counted. A rival scores only the cards left outside their groups (A, K, Q, J = 10, jokers 0), capped at 80; with a pure sequence, the other sets and sequences you had grouped do not count against you. With no pure sequence every card counts. You can drop out of a deal for 20 points before your first draw or 40 after it, and a wrong declaration costs 80 and puts you out of the deal.</p>
       <p>It is a pool game: points from each deal add up. Whoever reaches the pool limit (300 by default) is out, and the player with the fewest points when the others are out wins. A winner of a deal scores 0. Keys: S stock, T take discard, G group, X discard.</p>
     </details>
   </div>
