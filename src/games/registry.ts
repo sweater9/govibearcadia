@@ -289,6 +289,18 @@ export const registry: GameEntry[] = [
   },
   {
     meta: {
+      id: 'asteroid-assault',
+      title: 'Asteroid Assault',
+      description: 'Drift, thrust and blast rocks that split. Survive wave after wave.',
+      category: 'Arcade',
+      accent: 'from-slate-400 to-orange-500',
+      glyph: '☄',
+      estimated: '4–10 min',
+    },
+    Component: lazy(() => import('./AsteroidAssault').then((m) => ({ default: m.AsteroidAssault }))),
+  },
+  {
+    meta: {
       id: 'gravity-flip',
       title: 'Gravity Flip',
       description: 'Flip gravity to reach the exit in as few moves as you can. Ten handmade levels.',

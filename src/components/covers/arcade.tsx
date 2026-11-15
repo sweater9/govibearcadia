@@ -102,6 +102,18 @@ function Pixels({ rows, x, y, s, fill }: { rows: string[]; x: number; y: number;
 }
 
 /** Space Defender: a wave of invaders, one hit, and the cannon firing from behind the shields. */
+/** Asteroid Assault: a small ship among drifting rocks, a bullet on its way. */
+const asteroidAssault: Cover = (u, f) => <g>
+  <rect width="160" height="90" fill="#080b14" />
+  <circle cx="30" cy="24" r="13" fill="#2a3550" stroke="#9fb4d8" strokeWidth="1" />
+  <circle cx="124" cy="62" r="16" fill="#33405f" stroke="#9fb4d8" strokeWidth="1" />
+  <circle cx="132" cy="20" r="6" fill="#3c4b70" stroke="#9fb4d8" strokeWidth="1" />
+  <circle cx="22" cy="70" r="5" fill="#3c4b70" stroke="#9fb4d8" strokeWidth="1" />
+  <g transform="translate(76 52) rotate(30)"><path d="M0 -9 L6 6 L0 2.4 L-6 6 Z" fill="#ecf3fd" stroke={f('gold')} strokeWidth="1" /></g>
+  <circle cx="92" cy="36" r="1.6" fill={f('gold')} />
+  <circle cx="99" cy="30" r="1.6" fill={f('gold')} />
+</g>
+
 const spaceDefender: Cover = (u, f) => {
   const cols = ['#ff6b8a', '#ffb04d', '#7be0a6']
   return <g>
@@ -211,5 +223,5 @@ export const ARCADE_COVERS: Record<string, Cover> = {
   'lane-hopper': laneHopper,
   'mole-mash': moleMash,
   'traffic-dodger': trafficDodger,
-  'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'gravity-flip': gravityFlip,
+  'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'asteroid-assault': asteroidAssault, 'gravity-flip': gravityFlip,
 }
