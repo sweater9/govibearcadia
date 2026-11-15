@@ -130,6 +130,15 @@ export const registry: GameEntry[] = [
       estimated: '10–20 min',
     },
     Component: lazy(() => import('./Cribbage').then((m) => ({ default: m.Cribbage }))),
+      id: 'chinese-checkers',
+      title: 'Chinese Checkers',
+      description: 'Hop across the star to the opposite point. Two to six players against the computer.',
+      category: 'Strategy',
+      accent: 'from-pink-500 to-sky-500',
+      glyph: '✦',
+      estimated: '10–20 min',
+    },
+    Component: lazy(() => import('./ChineseCheckers').then((m) => ({ default: m.ChineseCheckers }))),
   },
   {
     meta: {

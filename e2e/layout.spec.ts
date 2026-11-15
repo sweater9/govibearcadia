@@ -13,6 +13,7 @@ const PLAY_AREA = {
   'tic-tac-toe': '.ttt-board',
   checkers: '.ck-board',
   'nine-mens-morris': '.nm-board',
+  'chinese-checkers': '.cc-board',
   battleship: '.bs-board',
   'daily-word': '.wordle',
   'brick-breaker': '.brk-field',
