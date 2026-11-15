@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Die, Disc, font, Shadow, type Paint } from './parts'
+import { POINTS, TIP } from '../../games/chinese/rules'
 
 export type Cover = (u: string, f: Paint) => ReactNode
 
@@ -84,6 +85,22 @@ const checkers: Cover = (u, f) => {
     <g transform={`translate(${x0 + 4 * s + s / 2} ${y0 + 3 * s + s / 2})`} fill={f('gold')} stroke="#7a4d00" strokeWidth=".5">
       <path d="M-3.4 2 L-4 -2.2 L-1.8 -0.3 L0 -3.2 L1.8 -0.3 L4 -2.2 L3.4 2Z" />
     </g>
+  </g>
+}
+
+/** Chinese Checkers: the star with a red tip and a blue tip facing each other. */
+const chineseCheckers: Cover = (u, f) => {
+  const px = (p: readonly number[]) => Math.sqrt(3) * (p[0] + p[2] / 2)
+  const py = (p: readonly number[]) => 1.5 * p[2]
+  const s = 3.1
+  return <g>
+    <rect width="160" height="90" fill="#141a2b" />
+    <Shadow u={u} cx={80} cy={88} rx={46} ry={3} o={0.5} />
+    {POINTS.map((p, i) => {
+      const tip = TIP[i]
+      const fill = tip === 4 ? f('red') : tip === 1 ? f('blue') : tip === 0 ? f('gold') : tip === 3 ? '#3fae5a' : '#2a3550'
+      return <circle key={i} cx={80 + px(p) * s * 0.74} cy={45 + py(p) * s * 0.54} r={tip >= 0 ? 2.1 : 1.5} fill={fill} />
+    })}
   </g>
 }
 
@@ -374,6 +391,6 @@ const chess: Cover = () => {
 
 export const BOARD_COVERS: Record<string, Cover> = {
   chess,
-  'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
+  'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, 'chinese-checkers': chineseCheckers, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
   pallanguzhi, carrom, ludo, 'world-trip': worldTrip, 'taiwanese-mahjong': mahjong,
 }

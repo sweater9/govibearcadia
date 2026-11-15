@@ -5,7 +5,7 @@ test('home page lists every game and the arcade branding', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveTitle(/GoVibeArcadia/)
   await expect(page.locator('article.game-card')).toHaveCount(GAMES.length)
-  for (const game of GAMES) await expect(page.locator('article.game-card').getByRole('heading', { name: game.title })).toBeVisible()
+  for (const game of GAMES) await expect(page.locator('article.game-card').getByRole('heading', { name: game.title, exact: true })).toBeVisible()
 })
 
 test('search narrows the collection and explains an empty result', async ({ page }) => {
@@ -80,7 +80,7 @@ test('exactly the five games with online rooms carry the Online badge, and the p
   const badged = page.locator('article.game-card', { has: page.locator('.online-badge') })
   await expect(badged).toHaveCount(5)
   for (const title of ['Connect Four', 'Tic-Tac-Toe', 'Checkers', 'Battleship', 'World Trip']) {
-    await expect(badged.getByRole('heading', { name: title })).toBeVisible()
+    await expect(badged.getByRole('heading', { name: title, exact: true })).toBeVisible()
   }
   expect(await overflowsHorizontally(page)).toBe(false)
   await expect(page.getByText(`${GAMES.length} free games`)).toBeVisible()
