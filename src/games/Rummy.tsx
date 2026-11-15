@@ -30,6 +30,7 @@ function Face({ id, wild, selected, fresh, onClick, disabled, label }: { id: num
 }
 
 const youOrComputer = (seat: number) => (seat === 0 ? 'You' : `Computer ${seat}`)
+const ordinal = (n: number) => `${n}${n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`
 
 export function Rummy({ onFinish, seed }: GameProps) {
   const [match, setMatch] = useState<Match | null>(() => loadMatch(seed))
@@ -219,6 +220,22 @@ export function Rummy({ onFinish, seed }: GameProps) {
       </div> })}
       {loose.length ? <div className="rm-group" data-kind="loose"><div className="rm-cards">{loose.map((id) => <Face key={id} id={id} wild={wild} fresh={id === drawn} selected={chosen.includes(id)} onClick={done ? undefined : () => toggle(id)} />)}</div><small>Loose</small></div> : null}
     </div>
+    {state && done && match && settled ? <table className="rm-board" aria-label="Scoreboard">
+      <caption>After deal {settled.deal}. Lowest total wins; reaching {limitNow} puts you out.</caption>
+      <thead><tr><th scope="col">Place</th><th scope="col">Player</th><th scope="col">This deal</th><th scope="col">Total</th><th scope="col">Left to {limitNow}</th></tr></thead>
+      <tbody>{settled.totals.map((total, seat) => ({ seat, total })).sort((a, b) => a.total - b.total || a.seat - b.seat).map(({ seat, total }) => {
+        const at = match.seats.indexOf(seat)
+        const place = 1 + settled.totals.filter((t) => t < total).length
+        const dealPoints = at >= 0 ? state.scores![at] : null
+        return <tr key={seat} data-you={seat === 0 ? 'true' : undefined} data-out={settled.out[seat] ? 'true' : undefined}>
+          <td>{ordinal(place)}</td>
+          <th scope="row">{youOrComputer(seat)}{at >= 0 && state.winner === at ? <small> won the deal</small> : null}</th>
+          <td>{dealPoints ?? 'out'}</td>
+          <td>{total}</td>
+          <td>{settled.out[seat] ? 'Out' : Math.max(0, limitNow - total)}</td>
+        </tr>
+      })}</tbody>
+    </table> : null}
     {state && !done && human && state.phase === 'discard' && declareProblem ? <p className="rm-hint" aria-live="polite">Declare: {declareProblem}</p> : null}
     <details className="rm-how"><summary>How to play</summary>
       <p>Each player gets 13 cards. On your turn draw one card (from the stock or the top discard), then discard one. Group your cards into sequences (3 or more in a row of one suit; the ace is low or high) and sets (3 or 4 of a rank in different suits). Jokers (★ and the wild rank shown on the table) can stand in for any card.</p>
