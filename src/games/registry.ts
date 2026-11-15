@@ -148,6 +148,15 @@ export const registry: GameEntry[] = [
       estimated: '10–25 min',
     },
     Component: lazy(() => import('./Go').then((m) => ({ default: m.Go }))),
+      id: 'quoridor',
+      title: 'Quoridor',
+      description: 'Race your pawn across the board and wall in your rival. Play the computer or a friend here.',
+      category: 'Strategy',
+      accent: 'from-amber-400 to-sky-500',
+      glyph: '▦',
+      estimated: '8–15 min',
+    },
+    Component: lazy(() => import('./Quoridor').then((m) => ({ default: m.Quoridor }))),
   },
   {
     meta: {

@@ -15,6 +15,7 @@ const PLAY_AREA = {
   'nine-mens-morris': '.nm-board',
   'chinese-checkers': '.cc-board',
   go: '.go-board',
+  quoridor: '.qr-board',
   battleship: '.bs-board',
   'daily-word': '.wordle',
   'brick-breaker': '.brk-field',

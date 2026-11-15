@@ -139,6 +139,21 @@ const go: Cover = (u, f) => {
       {Array.from({ length: 9 }, (_, i) => <path key={i} d={`M${x0 + i * s} ${y0} V${y0 + 8 * s} M${x0} ${y0 + i * s} H${x0 + 8 * s}`} />)}
     </g>
     {stones.map(([x, y, m]) => <Disc key={`${x}${y}`} u={u} f={f} cx={x0 + x * s} cy={y0 + y * s} r="4.3" m={m} />)}
+/** Quoridor: a 9x9 board, a few walls and two pawns racing past each other. */
+const quoridor: Cover = (u, f) => {
+  const s = 8.6
+  const x0 = 80 - 4.5 * s
+  const y0 = 3
+  const wallsH = [[2, 2], [4, 5], [6, 1]]
+  const wallsV = [[3, 4], [1, 6]]
+  return <g>
+    <rect width="160" height="90" fill="#101722" />
+    <Shadow u={u} cx={80} cy={88} rx={44} ry={3} o={0.5} />
+    {Array.from({ length: 81 }, (_, i) => <rect key={i} x={x0 + (i % 9) * s + 0.6} y={y0 + Math.floor(i / 9) * s * 0.98 + 0.6} width={s - 1.2} height={s * 0.98 - 1.2} rx="1.4" fill={f('woodD')} opacity=".85" />)}
+    {wallsH.map(([r, c]) => <rect key={`h${r}${c}`} x={x0 + c * s + 0.4} y={y0 + (r + 1) * s * 0.98 - 1.2} width={2 * s - 0.8} height="2.4" rx="1.1" fill={f('gold')} stroke="#7a4d00" strokeWidth=".4" />)}
+    {wallsV.map(([r, c]) => <rect key={`v${r}${c}`} x={x0 + (c + 1) * s - 1.2} y={y0 + r * s * 0.98 + 0.4} width="2.4" height={2 * s * 0.98 - 0.8} rx="1.1" fill={f('gold')} stroke="#7a4d00" strokeWidth=".4" />)}
+    <Disc u={u} f={f} cx={x0 + 4.5 * s} cy={y0 + 7.5 * s * 0.98} r="3.4" m="red" />
+    <Disc u={u} f={f} cx={x0 + 3.5 * s} cy={y0 + 1.5 * s * 0.98} r="3.4" m="blue" />
   </g>
 }
 
@@ -432,5 +447,6 @@ export const BOARD_COVERS: Record<string, Cover> = {
   'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, 'nine-mens-morris': ninemens, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
   'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, 'chinese-checkers': chineseCheckers, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
   'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, go, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
+  'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, quoridor, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
   pallanguzhi, carrom, ludo, 'world-trip': worldTrip, 'taiwanese-mahjong': mahjong,
 }
