@@ -112,6 +112,18 @@ export const registry: GameEntry[] = [
   },
   {
     meta: {
+      id: 'go',
+      title: 'Go',
+      description: 'Surround stones and territory on a 9×9 or 13×13 board against the computer.',
+      category: 'Strategy',
+      accent: 'from-amber-300 to-stone-500',
+      glyph: '⚫',
+      estimated: '10–25 min',
+    },
+    Component: lazy(() => import('./Go').then((m) => ({ default: m.Go }))),
+  },
+  {
+    meta: {
       id: 'checkers',
       title: 'Checkers',
       description: 'Jump, capture and crown kings against the computer, or a friend online.',

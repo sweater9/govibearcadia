@@ -9,6 +9,7 @@ export const GAMES = [
   { id: 'color-sort', title: 'Color Sort', category: 'Puzzle', chunk: 'ColorSort' },
   { id: 'connect-four', title: 'Connect Four', category: 'Strategy', chunk: 'ConnectFour' },
   { id: 'tic-tac-toe', title: 'Tic-Tac-Toe', category: 'Strategy', chunk: 'TicTacToe' },
+  { id: 'go', title: 'Go', category: 'Strategy', chunk: 'Go' },
   { id: 'checkers', title: 'Checkers', category: 'Strategy', chunk: 'Checkers' },
   { id: 'battleship', title: 'Battleship', category: 'Strategy', chunk: 'Battleship' },
   { id: 'daily-word', title: 'Daily Word', category: 'Word', chunk: 'DailyWord' },

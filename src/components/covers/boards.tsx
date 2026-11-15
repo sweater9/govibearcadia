@@ -87,6 +87,23 @@ const checkers: Cover = (u, f) => {
   </g>
 }
 
+/** Go: a kaya board with a handful of black and white stones and a capture in progress. */
+const go: Cover = (u, f) => {
+  const s = 9.4
+  const x0 = 80 - 4 * s
+  const y0 = 45 - 4 * s
+  const stones: [number, number, 'ink' | 'ivory'][] = [[2, 2, 'ink'], [3, 2, 'ivory'], [4, 2, 'ivory'], [3, 3, 'ink'], [4, 3, 'ink'], [5, 3, 'ivory'], [2, 4, 'ivory'], [3, 4, 'ivory'], [4, 4, 'ink'], [5, 4, 'ink'], [4, 5, 'ivory'], [5, 5, 'ink'], [6, 4, 'ivory']]
+  return <g>
+    <rect width="160" height="90" fill="#17120d" />
+    <Shadow u={u} cx={80} cy={88} rx={46} ry={3} o={0.5} />
+    <rect x={x0 - 6} y={y0 - 6} width={8 * s + 12} height={8 * s + 12} rx="3" fill="#d6a45a" />
+    <g stroke="#4a3515" strokeWidth=".5">
+      {Array.from({ length: 9 }, (_, i) => <path key={i} d={`M${x0 + i * s} ${y0} V${y0 + 8 * s} M${x0} ${y0 + i * s} H${x0 + 8 * s}`} />)}
+    </g>
+    {stones.map(([x, y, m]) => <Disc key={`${x}${y}`} u={u} f={f} cx={x0 + x * s} cy={y0 + y * s} r="4.3" m={m} />)}
+  </g>
+}
+
 /** Battleship: a warship on the grid with hits and misses marked. */
 const battleship: Cover = (u, f) => <g>
   <rect width="160" height="90" fill={f('sea')} />
@@ -374,6 +391,6 @@ const chess: Cover = () => {
 
 export const BOARD_COVERS: Record<string, Cover> = {
   chess,
-  'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
+  'connect-four': connectFour, 'tic-tac-toe': ticTacToe, checkers, go, battleship, 'ghata-bara': ghataBara, 'aadu-puli-attam': aaduPuli,
   pallanguzhi, carrom, ludo, 'world-trip': worldTrip, 'taiwanese-mahjong': mahjong,
 }
