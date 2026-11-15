@@ -47,14 +47,15 @@ test('two players: a bishop trade with promotion, then the captured bishop is dr
   await expect(status(page)).toHaveText('White to move')
   await play(move(sq(0, 6), sq(1, 7)))
   // Black now holds the captured bishop and drops it on the board.
-  const held = page.getByRole('button', { name: 'bishop in hand, 1' })
+  // White also holds a captured bishop; only the side to move can use theirs.
+  const held = page.getByRole('button', { name: 'bishop in hand, 1' }).and(page.locator(':enabled'))
   await expect(held).toBeVisible()
   await held.click()
   await expect(square(page, sq(4, 4))).toHaveAttribute('data-target', 'true')
   await square(page, sq(4, 4)).click()
   model = apply(model, { from: -1, to: sq(4, 4), drop: 6, promote: false })
   expect(await cellsOf(page)).toEqual(model.cells)
-  await expect(page.getByRole('button', { name: /bishop in hand/ })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /bishop in hand/ })).toHaveCount(1)
 })
 
 test('the keyboard can pick a piece and move it, and Escape drops the pick', async ({ page }) => {
