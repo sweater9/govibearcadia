@@ -251,6 +251,18 @@ export const registry: GameEntry[] = [
   },
   {
     meta: {
+      id: 'pinball',
+      title: 'Pinball',
+      description: 'Flip, bump and light the targets for a bigger multiplier. Three balls, three levels.',
+      category: 'Arcade',
+      accent: 'from-fuchsia-500 to-amber-400',
+      glyph: '●',
+      estimated: '3–6 min',
+    },
+    Component: lazy(() => import('./Pinball').then((m) => ({ default: m.Pinball }))),
+  },
+  {
+    meta: {
       id: 'mole-mash',
       title: 'Mole Mash',
       description: 'Whack the moles before they duck. Stars score big, bombs cost you. 45 seconds, and it speeds up.',
