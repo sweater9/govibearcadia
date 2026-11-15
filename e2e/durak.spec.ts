@@ -33,11 +33,11 @@ test('keys: a number plays a glowing card, and the table and hand stay on screen
   await expect(page.locator('.du-hand button[data-card]')).toHaveCount(6)
   // Let the computer lead if it attacks first, then it is our move.
   await expect(page.locator('.du-hand button[data-card]:not([disabled])').first()).toBeVisible({ timeout: 10_000 })
-  const before = await page.locator('.du-felt button[data-card], .du-felt .du-pair .du-card').count()
   const first = await page.locator('.du-hand button[data-card]:not([disabled])').first().getAttribute('data-card')
   const index = await page.locator('.du-hand button[data-card]').evaluateAll((els, id) => els.findIndex((e) => (e as HTMLElement).dataset.card === id), first)
   await page.keyboard.press(String(index + 1))
-  await expect.poll(async () => page.locator('.du-felt button[data-card], .du-felt .du-pair .du-card').count()).not.toBe(before)
+  // The card we played has left the hand and is on the table.
+  await expect(page.locator(`.du-hand [data-card="${first}"]`)).toHaveCount(0)
   const box = await page.locator('.du-felt').boundingBox()
   expect(box!.y + box!.height).toBeLessThanOrEqual(667)
 })

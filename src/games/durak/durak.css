@@ -1,5 +1,6 @@
 .du{max-width:560px;margin:auto;display:grid;gap:8px;--cw:clamp(30px,8vw,44px)}
 @media(max-height:760px){.du{--cw:clamp(28px,7vw,38px);gap:5px}}
+@media(max-height:680px){.du{--cw:clamp(26px,6.4vw,34px)}}
 .du-opts{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:.85rem}
 .du-opts label{display:inline-flex;gap:6px;align-items:center;margin:0}
 .du-opts select{background:#111721;color:inherit;border:1px solid #384860;border-radius:8px;padding:4px 8px;width:auto;min-height:0}
