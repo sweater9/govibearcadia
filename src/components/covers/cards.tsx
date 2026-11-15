@@ -72,6 +72,23 @@ const blackjack: Cover = (u, f) => <g>
   <Chips u={u} f={f} cx={138} base={84} n={4} m="ink" />
 </g>
 
+/** Scopa: a settebello and a cup on the felt, a scopa about to be made. */
+const scopa: Cover = (u, f) => <g>
+  <rect width="160" height="90" fill={f('felt')} />
+  {[[26, 30, -8], [50, 26, -3], [74, 26, 3], [98, 30, 8]].map(([x, y, r], i) => <g key={i}>
+    <g transform={`rotate(${r} ${x + 14} ${y + 20})`}>
+      <rect x={x + 1} y={y + 2} width="28" height="40" rx="3" fill="#000" opacity=".3" />
+      <rect x={x} y={y} width="28" height="40" rx="3" fill="#fbf8ef" stroke="#000" strokeOpacity=".25" strokeWidth=".5" />
+      {i === 0 ? <><circle cx={x + 14} cy={y + 21} r="8" fill="#d9a21b44" stroke="#d9a21b" strokeWidth="1.6" /><circle cx={x + 14} cy={y + 21} r="3.2" fill="none" stroke="#d9a21b" strokeWidth="1.4" /><text x={x + 3} y={y + 9} fontSize="8" {...font} fill="#1b2230">7</text></> : null}
+      {i === 1 ? <><path d={`M${x + 7} ${y + 12}h14c0 8-3 11-7 11s-7-3-7-11zM${x + 14} ${y + 23}v7M${x + 10} ${y + 32}h8`} fill="#c6283233" stroke="#c62832" strokeWidth="1.5" strokeLinecap="round" /><text x={x + 3} y={y + 9} fontSize="8" {...font} fill="#1b2230">3</text></> : null}
+      {i === 2 ? <><path d={`M${x + 14} ${y + 10}l3 3v13h-6V13zM${x + 8} ${y + 26}h12M${x + 14} ${y + 26}v9`} fill="#2b5fc433" stroke="#2b5fc4" strokeWidth="1.5" strokeLinecap="round" /><text x={x + 3} y={y + 9} fontSize="8" {...font} fill="#1b2230">4</text></> : null}
+      {i === 3 ? <><path d={`M${x + 11} ${y + 10}h6l1 6-2 3v12h-4V19l-2-3z`} fill="#2f8f4a33" stroke="#2f8f4a" strokeWidth="1.5" strokeLinejoin="round" /><text x={x + 3} y={y + 9} fontSize="8" {...font} fill="#1b2230">R</text></> : null}
+    </g>
+  </g>)}
+  <circle cx="132" cy="58" r="9" fill={f('gold')} stroke="#7a4d00" strokeWidth=".6" />
+  <text x="132" y="61.5" textAnchor="middle" fontSize="10" {...font} fill="#4a2c00">11</text>
+</g>
+
 /** Poker: a heart flush on the board, a pair of hole cards, chips and the dealer button. */
 const poker: Cover = (u, f) => <g>
   <rect width="160" height="90" fill={f('feltN')} />
@@ -114,4 +131,4 @@ const callBreak: Cover = (u, f) => <g>
   {[['A', 'S'], ['K', 'S'], ['Q', 'S'], ['J', 'S'], ['8', 'S']].map(([r, s], i) => <Card key={r} u={u} x={22 + i * 24} y={52} w={24} h={34} rank={r} suit={s as Suit} rot={(i - 2) * 4} />)}
 </g>
 
-export const CARD_COVERS: Record<string, Cover> = { 'indian-rummy': rummy, blackjack, poker, klondike, 'call-break': callBreak }
+export const CARD_COVERS: Record<string, Cover> = { 'indian-rummy': rummy, blackjack, scopa, poker, klondike, 'call-break': callBreak }
