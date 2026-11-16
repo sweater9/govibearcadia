@@ -86,5 +86,5 @@ const EMOJI: Record<Mark, string> = { correct: '🟩', present: '🟨', absent: 
 export function shareText(state: WordState, label: string): string {
   const rows = state.guesses.map((g) => evaluate(g, state.answer).map((m) => EMOJI[m]).join(''))
   const tries = state.status === 'won' ? `${state.guesses.length}/${MAX_GUESSES}` : `X/${MAX_GUESSES}`
-  return [`GoVibeArcadia Daily Word ${label} ${tries}`, ...rows].join('\n')
+  return [`GoVibeArcade Daily Word ${label} ${tries}`, ...rows].join('\n')
 }

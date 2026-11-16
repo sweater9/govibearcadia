@@ -3,7 +3,7 @@ import { GAMES, overflowsHorizontally, trackHosts } from './helpers'
 
 test('home page lists every game and the arcade branding', async ({ page }) => {
   await page.goto('/')
-  await expect(page).toHaveTitle(/GoVibeArcadia/)
+  await expect(page).toHaveTitle(/GoVibeArcade/)
   await expect(page.locator('article.game-card')).toHaveCount(GAMES.length)
   for (const game of GAMES) await expect(page.locator('article.game-card').getByRole('heading', { name: game.title, exact: true })).toBeVisible()
 })

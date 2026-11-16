@@ -1,5 +1,5 @@
 /**
- * Arcadia Passport: everything the player earns, computed locally from the run history. Pure functions, no
+ * Arcade Passport: everything the player earns, computed locally from the run history. Pure functions, no
  * browser APIs, so the numbers can be tested exactly and rebuilt from history at any time.
  */
 import { dailySeed, hashSeed } from './rng'
@@ -175,10 +175,10 @@ export function recordsByGame(history: readonly PlayRecord[]): GameRecord[] {
 /** A one-line result for the daily challenge. Contains the game, day, score and time, nothing else. */
 export function shareDaily(title: string, day: string, score: number, durationMs?: number): string {
   const time = durationMs ? ` in ${Math.round(durationMs / 1000)}s` : ''
-  return `GoVibeArcadia daily ${day}: ${title}, ${score.toLocaleString('en-US')} points${time}`
+  return `GoVibeArcade daily ${day}: ${title}, ${score.toLocaleString('en-US')} points${time}`
 }
 
 export function sharePassport(s: Summary): string {
   const streak = s.streak.current > 0 ? ` · ${s.streak.current}-day streak` : ''
-  return `GoVibeArcadia passport: level ${s.level} · ${s.xp.toLocaleString('en-US')} XP${streak} · ${earnedAchievements(s).length}/${ACHIEVEMENTS.length} achievements`
+  return `GoVibeArcade passport: level ${s.level} · ${s.xp.toLocaleString('en-US')} XP${streak} · ${earnedAchievements(s).length}/${ACHIEVEMENTS.length} achievements`
 }

@@ -31,7 +31,7 @@ export function Play() {
   const challenge = dailyChallenge(today(), games.filter((g) => g.daily).map((g) => g.id))
   const daily = params.get('daily') === challenge.day && id === challenge.gameId && seed === challenge.seed ? challenge.day : undefined
   const gameId = entry?.meta.id
-  usePageMeta(entry ? `${entry.meta.title}: play free online · GoVibeArcadia` : null, entry ? `${entry.meta.description} Free to play in your browser: no ads, no sign-up, works offline.` : null, `/play/${id ?? ''}`)
+  usePageMeta(entry ? `${entry.meta.title}: play free online · GoVibeArcade` : null, entry ? `${entry.meta.description} Free to play in your browser: no ads, no sign-up, works offline.` : null, `/play/${id ?? ''}`)
   const shellRef = useRef<HTMLElement>(null)
   const [favorite, setFavorite] = useState(false)
   const [locked, setLocked] = useState(false)

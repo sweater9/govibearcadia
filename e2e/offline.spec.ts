@@ -72,7 +72,7 @@ test('the web manifest is installable', async ({ page, request }) => {
   expect(href).toBeTruthy()
   const manifest = await (await request.get(href!)).json()
 
-  expect(manifest).toMatchObject({ name: 'GoVibeArcadia', display: 'standalone', start_url: '/' })
+  expect(manifest).toMatchObject({ name: 'GoVibeArcade', display: 'standalone', start_url: '/' })
   const sizes = (manifest.icons as { sizes: string; type: string; purpose?: string }[]).filter((i) => i.type === 'image/png')
   expect(sizes.map((i) => i.sizes)).toEqual(expect.arrayContaining(['192x192', '512x512']))
   expect(sizes.some((i) => i.purpose === 'maskable')).toBe(true)

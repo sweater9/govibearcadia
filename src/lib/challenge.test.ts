@@ -50,6 +50,6 @@ describe('who wins', () => {
     expect(verdictText('short', 700, { beat: 740, from: null })).toContain('Not this time')
   })
   it('the shared message carries the link', () => {
-    expect(shareChallenge('Carve', { score: 1200, won: true }, 'https://x.test/play/carve?seed=a')).toBe('I won Carve on GoVibeArcadia with 1,200. Same puzzle, can you beat it? https://x.test/play/carve?seed=a')
+    expect(shareChallenge('Carve', { score: 1200, won: true }, 'https://x.test/play/carve?seed=a')).toBe('I won Carve on GoVibeArcade with 1,200. Same puzzle, can you beat it? https://x.test/play/carve?seed=a')
   })
 })

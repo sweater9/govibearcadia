@@ -28,7 +28,7 @@ test('a game you played shows up under Recently played', async ({ page }) => {
 
 test('the shelves and the comparison fit the screen without sideways scrolling', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByRole('region', { name: 'How GoVibeArcadia differs' })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'How GoVibeArcade differs' })).toBeVisible()
   expect(await overflowsHorizontally(page)).toBe(false)
 })
 

@@ -26,8 +26,8 @@ export default defineConfig({
       workbox: { navigateFallbackDenylist: [/^\/api\//, /^\/(robots\.txt|sitemap\.xml|og-image\.png)$/], globPatterns: ['**/*.{js,css,html,woff2}'], maximumFileSizeToCacheInBytes: 4 * 1024 * 1024 },
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'GoVibeArcadia',
-        short_name: 'Arcadia',
+        name: 'GoVibeArcade',
+        short_name: 'Arcade',
         description: SITE_DESCRIPTION,
         theme_color: '#0d131d',
         background_color: '#0d131d',

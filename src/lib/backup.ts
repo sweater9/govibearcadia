@@ -43,14 +43,14 @@ export type ParseResult = { ok: true; backup: Backup } | { ok: false; error: str
 
 /** Parses and strictly validates a backup file. Unknown fields are dropped; any malformed row rejects the whole file. */
 export function parseBackup(text: string): ParseResult {
-  if (text.length > MAX_BACKUP_BYTES) return { ok: false, error: 'That file is too large to be a GoVibeArcadia backup.' }
+  if (text.length > MAX_BACKUP_BYTES) return { ok: false, error: 'That file is too large to be a GoVibeArcade backup.' }
   let raw: unknown
   try {
     raw = JSON.parse(text)
   } catch {
     return { ok: false, error: 'That file is not valid JSON.' }
   }
-  if (!isObj(raw) || raw.app !== 'govibearcadia') return { ok: false, error: 'That file is not a GoVibeArcadia backup.' }
+  if (!isObj(raw) || raw.app !== 'govibearcadia') return { ok: false, error: 'That file is not a GoVibeArcade backup.' }
   if (raw.version !== 1) return { ok: false, error: 'This backup was made by a newer version of the arcade and cannot be read.' }
   const { progress, favorites, history } = raw
   if (!Array.isArray(progress) || !Array.isArray(favorites) || !Array.isArray(history)) return { ok: false, error: 'The backup is missing data.' }

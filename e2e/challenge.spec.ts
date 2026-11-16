@@ -76,7 +76,7 @@ test('a finished run can be sent to a friend: the link carries the puzzle and th
   const text = await page.evaluate(() => navigator.clipboard.readText())
   const url = text.match(/https?:\/\/\S+/)![0]
   expect(new URL(url).pathname + new URL(url).search).toBe(challengePath('carve', seed, { score: SCORE, won: true }, null))
-  expect(text).toContain('I won Carve on GoVibeArcadia')
+  expect(text).toContain('I won Carve on GoVibeArcade')
 
   const friend = await context.newPage()
   await solve(friend, url.replace(new URL(url).origin, ''), seed)

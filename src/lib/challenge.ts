@@ -70,5 +70,5 @@ export function verdictText(v: Verdict, mine: number, challenge: Pick<Challenge,
 
 /** The message that gets copied: plain text with the link. */
 export function shareChallenge(title: string, result: { score: number; won: boolean }, url: string): string {
-  return `I ${result.won ? 'won' : 'played'} ${title} on GoVibeArcadia with ${result.score.toLocaleString()}. Same puzzle, can you beat it? ${url}`
+  return `I ${result.won ? 'won' : 'played'} ${title} on GoVibeArcade with ${result.score.toLocaleString()}. Same puzzle, can you beat it? ${url}`
 }

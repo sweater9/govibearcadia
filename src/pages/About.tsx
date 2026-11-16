@@ -4,7 +4,7 @@ import { SITE_NAME } from '../site'
 
 /** About and privacy: states plainly what the arcade stores and what it sends. */
 export function About() {
-  usePageMeta(`About and privacy | ${SITE_NAME}`, 'What GoVibeArcadia stores on your device, what it sends to a server, and what it never collects.', '/about')
+  usePageMeta(`About and privacy | ${SITE_NAME}`, 'What GoVibeArcade stores on your device, what it sends to a server, and what it never collects.', '/about')
   return (
     <main className="info-page">
       <p className="eyebrow">About</p>

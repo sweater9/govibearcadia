@@ -103,7 +103,7 @@ describe('keyboard marks and sharing', () => {
   it('shares a letter-free grid', () => {
     const s = guess(guess(newGame('crane'), 'slate'), 'crane')
     const text = shareText(s, '2026-10-28')
-    expect(text).toBe('GoVibeArcadia Daily Word 2026-10-28 2/6\n⬛⬛🟩⬛🟩\n🟩🟩🟩🟩🟩')
+    expect(text).toBe('GoVibeArcade Daily Word 2026-10-28 2/6\n⬛⬛🟩⬛🟩\n🟩🟩🟩🟩🟩')
     expect(text).not.toMatch(/crane|slate/)
   })
 })

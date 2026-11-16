@@ -193,12 +193,12 @@ export function Home() {
           {games.length} games · free, no account, and they work offline once loaded.
         </p>
       </section>
-      <section className="versus" aria-label="How GoVibeArcadia differs">
+      <section className="versus" aria-label="How GoVibeArcade differs">
         <p className="eyebrow">Why it feels different</p>
         <h2>Built to be played, not to sell ads</h2>
         <div className="versus-grid">
           <div className="versus-us">
-            <h3>GoVibeArcadia</h3>
+            <h3>GoVibeArcade</h3>
             <ul>
               <li>No ads, ever, so nothing interrupts a round</li>
               <li>No account: your scores, coins and streaks stay on your device</li>

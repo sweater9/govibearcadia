@@ -4,7 +4,7 @@ import { usePageMeta } from '../lib/pageMeta'
 
 /** Shown for any address the arcade does not have. Tells search engines not to index it. */
 export function NotFound() {
-  usePageMeta('Page not found | GoVibeArcadia', 'This page does not exist.', '/')
+  usePageMeta('Page not found | GoVibeArcade', 'This page does not exist.', '/')
   useEffect(() => {
     const meta = document.createElement('meta')
     meta.name = 'robots'

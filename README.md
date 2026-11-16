@@ -1,4 +1,4 @@
-# GoVibeArcadia
+# GoVibeArcade
 
 A free, independent, local-first browser arcade: 29 games (puzzles, arcade, card and board games, with optional online rooms for some), no ads, no accounts, no trackers. Everything needed to play is bundled and works offline once loaded; progress stays in the browser.
 

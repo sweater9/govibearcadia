@@ -95,13 +95,13 @@ describe('personal records', () => {
 
 describe('sharing', () => {
   it('daily text has only the game, day, score and time', () => {
-    expect(shareDaily('Twofold', '2026-10-28', 1234, 41_400)).toBe('GoVibeArcadia daily 2026-10-28: Twofold, 1,234 points in 41s')
-    expect(shareDaily('Carve', '2026-10-28', 90)).toBe('GoVibeArcadia daily 2026-10-28: Carve, 90 points')
+    expect(shareDaily('Twofold', '2026-10-28', 1234, 41_400)).toBe('GoVibeArcade daily 2026-10-28: Twofold, 1,234 points in 41s')
+    expect(shareDaily('Carve', '2026-10-28', 90)).toBe('GoVibeArcade daily 2026-10-28: Carve, 90 points')
   })
   it('passport text shows level, XP, streak and achievements', () => {
     const s = summarise([run('a', { won: true, daily: '2026-10-28' })], '2026-10-28')
-    expect(sharePassport(s)).toBe('GoVibeArcadia passport: level 1 · 75 XP · 1-day streak · 3/12 achievements')
-    expect(sharePassport(summarise([], '2026-10-28'))).toBe('GoVibeArcadia passport: level 1 · 0 XP · 0/12 achievements')
+    expect(sharePassport(s)).toBe('GoVibeArcade passport: level 1 · 75 XP · 1-day streak · 3/12 achievements')
+    expect(sharePassport(summarise([], '2026-10-28'))).toBe('GoVibeArcade passport: level 1 · 0 XP · 0/12 achievements')
   })
 })
 

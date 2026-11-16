@@ -121,11 +121,11 @@ test('sharing a daily win and the passport copies plain text with no personal da
   await page.getByRole('button', { name: 'Share result' }).click()
   await expect(page.getByRole('button', { name: 'Copied' })).toBeVisible()
   const text = await page.evaluate(() => navigator.clipboard.readText())
-  expect(text).toMatch(new RegExp(`^GoVibeArcadia daily ${day}: Twofold, [\\d,]+ points`))
+  expect(text).toMatch(new RegExp(`^GoVibeArcade daily ${day}: Twofold, [\\d,]+ points`))
 
   await page.goto('/passport')
   await page.getByRole('button', { name: 'Share my passport' }).click()
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('GoVibeArcadia passport: level 1 · 75 XP · 1-day streak · 3/12 achievements')
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('GoVibeArcade passport: level 1 · 75 XP · 1-day streak · 3/12 achievements')
 })
 
 

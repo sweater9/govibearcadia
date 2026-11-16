@@ -63,7 +63,7 @@ export function Passport() {
 
   return (
     <main className="passport">
-      <p className="eyebrow">Arcadia Passport</p>
+      <p className="eyebrow">Arcade Passport</p>
       <div className="pp-head">
         <Avatar avatar={resolveAvatar(avatarId, lvl.level)} size={64} />
         <h1>Level {lvl.level}</h1>

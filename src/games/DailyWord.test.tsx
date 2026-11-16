@@ -128,7 +128,7 @@ describe('Daily Word component', () => {
     enter()
     await act(async () => void fireEvent.click(screen.getByRole('button', { name: 'Copy result' })))
     expect(writeText).toHaveBeenCalledTimes(1)
-    expect(writeText.mock.calls[0][0]).toBe(`GoVibeArcadia Daily Word ${SEED} 1/6\n🟩🟩🟩🟩🟩`)
+    expect(writeText.mock.calls[0][0]).toBe(`GoVibeArcade Daily Word ${SEED} 1/6\n🟩🟩🟩🟩🟩`)
     expect(screen.getByText('Copied!')).toBeInTheDocument()
   })
 })
