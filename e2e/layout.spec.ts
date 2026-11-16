@@ -25,6 +25,7 @@ const PLAY_AREA = {
   'space-defender': '.sd-field',
   'asteroid-assault': '.aa-field',
   'rhythm-master': '.rm-field',
+  'marble-maze': '.mz-board',
   'gravity-flip': '.gf',
   vibeline: '.vl',
   twofold: '.tf',
