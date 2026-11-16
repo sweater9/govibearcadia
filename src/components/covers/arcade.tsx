@@ -230,9 +230,18 @@ const pinball: Cover = (u, f) => <g>
   <ellipse cx="80" cy="86" rx="40" ry="3" fill="#000" opacity=".3" filter={`url(#${u}-soft)`} />
 </g>
 
+/** Rhythm Master: four lanes, falling notes and the glowing hit line. */
+const rhythmMaster: Cover = (u, f) => <g>
+  <rect width="160" height="90" fill="#080b14" />
+  {[0, 1, 2, 3].map((i) => <rect key={i} x={36 + i * 22} y="0" width="20" height="90" fill="#131c33" />)}
+  {[[0, 22], [1, 40], [2, 12], [3, 56], [1, 66], [2, 30]].map(([l, y], i) => <rect key={i} x={40 + l * 22} y={y} width="12" height="7" rx="3" fill={['#7fd8ff', '#ff8fb0', '#9dff9d', '#ffd66b'][l]} />)}
+  <rect x="34" y="72" width="92" height="3" fill={f('gold')} />
+  <ellipse cx="80" cy="86" rx="40" ry="3" fill="#000" opacity=".3" filter={`url(#${u}-soft)`} />
+</g>
+
 export const ARCADE_COVERS: Record<string, Cover> = {
   'stack-tower': stackTower,
   'lane-hopper': laneHopper,
   'mole-mash': moleMash,
   'traffic-dodger': trafficDodger,
-  'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'gravity-flip': gravityFlip, 'asteroid-assault': asteroidAssault, pinball }
+  'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'gravity-flip': gravityFlip, 'asteroid-assault': asteroidAssault, pinball, 'rhythm-master': rhythmMaster }

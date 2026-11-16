@@ -589,6 +589,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./Shogi').then((m) => ({ default: m.Shogi }))),
   },
+  {
+    meta: {
+      id: 'rhythm-master',
+      title: 'Rhythm Master',
+      description: 'Hit falling notes in time to three original tracks. Build a combo and earn a grade.',
+      category: 'Arcade',
+      accent: 'from-fuchsia-500 to-cyan-400',
+      glyph: '♪',
+      estimated: '2–4 min',
+    },
+    Component: lazy(() => import('./RhythmMaster').then((m) => ({ default: m.RhythmMaster }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)
