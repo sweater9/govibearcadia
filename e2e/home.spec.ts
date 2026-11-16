@@ -86,3 +86,10 @@ test('exactly the six games with online rooms carry the Online badge, and the ph
   expect(await overflowsHorizontally(page)).toBe(false)
   await expect(page.getByText(`${GAMES.length} free games`)).toBeVisible()
 })
+
+test('the online rooms tile names every game that has online rooms', async ({ page }) => {
+  await page.goto('/')
+  const tile = page.getByRole('region', { name: 'Play online' })
+  await expect(tile).toContainText("Nine Men's Morris")
+  for (const title of ['Connect Four', 'Tic-Tac-Toe', 'Checkers', 'Battleship']) await expect(tile).toContainText(title)
+})

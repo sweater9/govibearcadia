@@ -40,6 +40,6 @@ test('a played game appears under "Continue your run" after a reload', async ({ 
   await page.goto('/')
   await expect(page.getByText('Continue your run')).toBeVisible()
   await expect(page.locator('.continue h2')).toHaveText('Pulse Tap')
-  await expect(page.locator('.continue')).toContainText('1 plays · Best 100')
+  await expect(page.locator('.continue')).toContainText('1 play · Best 100')
   await expect(page.getByRole('link', { name: /Continue playing/ })).toHaveAttribute('href', '/play/pulse-tap')
 })

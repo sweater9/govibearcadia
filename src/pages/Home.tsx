@@ -6,6 +6,7 @@ import { GameRow } from '../components/GameRow'
 import { SHELVES, shelfGames } from '../lib/rows'
 import { categories, games } from '../data/games'
 import { db, toggleFavorite } from '../lib/db'
+import { ONLINE_GAME_LIST } from '../lib/online'
 import { dailyChallenge, today } from '../lib/passport'
 import { usePageMeta } from '../lib/pageMeta'
 import { InstallPrompt } from '../components/InstallPrompt'
@@ -19,6 +20,12 @@ const HERO_TILES = [
   { id: 'pulse-tap', cat: '#d4707c', bg: '#2B1620' },
   { id: 'neon-snake', cat: '#C9A6FF', bg: '#3c2a1e' },
 ] as const
+
+/** "A, B, C or D." built from the games that really have online rooms, so the sentence cannot go stale. */
+const onlineNames = (() => {
+  const names = ONLINE_GAME_LIST.map((g) => g.title)
+  return `${names.slice(0, -1).join(', ')} or ${names[names.length - 1]}.`
+})()
 
 export function Home() {
   usePageMeta(null, null, '/')
@@ -97,7 +104,7 @@ export function Home() {
           <div>
             <p className="eyebrow">Play with a friend</p>
             <h2>Private online rooms</h2>
-            <p>Connect Four, Tic-Tac-Toe, Checkers or Battleship. Send a code, no account needed.</p>
+            <p>{onlineNames} Send a code, no account needed.</p>
           </div>
           <div className="today-links">
             <Link className="secondary-btn" to="/online">
@@ -115,7 +122,7 @@ export function Home() {
             <p className="eyebrow">Continue your run</p>
             <h2>{recent.title}</h2>
             <p>
-              {progress[0].plays} plays · Best {progress[0].highScore.toLocaleString()}
+              {progress[0].plays} {progress[0].plays === 1 ? 'play' : 'plays'} · Best {progress[0].highScore.toLocaleString()}
             </p>
           </div>
           <Link className="primary-btn" to={`/play/${recent.id}`}>
