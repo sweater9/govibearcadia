@@ -589,6 +589,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./Shogi').then((m) => ({ default: m.Shogi }))),
   },
+  {
+    meta: {
+      id: 'slap-pile',
+      title: 'Slap Pile',
+      description: 'Race the computer to slap pairs and sandwiches, answer face cards, and win every card.',
+      category: 'Cards',
+      accent: 'from-lime-400 to-emerald-600',
+      glyph: '✋',
+      estimated: '5–15 min',
+    },
+    Component: lazy(() => import('./SlapPile').then((m) => ({ default: m.SlapPile }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)
