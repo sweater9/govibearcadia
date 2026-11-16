@@ -161,6 +161,7 @@ export function PixelRun({ onFinish, seed }: GameProps) {
         </g>,
       )
     }
+  const inView = (px: number, w = TILE) => px + w >= cam - 2 && px <= cam + VIEW_W + 2
   const blink = game.invuln > 0 && game.status === 'playing' && Math.floor(game.invuln * 10) % 2 === 0
   const fx = lv.flag.x * TILE
   const fy = lv.flag.y * TILE
@@ -193,14 +194,18 @@ export function PixelRun({ onFinish, seed }: GameProps) {
         <svg viewBox={`0 0 ${VIEW_W} ${VIEW_H}`} aria-hidden="true">
           <g transform={`translate(${-cam} 0)`}>
             {tiles}
-            {lv.spikes.map((p) => (
+            {lv.spikes.filter((p) => inView(p.x * TILE)).map((p) => (
               <polygon key={`s${p.x}:${p.y}`} className="pr-spike" points={`${p.x * TILE + 1},${(p.y + 1) * TILE} ${p.x * TILE + 4.5},${p.y * TILE + 7} ${p.x * TILE + 8},${(p.y + 1) * TILE} ${p.x * TILE + 11.5},${p.y * TILE + 7} ${p.x * TILE + 15},${(p.y + 1) * TILE}`} />
             ))}
-            <rect className="pr-pole" x={fx + 7} y={fy - TILE} width={2} height={TILE * 2} />
-            <polygon className="pr-flag" points={`${fx + 9},${fy - TILE} ${fx + 9 + 12},${fy - TILE + 5} ${fx + 9},${fy - TILE + 10}`} />
-            {game.coins.map((c, i) => (c.got ? null : <ellipse key={i} className="pr-coin" cx={c.x * TILE + 8} cy={c.y * TILE + 8} rx={4} ry={5} />))}
+            {inView(fx, 24) ? (
+              <>
+                <rect className="pr-pole" x={fx + 7} y={fy - TILE} width={2} height={TILE * 2} />
+                <polygon className="pr-flag" points={`${fx + 9},${fy - TILE} ${fx + 9 + 12},${fy - TILE + 5} ${fx + 9},${fy - TILE + 10}`} />
+              </>
+            ) : null}
+            {game.coins.map((c, i) => (c.got || !inView(c.x * TILE) ? null : <ellipse key={i} className="pr-coin" cx={c.x * TILE + 8} cy={c.y * TILE + 8} rx={4} ry={5} />))}
             {game.enemies.map((e, i) =>
-              e.alive ? (
+              !inView(e.x, EW) ? null : e.alive ? (
                 <g key={i} transform={`translate(${e.x} ${e.y})`}>
                   <rect className="pr-foe" x={0} y={3} width={EW} height={EH - 3} rx={2} />
                   <rect className="pr-foe" x={2} y={0} width={EW - 4} height={4} rx={1} />
