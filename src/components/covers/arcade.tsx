@@ -230,9 +230,21 @@ const pinball: Cover = (u, f) => <g>
   <ellipse cx="80" cy="86" rx="40" ry="3" fill="#000" opacity=".3" filter={`url(#${u}-soft)`} />
 </g>
 
+/** Pixel Run: a small hero on a grassy ledge, a coin, a spike and the flag. */
+const pixelRun: Cover = (u, f) => <g>
+  <rect width="160" height="90" fill="#6ec8ff" />
+  <rect y="56" width="160" height="34" fill="#7a5236" />
+  <rect y="56" width="160" height="6" fill="#4fbf5d" />
+  <rect x="62" y="62" width="22" height="28" fill="#6ec8ff" />
+  <polygon points="96,56 102,44 108,56 114,44 120,56" fill="#c9d3e0" stroke="#6b7a90" strokeWidth="1" />
+  <ellipse cx="80" cy="36" rx="5" ry="6" fill={f('gold')} stroke="#c98e00" strokeWidth="1" />
+  <rect x="34" y="40" width="12" height="16" fill="#3f7cff" /><rect x="34" y="34" width="12" height="8" fill="#ffd2a6" /><rect x="33" y="31" width="13" height="4" fill="#e8465f" />
+  <rect x="138" y="26" width="2.5" height="30" fill="#f1f6ff" /><polygon points="140.5,26 154,31 140.5,36" fill={f('red')} />
+</g>
+
 export const ARCADE_COVERS: Record<string, Cover> = {
   'stack-tower': stackTower,
   'lane-hopper': laneHopper,
   'mole-mash': moleMash,
   'traffic-dodger': trafficDodger,
-  'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'gravity-flip': gravityFlip, 'asteroid-assault': asteroidAssault, pinball }
+  'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'gravity-flip': gravityFlip, 'asteroid-assault': asteroidAssault, pinball, 'pixel-run': pixelRun }

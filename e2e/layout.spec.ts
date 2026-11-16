@@ -24,6 +24,7 @@ const PLAY_AREA = {
   'sudoku-master': '.sdk',
   'space-defender': '.sd-field',
   'asteroid-assault': '.aa-field',
+  'pixel-run': '.pr-field',
   'gravity-flip': '.gf',
   vibeline: '.vl',
   twofold: '.tf',
