@@ -25,9 +25,10 @@
 .td-enemy[data-kind=fast] circle{fill:#9be36b}.td-enemy[data-kind=armoured] circle{fill:#8a93a8}
 .td-enemy[data-slow=true] circle{stroke:#7fd8ff;stroke-width:.1}
 .td-enemy rect{fill:#ff5a6a}
-.td-over{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:12px;text-align:center;background:rgba(6,12,20,.86);color:#e9f6ff}
+.td-over{pointer-events:none;position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:12px;text-align:center;background:rgba(6,12,20,.86);color:#e9f6ff}
 .td-over strong{font-size:1.3rem}.td-over span{font-size:.85rem;color:#b9cade;max-width:46ch}
 .td-levels{display:flex;gap:6px}
 .td-info{display:flex;gap:10px;align-items:center;justify-content:center;min-height:30px;color:#9fb2c8;font-size:.9rem}
 @media (max-height:820px){.play-page:has(.td) .play-head{margin-bottom:0}.play-page:has(.td) h1{font-size:1.05rem;line-height:1.2;margin:0}.play-page:has(.td) .eyebrow{display:none}.td{--h:clamp(190px,calc(100dvh - 380px),480px);gap:6px}}
 @media (max-width:520px){.td-over span{font-size:.75rem}.td-over{gap:5px;padding:8px}}
+.td-levels{pointer-events:auto}
