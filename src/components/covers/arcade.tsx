@@ -219,6 +219,17 @@ const asteroidAssault: Cover = (u, f) => <g>
   <circle cx="99" cy="30" r="1.6" fill={f('gold')} />
 </g>
 
+/** Marble Maze: a maze with a marble, a hole and the green goal. */
+const marbleMaze: Cover = (u, f) => <g>
+  <rect width="160" height="90" fill="#0e1420" />
+  <rect x="20" y="10" width="120" height="70" fill="#1a2236" />
+  <path d="M20 10h120v70H20zM20 38h56M76 38v-28M76 38v28M104 80V30M104 30h36M48 66h28" fill="none" stroke="#9fb4d8" strokeWidth="2.5" strokeLinecap="square" />
+  <circle cx="52" cy="24" r="6" fill="#04060b" stroke="#384860" />
+  <circle cx="122" cy="62" r="7" fill="#34c27a" stroke="#b6f5d3" />
+  <circle cx="36" cy="52" r="6" fill="#e6edf7" stroke={f('gold')} />
+  <ellipse cx="36" cy="58" rx="5" ry="1.6" fill="#000" opacity=".3" filter={`url(#${u}-soft)`} />
+</g>
+
 /** Pinball: a table with three pop bumpers, two flippers and a ball mid-flight. */
 const pinball: Cover = (u, f) => <g>
   <rect width="160" height="90" fill="#150f2a" />
@@ -235,4 +246,4 @@ export const ARCADE_COVERS: Record<string, Cover> = {
   'lane-hopper': laneHopper,
   'mole-mash': moleMash,
   'traffic-dodger': trafficDodger,
-  'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'gravity-flip': gravityFlip, 'asteroid-assault': asteroidAssault, pinball }
+  'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'gravity-flip': gravityFlip, 'asteroid-assault': asteroidAssault, pinball, 'marble-maze': marbleMaze }

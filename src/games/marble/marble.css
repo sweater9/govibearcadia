@@ -1,0 +1,15 @@
+.mz{max-width:520px;margin:auto}
+.mz-bar{gap:6px}.mz-bar strong{font-size:20px}.mz-bar button{padding:8px 9px}.mz-bar button:disabled{opacity:.4;cursor:default}
+.mz-board{position:relative;margin:8px auto 0;width:min(100%,calc(100svh - 330px),520px);min-width:240px;border-radius:12px;overflow:hidden;background:#0e1420;border:1px solid #6f5aa8;touch-action:none;user-select:none}
+.mz-board svg{position:absolute;inset:0;width:100%;height:100%}
+.mz-floor{fill:#1a2236}
+.mz-walls{stroke:#9fb4d8;stroke-linecap:square;fill:none}
+.mz-hole{fill:#04060b;stroke:#384860;stroke-width:.4}
+.mz-check{fill:none;stroke:#ffb547;stroke-width:.6;stroke-dasharray:1.2 1}
+.mz-check[data-reached]{fill:#ffb54740}
+.mz-goal{fill:#34c27a;stroke:#b6f5d3;stroke-width:.5}
+.mz-marble{fill:#e6edf7;stroke:#fff;stroke-width:.3}
+.mz-hint{position:absolute;inset:auto 8px 8px;display:grid;gap:6px;justify-items:center;text-align:center;font-size:13px;background:#0a0f17dd;padding:8px;border-radius:10px}
+.mz-hint select{margin-left:6px;background:#111721;color:inherit;border:1px solid #384860;border-radius:8px;padding:3px 8px}
+.mz-tilt{background:#111721;color:inherit;border:1px solid #384860;border-radius:8px;padding:4px 10px}
+@media(max-height:760px){.mz .game-help{display:none}}

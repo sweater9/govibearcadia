@@ -24,6 +24,7 @@ const PLAY_AREA = {
   'sudoku-master': '.sdk',
   'space-defender': '.sd-field',
   'asteroid-assault': '.aa-field',
+  'marble-maze': '.mz-board',
   'gravity-flip': '.gf',
   vibeline: '.vl',
   twofold: '.tf',

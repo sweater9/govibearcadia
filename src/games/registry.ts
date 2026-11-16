@@ -589,6 +589,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./Shogi').then((m) => ({ default: m.Shogi }))),
   },
+  {
+    meta: {
+      id: 'marble-maze',
+      title: 'Marble Maze',
+      description: 'Tilt the board to roll a marble through the maze, past the holes, to the goal.',
+      category: 'Arcade',
+      accent: 'from-sky-400 to-indigo-600',
+      glyph: '◉',
+      estimated: '2–6 min',
+    },
+    Component: lazy(() => import('./MarbleMaze').then((m) => ({ default: m.MarbleMaze }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)
