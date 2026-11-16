@@ -23,7 +23,7 @@ Status: **not verified from the repo or this tooling.** The roadmap lists "Domai
 
 ## Things that reset on a new origin
 
-IndexedDB (history, favourites, passport) and the sound setting are stored per origin. Players moving from `*.workers.dev` to the custom domain start with empty local data; the Backup page can export and import it.
+IndexedDB (history, favourites, passport) and the sound setting are stored per origin. Players moving from `*.workers.dev` to the custom domain start with empty local data; the backup option on the Passport page can export and import it.
 
 ## Not covered here
 
