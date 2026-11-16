@@ -49,6 +49,7 @@ export const GAMES = [
   { id: 'scopa', title: 'Scopa', category: 'Cards', chunk: 'Scopa' },
   { id: 'shogi', title: 'Shogi', category: 'Strategy', chunk: 'Shogi' },
   { id: 'rhythm-master', title: 'Rhythm Master', category: 'Arcade', chunk: 'RhythmMaster' },
+  { id: 'slap-pile', title: 'Slap Pile', category: 'Cards', chunk: 'SlapPile' },
 ] as const
 
 type Row = Record<string, unknown>

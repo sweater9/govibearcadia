@@ -1,0 +1,23 @@
+.sp{max-width:560px;margin:auto;display:grid;gap:8px}
+.sp-opts{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:.85rem}
+.sp-opts label{display:inline-flex!important;flex-direction:row!important;gap:6px;align-items:center;margin:0}
+.sp-opts select{width:auto;min-height:0;background:#111721;color:inherit;border:1px solid #384860;border-radius:8px;padding:4px 8px}
+.sp-small{min-height:0;padding:4px 8px}
+.sp-felt{position:relative;display:grid;gap:8px;padding:10px;border-radius:14px;background:#14402c;border:1px solid #2a6b4a}
+.sp-felt[data-flash$='ok']{box-shadow:0 0 0 3px #2f8f4a}
+.sp-felt[data-flash$='bad']{box-shadow:0 0 0 3px #c62832}
+.sp-hands{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:6px}
+.sp-hand{display:flex;justify-content:space-between;gap:6px;padding:4px 8px;border-radius:8px;background:#0e2e20;font-size:.8rem}
+.sp-hand[data-turn]{outline:2px solid #d9a21b}
+.sp-hand[data-out]{opacity:.45}
+.sp-pile{display:grid;justify-items:center;gap:4px;min-height:110px}
+.sp-card{position:relative;width:64px;height:92px;border-radius:8px;background:#f6f1e3;color:#1b2230;display:grid;place-items:center;font-weight:800;font-size:1.6rem}
+.sp-card i{position:absolute;bottom:8px;width:16px;height:16px;border-radius:50%}
+.sp-empty{display:grid;place-items:center;width:64px;height:92px;border:2px dashed #2a6b4a;border-radius:8px;font-size:.7rem;text-align:center}
+.sp-note{margin:0;text-align:center;font-size:.85rem;min-height:2.4em}
+.sp-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sp-actions button{min-height:48px;font-weight:700;border-radius:10px}
+.sp-slap{background:#c62832;color:#fff}
+.sp-over{position:absolute;inset:0;display:grid;place-content:center;gap:8px;text-align:center;background:#000a;border-radius:14px;font-size:1.4rem;font-weight:800}
+.sp-over small{font-size:.9rem;font-weight:400}
+@media (max-height:680px){.sp-pile{min-height:84px}.sp-card,.sp-empty{width:48px;height:68px;font-size:1.2rem}.sp-actions button{min-height:40px}.sp-note{min-height:0}}

@@ -157,4 +157,11 @@ const scopa: Cover = (u, f) => <g>
   <text x="132" y="61.5" textAnchor="middle" fontSize="10" {...font} fill="#4a2c00">11</text>
 </g>
 
-export const CARD_COVERS: Record<string, Cover> = { 'indian-rummy': rummy, blackjack, poker, klondike, 'call-break': callBreak, cribbage, durak, scopa }
+const slapPile: Cover = (u, f) => <g>
+  <rect x="52" y="14" width="40" height="58" rx="5" fill={f('paper')} stroke="#1b2230" strokeWidth="1.2" transform="rotate(-8 72 43)" />
+  <rect x="66" y="14" width="40" height="58" rx="5" fill={f('paper')} stroke="#1b2230" strokeWidth="1.2" transform="rotate(6 86 43)" />
+  <text x="86" y="52" textAnchor="middle" fontSize="26" fontWeight="800" fill="#1b2230">K</text>
+  <path d="M112 62c-4-10-4-20 0-26l6 2-2 8 8-2 2 6-6 4 4 8z" fill={f('gold')} stroke="#7a4d00" strokeWidth=".8" />
+</g>
+
+export const CARD_COVERS: Record<string, Cover> = { 'indian-rummy': rummy, blackjack, poker, klondike, 'call-break': callBreak, cribbage, durak, scopa, 'slap-pile': slapPile }
