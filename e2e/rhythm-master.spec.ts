@@ -15,13 +15,13 @@ test('playing every note of an easy chart with the keyboard wins and is saved on
   const chart = makeChart('drift', 'easy', 'e2e-rm')
   await page.getByRole('button', { name: 'Start' }).click()
   await expect(field).toHaveAttribute('data-status', 'playing')
-  // Song time is the sum of frames since the first one, about one frame behind the page clock.
-  let now = 0
+  // Freeze the page clock so only runFor moves song time.
+  await page.clock.pauseAt(new Date('2026-11-15T10:10:00Z'))
+  // The page exposes song time (data-now), so presses are placed against it instead of guessing the drift.
+  const songNow = async () => Number(await field.getAttribute('data-now'))
   for (const n of chart) {
-    if (n.t - 6 > now) {
-      await page.clock.runFor(n.t - 6 - now)
-      now = n.t - 6
-    }
+    const now = await songNow()
+    if (n.t - 6 > now) await page.clock.runFor(n.t - 6 - now)
     await page.keyboard.press(KEYS[n.lane])
   }
   await page.clock.runFor(3000)

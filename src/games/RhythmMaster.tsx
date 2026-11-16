@@ -181,7 +181,7 @@ export function RhythmMaster({ onFinish, seed }: GameProps) {
         <button onClick={togglePause} disabled={game.status !== 'playing'} aria-label={paused ? 'Resume' : 'Pause'}>{paused ? <Play size={15} /> : <Pause size={15} />}</button>
         <button onClick={() => restart()} aria-label="New game"><RotateCcw size={15} /></button>
       </div>
-      <div className="rm-field" role="group" aria-label={`${track.name}, ${LEVELS[level].label}`} data-status={paused && game.status === 'playing' ? 'paused' : game.status} data-score={game.score} data-combo={game.combo} data-perfect={game.perfect} data-good={game.good} data-miss={game.miss} data-notes={game.notes.length}>
+      <div className="rm-field" role="group" aria-label={`${track.name}, ${LEVELS[level].label}`} data-status={paused && game.status === 'playing' ? 'paused' : game.status} data-score={game.score} data-combo={game.combo} data-perfect={game.perfect} data-good={game.good} data-miss={game.miss} data-notes={game.notes.length} data-now={Math.round(game.now)}>
         {Array.from({ length: LANES }, (_, lane) => (
           <button
             key={lane}
