@@ -207,7 +207,7 @@ const moleMash: Cover = (u, f) => <g>
 </g>
 
 /** Space Defender: a wave of invaders, one hit, and the cannon firing from behind the shields. */
-/** Asteroid Assault: a small ship among drifting rocks, a bullet on its way. */
+/** Rock Blaster: a small ship among drifting rocks, a bullet on its way. */
 const asteroidAssault: Cover = (u, f) => <g>
   <rect width="160" height="90" fill="#080b14" />
   <circle cx="30" cy="24" r="13" fill="#2a3550" stroke="#9fb4d8" strokeWidth="1" />

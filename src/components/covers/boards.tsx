@@ -401,7 +401,7 @@ const ninemens: Cover = (u, f) => {
   </g>
 }
 
-/** Chinese Checkers: the star with a red tip and a blue tip facing each other. */
+/** Star Hop: the star with a red tip and a blue tip facing each other. */
 const chineseCheckers: Cover = (u, f) => {
   const px = (p: readonly number[]) => Math.sqrt(3) * (p[0] + p[2] / 2)
   const py = (p: readonly number[]) => 1.5 * p[2]
@@ -434,7 +434,7 @@ const go: Cover = (u, f) => {
   </g>
 }
 
-/** Quoridor: a 9x9 board, a few walls and two pawns racing past each other. */
+/** Wall Race: a 9x9 board, a few walls and two pawns racing past each other. */
 const quoridor: Cover = (u, f) => {
   const s = 8.6
   const x0 = 80 - 4.5 * s

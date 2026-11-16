@@ -31,7 +31,7 @@ export function StarBoard({ cells, selected, targets, last, disabled, onPoint }:
   onPoint: (i: number) => void
 }) {
   return (
-    <div className="cc-board" role="group" aria-label="Chinese Checkers board" style={{ aspectRatio: `${W} / ${H}` }}>
+    <div className="cc-board" role="group" aria-label="Star Hop board" style={{ aspectRatio: `${W} / ${H}` }}>
       {POINTS.map((_, i) => {
         const c = cells[i]
         const what = c === 0 ? 'empty' : `${COLOURS[c - 1]} man`

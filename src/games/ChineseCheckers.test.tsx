@@ -22,7 +22,7 @@ function setup(seed = 'cc-component') {
   return { onFinish, hole, cells }
 }
 
-describe('Chinese Checkers component', () => {
+describe('Star Hop component', () => {
   it('selecting a man highlights its moves; moving makes the computer answer, like the pure model', () => {
     const { hole, cells } = setup()
     const model = newGame(2)

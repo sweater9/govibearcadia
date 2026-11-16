@@ -20,7 +20,7 @@ function setup(seed = 'aa-component') {
   return { onFinish, field, run, view }
 }
 
-describe('Asteroid Assault component', () => {
+describe('Rock Blaster component', () => {
   it('waits to start, then spawns the first wave of rocks', () => {
     const { field, run } = setup()
     expect(field.dataset.status).toBe('ready')

@@ -157,7 +157,7 @@ export function Quoridor({ onFinish, seed }: GameProps) {
         <span data-turn={!over && game.turn === 2 ? 'true' : undefined}>{names[1]} (blue, top): <b>{game.left[1]}</b> walls</span>
         <span data-turn={!over && game.turn === 1 ? 'true' : undefined}>{names[0]} (red, bottom): <b>{game.left[0]}</b> walls</span>
       </div>
-      <div className="qr-board" role="group" aria-label="Quoridor board">
+      <div className="qr-board" role="group" aria-label="Wall Race board">
         {cells}
         {game.walls.map((w, i) => wallEl(w, `w${i}`))}
         {placing && wall ? wallEl(wall, 'preview', { 'data-preview': wallOk ? 'ok' : 'bad' }) : null}

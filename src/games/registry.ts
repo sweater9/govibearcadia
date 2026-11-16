@@ -496,7 +496,7 @@ export const registry: GameEntry[] = [
   {
     meta: {
       id: 'chinese-checkers',
-      title: 'Chinese Checkers',
+      title: 'Star Hop',
       description: 'Hop across the star to the opposite point. Two to six players against the computer.',
       category: 'Strategy',
       accent: 'from-pink-500 to-sky-500',
@@ -508,7 +508,7 @@ export const registry: GameEntry[] = [
   {
     meta: {
       id: 'asteroid-assault',
-      title: 'Asteroid Assault',
+      title: 'Rock Blaster',
       description: 'Drift, thrust and blast rocks that split. Survive wave after wave.',
       category: 'Arcade',
       accent: 'from-slate-400 to-orange-500',
@@ -544,7 +544,7 @@ export const registry: GameEntry[] = [
   {
     meta: {
       id: 'quoridor',
-      title: 'Quoridor',
+      title: 'Wall Race',
       description: 'Race your pawn across the board and wall in your rival. Play the computer or a friend here.',
       category: 'Strategy',
       accent: 'from-amber-400 to-sky-500',

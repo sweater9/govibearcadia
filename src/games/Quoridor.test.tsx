@@ -39,7 +39,7 @@ function click(h: ReturnType<typeof setup>, m: Move) {
   }
 }
 
-describe('Quoridor component', () => {
+describe('Wall Race component', () => {
   it('steps the pawn on a highlighted square and the computer answers once, like the pure model', () => {
     const h = setup()
     fireEvent.click(h.cell(7, 4))
