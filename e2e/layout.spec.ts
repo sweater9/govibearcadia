@@ -26,6 +26,7 @@ const PLAY_AREA = {
   'asteroid-assault': '.aa-field',
   'rhythm-master': '.rm-field',
   'marble-maze': '.mz-board',
+  'pixel-run': '.pr-field',
   'gravity-flip': '.gf',
   vibeline: '.vl',
   twofold: '.tf',

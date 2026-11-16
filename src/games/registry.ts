@@ -625,6 +625,18 @@ export const registry: GameEntry[] = [
     },
     Component: lazy(() => import('./MarbleMaze').then((m) => ({ default: m.MarbleMaze }))),
   },
+  {
+    meta: {
+      id: 'pixel-run',
+      title: 'Pixel Run',
+      description: 'Run, jump and squash walkers through three pixel levels to the flag. Mind the spikes and pits.',
+      category: 'Arcade',
+      accent: 'from-sky-400 to-emerald-500',
+      glyph: '⚑',
+      estimated: '4–10 min',
+    },
+    Component: lazy(() => import('./PixelRun').then((m) => ({ default: m.PixelRun }))),
+  },
 ]
 
 export const getGame = (id?: string): GameEntry | undefined => registry.find((entry) => entry.meta.id === id)
