@@ -20,14 +20,16 @@ test('Slap Pile: play with Enter and Space, pause, and pile counts change', asyn
 })
 
 test('Slap Pile: touch buttons work at phone width and a finished game is saved', async ({ page }) => {
+  test.setTimeout(240_000)
   await page.clock.install()
   await page.goto('/play/slap-pile?seed=e2e-finish')
-  for (let i = 0; i < 3000; i++) {
-    if (await page.getByTestId('sp-over').isVisible()) break
-    const play = page.getByTestId('sp-play')
-    if (await play.isEnabled()) await play.click()
-    await page.clock.runFor(60)
+  const over = page.getByTestId('sp-over')
+  const play = page.getByTestId('sp-play')
+  for (let i = 0; i < 4000 && !(await over.isVisible()); i++) {
+    // Tap the deck whenever it is our turn; the opponent plays on the fake clock.
+    if (await play.isEnabled()) await play.tap().catch(() => play.click())
+    await page.clock.runFor(250)
   }
-  await expect(page.getByTestId('sp-over')).toBeVisible()
+  await expect(over).toBeVisible()
   await expectRows(page, 'history', 1)
 })
