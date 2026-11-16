@@ -230,9 +230,18 @@ const pinball: Cover = (u, f) => <g>
   <ellipse cx="80" cy="86" rx="40" ry="3" fill="#000" opacity=".3" filter={`url(#${u}-soft)`} />
 </g>
 
+const towerDefense: Cover = (u, f) => <g>
+  <rect width="160" height="90" fill="#10261d" />
+  <path d="M-4 20 H120 V46 H40 V70 H130 V94" fill="none" stroke="#6b5a3a" strokeWidth="12" strokeLinejoin="round" />
+  {[[30, 34], [80, 34], [80, 58], [140, 60]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="8" fill={['#ffc247', '#7fd8ff', '#ff6b8b', '#ffc247'][i]} stroke="#fff" strokeWidth="1.4" />)}
+  {[[60, 20], [100, 20], [40, 46]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="4.5" fill={f('red')} stroke="#0b0f1a" strokeWidth="1" />)}
+  <path d="M80 34 L100 20" stroke="#fff" strokeWidth="1.2" opacity=".8" />
+  <ellipse cx="80" cy="87" rx="40" ry="3" fill="#000" opacity=".3" filter={`url(#${u}-soft)`} />
+</g>
+
 export const ARCADE_COVERS: Record<string, Cover> = {
   'stack-tower': stackTower,
   'lane-hopper': laneHopper,
   'mole-mash': moleMash,
   'traffic-dodger': trafficDodger,
-  'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'gravity-flip': gravityFlip, 'asteroid-assault': asteroidAssault, pinball }
+  'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'gravity-flip': gravityFlip, 'asteroid-assault': asteroidAssault, pinball, 'tower-defense': towerDefense }

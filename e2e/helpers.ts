@@ -43,6 +43,7 @@ export const GAMES = [
   { id: 'chinese-checkers', title: 'Star Hop', category: 'Strategy', chunk: 'ChineseCheckers' },
   { id: 'asteroid-assault', title: 'Rock Blaster', category: 'Arcade', chunk: 'AsteroidAssault' },
   { id: 'pinball', title: 'Pinball', category: 'Arcade', chunk: 'Pinball' },
+  { id: 'tower-defense', title: 'Tower Defense', category: 'Arcade', chunk: 'TowerDefense' },
   { id: 'go', title: 'Go', category: 'Strategy', chunk: 'Go' },
   { id: 'quoridor', title: 'Wall Race', category: 'Strategy', chunk: 'Quoridor' },
   { id: 'durak', title: 'Durak', category: 'Cards', chunk: 'Durak' },
