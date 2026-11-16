@@ -16,6 +16,12 @@ describe('MoleMash', () => {
     expect(onFinish).toHaveBeenCalledTimes(1)
     expect(onFinish.mock.calls[0][0]).toMatchObject({ score: 70, won: false, stats: { hits: 7, misses: 2, bombs: 0 } })
   })
+  it('shows the colour to whack, three lives and the streak multiplier', () => {
+    render(<MoleMash onFinish={vi.fn()} seed="u" />)
+    expect(screen.getByTestId('mm-target')).toHaveTextContent(/Whack (Red|Blue|Green) only/)
+    expect(screen.getByTestId('mm-lives')).toHaveTextContent('♥♥♥')
+    expect(screen.getByTestId('mm-mult')).toHaveTextContent('×1')
+  })
   it('shows nine holes and does not finish before it is played', () => {
     const onFinish = vi.fn()
     render(<MoleMash onFinish={onFinish} seed="u" />)
