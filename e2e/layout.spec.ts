@@ -43,6 +43,7 @@ const PLAY_AREA = {
   'traffic-dodger': '.tr-pad',
   'lane-hopper': '.hp-pad',
   pinball: '.pb-table',
+  'tower-defense': '.td-board',
   'mole-mash': '.mm-board',
   'call-break': '.cb-hand',
   chess: '.ch-setup',

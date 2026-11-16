@@ -531,6 +531,18 @@ export const registry: GameEntry[] = [
   },
   {
     meta: {
+      id: 'tower-defense',
+      title: 'Tower Defense',
+      description: 'Build and upgrade towers along a winding path and stop twelve waves reaching the exit.',
+      category: 'Arcade',
+      accent: 'from-emerald-500 to-lime-300',
+      glyph: '♜',
+      estimated: '8–15 min',
+    },
+    Component: lazy(() => import('./TowerDefense').then((m) => ({ default: m.TowerDefense }))),
+  },
+  {
+    meta: {
       id: 'go',
       title: 'Go',
       description: 'Surround stones and territory on a 9×9 or 13×13 board against the computer.',

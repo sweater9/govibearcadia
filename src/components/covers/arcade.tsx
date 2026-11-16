@@ -242,6 +242,7 @@ const pinball: Cover = (u, f) => <g>
 </g>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /** Rhythm Master: four lanes, falling notes and the glowing hit line. */
 const rhythmMaster: Cover = (u, f) => <g>
   <rect width="160" height="90" fill="#080b14" />
@@ -261,6 +262,15 @@ const pixelRun: Cover = (u, f) => <g>
   <rect x="34" y="40" width="12" height="16" fill="#3f7cff" /><rect x="34" y="34" width="12" height="8" fill="#ffd2a6" /><rect x="33" y="31" width="13" height="4" fill="#e8465f" />
   <rect x="138" y="26" width="2.5" height="30" fill="#f1f6ff" /><polygon points="140.5,26 154,31 140.5,36" fill={f('red')} />
 >>>>>>> origin/feature/pixel-run
+=======
+const towerDefense: Cover = (u, f) => <g>
+  <rect width="160" height="90" fill="#10261d" />
+  <path d="M-4 20 H120 V46 H40 V70 H130 V94" fill="none" stroke="#6b5a3a" strokeWidth="12" strokeLinejoin="round" />
+  {[[30, 34], [80, 34], [80, 58], [140, 60]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="8" fill={['#ffc247', '#7fd8ff', '#ff6b8b', '#ffc247'][i]} stroke="#fff" strokeWidth="1.4" />)}
+  {[[60, 20], [100, 20], [40, 46]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="4.5" fill={f('red')} stroke="#0b0f1a" strokeWidth="1" />)}
+  <path d="M80 34 L100 20" stroke="#fff" strokeWidth="1.2" opacity=".8" />
+  <ellipse cx="80" cy="87" rx="40" ry="3" fill="#000" opacity=".3" filter={`url(#${u}-soft)`} />
+>>>>>>> origin/feature/tower-defense
 </g>
 
 export const ARCADE_COVERS: Record<string, Cover> = {
@@ -269,7 +279,11 @@ export const ARCADE_COVERS: Record<string, Cover> = {
   'mole-mash': moleMash,
   'traffic-dodger': trafficDodger,
 <<<<<<< HEAD
+<<<<<<< HEAD
   'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'gravity-flip': gravityFlip, 'asteroid-assault': asteroidAssault, pinball, 'rhythm-master': rhythmMaster, 'marble-maze': marbleMaze }
 =======
   'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'gravity-flip': gravityFlip, 'asteroid-assault': asteroidAssault, pinball, 'pixel-run': pixelRun }
 >>>>>>> origin/feature/pixel-run
+=======
+  'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'gravity-flip': gravityFlip, 'asteroid-assault': asteroidAssault, pinball, 'tower-defense': towerDefense }
+>>>>>>> origin/feature/tower-defense
