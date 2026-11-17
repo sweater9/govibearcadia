@@ -66,6 +66,8 @@ export function attachGameSound(root: HTMLElement): () => void {
     if (el?.closest('button, [role="button"]') && !el.closest('.game-over')) playSound('tap')
   }
   const onKey = (e: KeyboardEvent) => {
+    // A held key repeats many times a second; one move sound per press is enough.
+    if (e.repeat) return
     if (/^(Arrow|[1-9]$| $)/.test(e.key) || e.key === ' ') playSound('move')
   }
   root.addEventListener('click', onTap)

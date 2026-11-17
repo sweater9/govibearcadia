@@ -12,6 +12,14 @@ import {
 const FIXED_MS = 1000 / 120
 const MAX_FRAME_MS = 100
 const pct = (v: number, of: number) => `${(v / of) * 100}%`
+/** Moves by compositor-only transforms (a percentage of the element's own size), so a frame never forces a layout. */
+const at = (x: number, y: number, w: number, h: number) => ({
+  left: 0,
+  top: 0,
+  width: pct(w, W),
+  height: pct(h, H),
+  transform: `translate(${(x / w) * 100}%, ${(y / h) * 100}%)`,
+})
 
 export function NeonPong({ onFinish, seed, level = 1 }: GameProps) {
   const pace = levelPace(level)
@@ -167,18 +175,18 @@ export function NeonPong({ onFinish, seed, level = 1 }: GameProps) {
         <div
           className="pong-paddle ai"
           data-x={Math.round(game.aiX)}
-          style={{ left: pct(game.aiX - PADDLE_W / 2, W), top: pct(AI_Y, H), width: pct(PADDLE_W, W), height: pct(PADDLE_H, H) }}
+          style={at(game.aiX - PADDLE_W / 2, AI_Y, PADDLE_W, PADDLE_H)}
         />
         <div
           className="pong-paddle you"
           data-x={Math.round(game.playerX)}
-          style={{ left: pct(game.playerX - PADDLE_W / 2, W), top: pct(PLAYER_Y, H), width: pct(PADDLE_W, W), height: pct(PADDLE_H, H) }}
+          style={at(game.playerX - PADDLE_W / 2, PLAYER_Y, PADDLE_W, PADDLE_H)}
         />
         <div
           className="pong-ball"
           data-x={Math.round(game.ball.x)}
           data-y={Math.round(game.ball.y)}
-          style={{ left: pct(game.ball.x - BALL_R, W), top: pct(game.ball.y - BALL_R, H), width: pct(BALL_R * 2, W), height: pct(BALL_R * 2, H) }}
+          style={at(game.ball.x - BALL_R, game.ball.y - BALL_R, BALL_R * 2, BALL_R * 2)}
         />
         {game.status === 'ready' ? <div className="pong-hint">Tap, click or press Space to serve</div> : null}
         {paused && game.status === 'playing' ? <div className="pong-hint">Paused</div> : null}

@@ -16,6 +16,8 @@ const KEYS: Record<string, Direction> = {
 export function NeonMerge({ onFinish, seed }: GameProps) {
   const random = useMemo(() => createRandom(seed), [seed])
   const [game, setGame] = useState<MergeState>(() => newGame(random))
+  // The board before the last move: only tiles that changed play the pop animation.
+  const [before, setBefore] = useState<MergeState['board'] | null>(null)
   const startedAt = useRef(Date.now())
   const reported = useRef(false)
 
@@ -38,6 +40,7 @@ export function NeonMerge({ onFinish, seed }: GameProps) {
     (dir: Direction) => {
       const next = step(game, dir, random)
       if (next === game) return
+      setBefore(game.board)
       setGame(next)
       if (next.over) report(next)
     },
@@ -60,6 +63,7 @@ export function NeonMerge({ onFinish, seed }: GameProps) {
     if (game.score > 0) report(game)
     reported.current = false
     startedAt.current = Date.now()
+    setBefore(null)
     setGame(newGame(random))
   }
 
@@ -78,7 +82,7 @@ export function NeonMerge({ onFinish, seed }: GameProps) {
       <div className="merge-board">
         {game.board.flatMap((row, y) =>
           row.map((value, x) => (
-            <div className={`merge-tile ${tileClass(value)}`} key={`${y}-${x}-${value}`}>
+            <div className={`merge-tile ${tileClass(value)}${value && before && before[y][x] !== value ? ' tile-new' : ''}`} key={`${y}-${x}`}>
               {value || ''}
             </div>
           )),
