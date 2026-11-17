@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { createRandom } from './rng'
-import { challengePath, parseChallenge, randomSeed, shareChallenge, verdict, verdictText } from './challenge'
+import { challengePath, parseChallenge, randomSeed, shareChallenge, shareScore, verdict, verdictText } from './challenge'
 
 const parse = (path: string) => parseChallenge(new URL(path, 'https://x.test').searchParams)
 
@@ -51,5 +51,15 @@ describe('who wins', () => {
   })
   it('the shared message carries the link', () => {
     expect(shareChallenge('Carve', { score: 1200, won: true }, 'https://x.test/play/carve?seed=a')).toBe('I won Carve on GoVibeArcade with 1,200. Same puzzle, can you beat it? https://x.test/play/carve?seed=a')
+  })
+})
+
+describe('shareScore', () => {
+  it('words a score, a win and a plain play, with the link', () => {
+    expect(shareScore('Pulse Tap', { score: 1234, won: false }, 'https://x.test/play/pulse-tap')).toBe(
+      'I scored 1,234 in Pulse Tap on GoVibeArcade. Can you beat it? https://x.test/play/pulse-tap',
+    )
+    expect(shareScore('Sudoku', { score: 0, won: true }, 'u')).toContain('won Sudoku on')
+    expect(shareScore('Sudoku', { score: 0, won: false }, 'u')).toContain('played Sudoku on')
   })
 })
