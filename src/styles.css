@@ -892,3 +892,9 @@ main{overflow-x:clip}
 @media (max-width:820px){.hero{padding-top:28px;padding-bottom:20px}.hero h1{font-size:clamp(34px,9vw,52px)}}
 @media (max-width:700px){.home-daily,.continue{padding:16px 18px}}
 @media (max-width:820px){.hero-art{margin-top:24px}}
+
+/* Levels */
+.level-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin:0 auto 10px;max-width:640px;font-size:.92rem;color:var(--text-muted)}
+.level-bar select{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:4px 8px;min-height:32px}
+.level-result{margin:0;color:var(--text);display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+@media(max-height:800px){.level-bar{margin-bottom:4px;gap:4px 12px}.level-bar select{min-height:28px;padding:2px 6px}.play-page:has(.level-bar) .play-title .eyebrow{display:none}.play-page:has(.level-bar) .play-title{margin:8px 0}}

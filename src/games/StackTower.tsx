@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createRandom } from '../lib/rng'
+import { levelPace } from '../lib/levels'
 import type { GameProps } from '../types'
 import { drop, floors, newGame, score, speedAt, step, type State } from './stack/rules'
 import './stack/stack.css'
 
 const ROWS = 9
 
-export function StackTower({ onFinish, seed }: GameProps) {
+export function StackTower({ onFinish, seed, level = 1 }: GameProps) {
+  const pace = levelPace(level)
   const [base] = useState(() => seed ?? String(createRandom()()))
   const [run, setRun] = useState(0)
   const [game, setGameState] = useState<State>(() => newGame(base))
@@ -46,12 +48,12 @@ export function StackTower({ onFinish, seed }: GameProps) {
     const frame = (now: number) => {
       const dt = Math.min(50, now - last)
       last = now
-      if (current.current.status === 'playing') apply(step(current.current, dt))
+      if (current.current.status === 'playing') apply(step(current.current, dt * pace))
       raf = requestAnimationFrame(frame)
     }
     raf = requestAnimationFrame(frame)
     return () => cancelAnimationFrame(raf)
-  }, [apply])
+  }, [apply, pace])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

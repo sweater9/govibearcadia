@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createRandom } from '../lib/rng'
+import { levelPace } from '../lib/levels'
 import type { GameProps } from '../types'
 import { DURATION, HOLES, LIVES, SWITCH_MS, newGame, multiplier, score, start, step, switchIn, timeLeft, whack, type Colour, type State } from './mole/rules'
 import './mole/mole.css'
@@ -10,7 +11,8 @@ const LABEL = { mole: 'Mole', gold: 'Golden mole', bomb: 'Bomb' } as const
 const SHAPE: Record<Colour, string> = { red: '▲', blue: '●', green: '■' }
 const NAME: Record<Colour, string> = { red: 'Red', blue: 'Blue', green: 'Green' }
 
-export function MoleMash({ onFinish, seed }: GameProps) {
+export function MoleMash({ onFinish, seed, level = 1 }: GameProps) {
+  const pace = levelPace(level)
   const [base] = useState(() => seed ?? String(createRandom()()))
   const [run, setRun] = useState(0)
   const [game, setGameState] = useState<State>(() => newGame(base))
@@ -50,12 +52,12 @@ export function MoleMash({ onFinish, seed }: GameProps) {
     const frame = (now: number) => {
       const dt = Math.min(50, now - last)
       last = now
-      if (current.current.status === 'playing') apply(step(current.current, dt))
+      if (current.current.status === 'playing') apply(step(current.current, dt * pace))
       raf = requestAnimationFrame(frame)
     }
     raf = requestAnimationFrame(frame)
     return () => cancelAnimationFrame(raf)
-  }, [apply])
+  }, [apply, pace])
 
   // Number keys 1-9 hit the holes in reading order (1 is top-left), like a phone keypad turned upside down.
   useEffect(() => {

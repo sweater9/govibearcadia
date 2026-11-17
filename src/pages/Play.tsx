@@ -13,6 +13,8 @@ import { games } from '../data/games'
 import { lockScreen, unlockScreen } from '../lib/screenLock'
 import { ShareButton } from '../components/ShareButton'
 import { challengePath, parseChallenge, randomSeed, shareChallenge, verdict, verdictText } from '../lib/challenge'
+import { LevelBar } from '../components/LevelBar'
+import { isLeveled, levelCleared, readCleared, saveCleared } from '../lib/levels'
 import { getNick } from '../lib/online'
 import { usePageMeta } from '../lib/pageMeta'
 import { dailyChallenge, shareDaily, today } from '../lib/passport'
@@ -37,9 +39,21 @@ export function Play() {
   const [locked, setLocked] = useState(false)
   const [dailyWin, setDailyWin] = useState<GameResult | null>(null)
   const [coinsWon, setCoinsWon] = useState(0)
-  const [lastRun, setLastRun] = useState<{ score: number; won: boolean } | null>(null)
+  const [lastRun, setLastRun] = useState<{ score: number; won: boolean; passed?: boolean } | null>(null)
+  // Levels: only for the score-chase games, and never for a daily challenge or a friend's challenge link.
+  const leveled = !!gameId && isLeveled(gameId) && !daily && !incoming
+  const [level, setLevel] = useState(1)
+  const [run, setRun] = useState(0)
+  const [cleared, setCleared] = useState(0)
 
-  useEffect(() => setLastRun(null), [seed, gameId])
+  useEffect(() => setLastRun(null), [seed, gameId, level, run])
+  useEffect(() => {
+    if (!gameId || !isLeveled(gameId)) return
+    const best = readCleared()[gameId] ?? 0
+    setCleared(best)
+    setLevel(best + 1)
+    setRun(0)
+  }, [gameId])
 
   // The lock never outlives the game page, and leaving full screen by the browser's own gesture unlocks too.
   useEffect(() => {
@@ -66,10 +80,15 @@ export function Play() {
     (result: GameResult) => {
       if (gameId) void recordPlay(gameId, result, daily)
       if (daily && result.won) setDailyWin(result)
-      setLastRun({ score: result.score, won: !!result.won })
+      const passed = leveled && gameId ? levelCleared(gameId, level, result) : undefined
+      if (passed && gameId) {
+        saveCleared(gameId, level)
+        setCleared((c) => Math.max(c, level))
+      }
+      setLastRun({ score: result.score, won: !!result.won, passed })
       setCoinsWon(coinsFor({ won: result.won, daily }))
     },
-    [gameId, daily],
+    [gameId, daily, leveled, level],
   )
 
   if (!entry) return <Navigate to="/" replace />
@@ -115,10 +134,21 @@ export function Play() {
           <Unlock size={16} /> Unlock
         </button>
       ) : null}
+      {leveled && gameId ? (
+        <LevelBar
+          gameId={gameId}
+          level={level}
+          cleared={cleared}
+          last={lastRun && lastRun.passed !== undefined ? { score: lastRun.score, passed: lastRun.passed } : null}
+          onPick={setLevel}
+          onNext={() => setLevel((n) => n + 1)}
+          onRetry={() => setRun((n) => n + 1)}
+        />
+      ) : null}
       <section className="game-shell" ref={shellRef}>
         <GameBoundary key={meta.id}>
           <Suspense fallback={<p className="game-help">Loading {meta.title}…</p>}>
-            <Game key={seed ?? ''} onFinish={finish} seed={seed} />
+            <Game key={`${seed ?? ''}:${level}:${run}`} onFinish={finish} seed={seed} level={leveled ? level : undefined} />
           </Suspense>
         </GameBoundary>
       </section>

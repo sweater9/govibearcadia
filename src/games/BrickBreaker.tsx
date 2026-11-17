@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent } from 'react'
 import { Pause, Play, RotateCcw } from 'lucide-react'
 import { createRandom } from '../lib/rng'
+import { levelPace } from '../lib/levels'
 import type { GameProps } from '../types'
 import {
   BALL_R, BRICK_H, BRICK_W, COLS, H, PADDLE_H, PADDLE_W, PADDLE_Y, TOP, W,
@@ -12,7 +13,8 @@ const FIXED_MS = 1000 / 120
 const MAX_FRAME_MS = 100
 const pct = (v: number, of: number) => `${(v / of) * 100}%`
 
-export function BrickBreaker({ onFinish, seed }: GameProps) {
+export function BrickBreaker({ onFinish, seed, level = 1 }: GameProps) {
+  const pace = levelPace(level)
   const random = useMemo(() => createRandom(seed), [seed])
   const [game, setGameState] = useState<BreakerState>(() => newGame())
   const [paused, setPaused] = useState(false)
@@ -55,7 +57,7 @@ export function BrickBreaker({ onFinish, seed }: GameProps) {
       last = t
       let s = current.current
       while (acc >= FIXED_MS && (s.status === 'ready' || s.status === 'playing')) {
-        s = step(s, FIXED_MS / 1000, dir.current)
+        s = step(s, (FIXED_MS * pace) / 1000, dir.current)
         if (s.status === 'playing') playedMs.current += FIXED_MS
         acc -= FIXED_MS
       }
@@ -67,7 +69,7 @@ export function BrickBreaker({ onFinish, seed }: GameProps) {
     }
     raf = requestAnimationFrame(frame)
     return () => cancelAnimationFrame(raf)
-  }, [running, report, setGame])
+  }, [running, report, setGame, pace])
 
   const serve = useCallback(() => {
     if (current.current.status === 'ready' && !paused) setGame(launch(current.current, random))

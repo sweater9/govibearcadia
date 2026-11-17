@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent } from 'react'
 import { Pause, Play, RotateCcw } from 'lucide-react'
 import { createRandom } from '../lib/rng'
+import { levelPace } from '../lib/levels'
 import type { GameProps } from '../types'
 import {
   BULLET_H, BULLET_W, ENEMY_H, ENEMY_W, H, SHIP_H, SHIP_W, SHIP_Y, SHOT_W, W, WAVES,
@@ -12,7 +13,8 @@ const FIXED_MS = 1000 / 120
 const MAX_FRAME_MS = 100
 const pct = (v: number, of: number) => `${(v / of) * 100}%`
 
-export function SpaceDefender({ onFinish, seed }: GameProps) {
+export function SpaceDefender({ onFinish, seed, level = 1 }: GameProps) {
+  const pace = levelPace(level)
   const random = useMemo(() => createRandom(seed), [seed])
   const [game, setGameState] = useState<DefenderState>(() => newGame())
   const [paused, setPaused] = useState(false)
@@ -54,7 +56,7 @@ export function SpaceDefender({ onFinish, seed }: GameProps) {
       last = t
       let s = current.current
       while (acc >= FIXED_MS && (s.status === 'ready' || s.status === 'playing')) {
-        s = step(s, FIXED_MS / 1000, dir.current, random)
+        s = step(s, (FIXED_MS * pace) / 1000, dir.current, random)
         if (s.status === 'playing') playedMs.current += FIXED_MS
         acc -= FIXED_MS
       }
@@ -66,7 +68,7 @@ export function SpaceDefender({ onFinish, seed }: GameProps) {
     }
     raf = requestAnimationFrame(frame)
     return () => cancelAnimationFrame(raf)
-  }, [running, random, report, setGame])
+  }, [running, random, report, setGame, pace])
 
   const begin = useCallback(() => {
     if (current.current.status === 'ready' && !paused) setGame(start(current.current))
