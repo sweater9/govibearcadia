@@ -892,3 +892,10 @@ main{overflow-x:clip}
 @media (max-width:820px){.hero{padding-top:28px;padding-bottom:20px}.hero h1{font-size:clamp(34px,9vw,52px)}}
 @media (max-width:700px){.home-daily,.continue{padding:16px 18px}}
 @media (max-width:820px){.hero-art{margin-top:24px}}
+
+/* Sharing */
+.share{display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px}
+.share-links{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px}
+.share-link{padding:6px 12px;border-radius:999px;border:1px solid var(--border);color:var(--text);text-decoration:none;font-size:.85rem;min-height:32px;display:inline-flex;align-items:center}
+.share-link:hover,.share-link:focus-visible{border-color:var(--primary);color:var(--primary)}
+.share-hint{flex-basis:100%;color:var(--text-muted);font-size:.8rem}

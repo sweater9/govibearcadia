@@ -12,7 +12,7 @@ import { GameRow } from '../components/GameRow'
 import { games } from '../data/games'
 import { lockScreen, unlockScreen } from '../lib/screenLock'
 import { ShareButton } from '../components/ShareButton'
-import { challengePath, parseChallenge, randomSeed, shareChallenge, verdict, verdictText } from '../lib/challenge'
+import { challengePath, parseChallenge, randomSeed, shareChallenge, shareScore, verdict, verdictText } from '../lib/challenge'
 import { getNick } from '../lib/online'
 import { usePageMeta } from '../lib/pageMeta'
 import { dailyChallenge, shareDaily, today } from '../lib/passport'
@@ -132,6 +132,7 @@ export function Play() {
           />
         </div>
       ) : null}
+      {lastRun && !meta.challenge && !(daily && dailyWin) ? <ShareButton label="Share score" text={shareScore(meta.title, lastRun, `${location.origin}/play/${meta.id}`)} /> : null}
       {daily && dailyWin ? <ShareButton text={shareDaily(meta.title, daily, dailyWin.score, dailyWin.durationMs)} /> : null}
       <p className="game-help">Keyboard and touch controls supported · Progress is saved on this device</p>
       <div className="play-more">

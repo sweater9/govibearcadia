@@ -72,3 +72,10 @@ export function verdictText(v: Verdict, mine: number, challenge: Pick<Challenge,
 export function shareChallenge(title: string, result: { score: number; won: boolean }, url: string): string {
   return `I ${result.won ? 'won' : 'played'} ${title} on GoVibeArcade with ${result.score.toLocaleString()}. Same puzzle, can you beat it? ${url}`
 }
+
+/** A plain result for any game, with a link back to it. */
+export function shareScore(title: string, result: { score: number; won: boolean }, url: string): string {
+  const score = result.score.toLocaleString('en-US')
+  const what = result.won ? `won ${title}${result.score > 0 ? ` with ${score}` : ''}` : result.score > 0 ? `scored ${score} in ${title}` : `played ${title}`
+  return `I ${what} on GoVibeArcade. Can you beat it? ${url}`
+}
