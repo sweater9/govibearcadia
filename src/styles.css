@@ -917,3 +917,8 @@ main:focus{outline:none}
 .pong-paddle,.pong-ball{will-change:transform}
 .pong-ball{box-shadow:0 0 10px 2px #d0e1fb88}
 .pong-paddle.you,.pong-paddle.ai{box-shadow:0 0 8px #ffffff33}
+
+/* Game page: how to play and related games */
+.game-about{max-width:640px;margin:28px auto 0;color:var(--text-muted);line-height:1.6}
+.game-about h2{font-size:1.15rem;color:var(--text);margin:22px 0 8px}
+.game-about p{margin:0 0 10px}

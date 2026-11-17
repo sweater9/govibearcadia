@@ -52,7 +52,7 @@ Navigation: Home | Discover | Daily Arcade | Multiplayer | Achievements | Leader
 
 ## Phases
 
-### Phase 1: Foundation (in progress)
+### Phase 1: Foundation (done)
 
 Playable arcade, premium responsive homepage, reusable game architecture, local progress, favorites and recently played, search and category filtering, offline PWA, automated tests. Target: 15 polished games (19 now: 16 at launch including Pulse Tap, plus Tic-Tac-Toe, Checkers and Battleship), prioritising working and tested games over placeholders.
 
@@ -99,7 +99,7 @@ Completion: reliable cross-device access, sustainable costs, and monetization th
 | Item | Status |
 |------|--------|
 | Repository, stack, architecture | Done |
-| Games implemented | 16: Neon Merge, Memory Grid, Pulse Tap, Minesweeper, Neon Snake, Color Sort, Connect Four, Daily Word, Brick Breaker, Neon Pong, Sudoku Master, Space Defender, Gravity Flip, VibeLine, Twofold, Carve |
+| Games implemented | 52 (updated 2026-11-17; the registry in `src/games/registry.ts` is the source of truth). The list in the next rows is the original launch set of 16; the games added since are described per game below and in `docs/`. |
 | Search, categories, favorites, recent play, high scores | Done |
 | Lazy-loaded games, seeded randomness, game result contract | Done |
 | Offline PWA with PNG icons | Done. Verified in headless Chromium: service worker precaches every game chunk, the app reloads and plays offline, manifest and icons are valid. Not yet verified on real devices (install prompt, iOS Safari). |
@@ -136,5 +136,14 @@ Completion: reliable cross-device access, sustainable costs, and monetization th
 | Redesign step 3: game pages | The frame around every game (page title, game card, toolbar, buttons, overlays) uses the design tokens: flat surfaces, 1px borders, no glow. Sizes are untouched so every board still fits on screen. Boards keep their own look. Leaderboard, passport, online pages and the accent-colour themes are later steps. |
 | Redesign step 4: leaderboard, passport, online | Stat boxes with mono labels, top three leaderboard entries as cards (rank 1 amber border) and the rest as rows, filter chips, flat panels and inputs. Colours, borders and radii only. The accent-colour themes are the next step. |
 | Redesign step 5: accent themes | Ocean, Forest and Ember no longer shift every colour on the page (the old hue-rotate filter is gone). A theme now changes only the primary accent colour (blue, green, coral; Neon stays cyan); background, surfaces and text stay fixed. A unit test checks every theme's primary and its text colour stay at least 4.5:1. Unlock levels and the Passport picker are unchanged, and the picker shows a colour swatch. |
-| Domain purchase and configuration | Not confirmed |
+| Domain purchase and configuration | Done. govibearcade.com is connected through Cloudflare (apex and www as Worker custom domains, www redirects to the apex, http to https, SSL Full). Runbook: `docs/DOMAIN.md`. |
 | Production deployment | Authorized by the owner on 2026-10-28; Cloudflare Workers builds from `feature/phase-1-arcade-foundation` |
+| Notes on older rows | Rows above that say "Draft PR, not deployed" were written before each game shipped. All 52 games in the registry are in the live branch. |
+| Games 29 to 52 | Added after the rows above: Klondike, Call Break, Chess, Nine Men's Morris, Cribbage, Chinese Checkers, Asteroid Assault, Pinball, Tower Defense, Go, Quoridor, Durak, Scopa, Shogi, Rhythm Master, Slap Pile, Marble Maze, Pixel Run, and others (see the registry). Pinball feel, Tower Defense balance and Rhythm Master sound need real-device playtesting. |
+| Rename to GoVibeArcade | Done 2026-11-17: logo, titles and share image. Storage keys and the repository name keep the old lowercase `govibearcadia` so no one's saved progress is lost. |
+| Accessibility pass | Done for the checks we can automate: skip link, a page-change announcer for screen readers, reduced-motion support, visible keyboard focus, ARIA role fixes, and an axe-core scan of every page and every game (`e2e/accessibility.spec.ts`). Two boards (Chinese Checkers, Aadu Puli Attam) have holes smaller than 24 px and are listed as known. Not tested with a real screen reader. |
+| Levels | Ten score-chase games (Pulse Tap, Brick Breaker, Neon Pong, Neon Snake, Space Defender, Asteroid Assault, Lane Hopper, Traffic Dodger, Stack Tower, Mole Mash) have levels: a score target per level, faster play each level, a level picker, Next level and Retry. Cleared levels are saved on the device only. The targets are estimates and need playtesting (`src/lib/levels.ts`). |
+| Sharing | The share button opens the phone's share sheet where there is one (WhatsApp, Instagram and others) and otherwise copies the text, with WhatsApp, Telegram, X and Facebook links. Every finished run has a Share score button. Instagram has no web share link. The native share sheet is not verified on a real phone. |
+| Per-game pages | Each game has its own server-generated page (`/play/<id>`) with its own title, description, link-preview picture (`public/og/`, drawn by `scripts/og-games.cjs`) and VideoGame structured data, plus a How to play section on the page. Sharing a game link now previews that game. Google picks this up only when it re-crawls. |
+| Search presence | Favicon files and a WebSite structured-data block are live. Whether Google shows the logo and the new snippet depends on its re-crawl; the owner can request indexing in Search Console. |
+| Still open (Phase 3 to 5) | Matchmaking, tournaments and spectator mode (Phase 3); the three original flagships and community events (Phase 4); cloud sync, controller support, localization and apps (Phase 5). Real-device checks for the PWA install, the share sheet and game feel. |

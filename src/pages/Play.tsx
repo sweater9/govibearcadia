@@ -13,6 +13,8 @@ import { games } from '../data/games'
 import { lockScreen, unlockScreen } from '../lib/screenLock'
 import { ShareButton } from '../components/ShareButton'
 import { challengePath, parseChallenge, randomSeed, shareChallenge, shareScore, verdict, verdictText } from '../lib/challenge'
+import { gameDescription, gameTitle } from '../lib/gamePages'
+import { GameAbout } from '../components/GameAbout'
 import { LevelBar } from '../components/LevelBar'
 import { isLeveled, levelCleared, readCleared, saveCleared } from '../lib/levels'
 import { getNick } from '../lib/online'
@@ -33,7 +35,7 @@ export function Play() {
   const challenge = dailyChallenge(today(), games.filter((g) => g.daily).map((g) => g.id))
   const daily = params.get('daily') === challenge.day && id === challenge.gameId && seed === challenge.seed ? challenge.day : undefined
   const gameId = entry?.meta.id
-  usePageMeta(entry ? `${entry.meta.title}: play free online · GoVibeArcade` : null, entry ? `${entry.meta.description} Free to play in your browser: no ads, no sign-up, works offline.` : null, `/play/${id ?? ''}`)
+  usePageMeta(entry ? gameTitle(entry.meta) : null, entry ? gameDescription(entry.meta) : null, `/play/${id ?? ''}`)
   const shellRef = useRef<HTMLElement>(null)
   const [favorite, setFavorite] = useState(false)
   const [locked, setLocked] = useState(false)
@@ -168,6 +170,7 @@ export function Play() {
       <div className="play-more">
         <GameRow title="More like this" blurb={`More ${meta.category.toLowerCase()} games`} games={games.filter((g) => g.category === meta.category && g.id !== meta.id).slice(0, 6)} />
       </div>
+      <GameAbout meta={meta} />
     </main>
   )
 }
