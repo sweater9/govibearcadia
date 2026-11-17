@@ -61,7 +61,7 @@ test.describe('accessibility', () => {
   test('moving to another page is announced to screen readers', async ({ page, isMobile }) => {
   test.skip(isMobile, 'the main menu is hidden on phones')
     await page.goto('/')
-    const status = page.locator('p.sr-only[role="status"]')
+    const status = page.locator('p.sr-only[aria-live]')
     await expect(status).toHaveText('')
     await page.goto('/')
     await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Passport' }).click()
