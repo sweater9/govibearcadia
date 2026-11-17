@@ -12,6 +12,7 @@ export const buildRobots = (base = SITE_URL) => `User-agent: *\nAllow: /\nDisall
 export function fillHtml(html: string, base = SITE_URL): string {
   return html
     .replaceAll('__SITE_URL__', base.replace(/\/$/, ''))
+    .replaceAll('__SITE_HOST__', new URL(base).hostname)
     .replaceAll('__SITE_NAME__', SITE_NAME)
     .replaceAll('__SITE_TITLE__', SITE_TITLE)
     .replaceAll('__SITE_DESCRIPTION__', SITE_DESCRIPTION)
