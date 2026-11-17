@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createRandom } from '../lib/rng'
+import { levelPace } from '../lib/levels'
 import type { GameProps } from '../types'
 
 const DURATION = 30
 const POINTS_PER_HIT = 100
 
-export function PulseTap({ onFinish, seed }: GameProps) {
+export function PulseTap({ onFinish, seed, level = 1 }: GameProps) {
   const random = useMemo(() => createRandom(seed), [seed])
   const [playing, setPlaying] = useState(false)
   const [time, setTime] = useState(DURATION)
@@ -19,6 +20,13 @@ export function PulseTap({ onFinish, seed }: GameProps) {
     const timer = setInterval(() => setTime((t) => Math.max(0, t - 1)), 1000)
     return () => clearInterval(timer)
   }, [playing])
+
+  // From level 2 the signal drifts to a new spot if it is not hit in time; the window shrinks with each level.
+  useEffect(() => {
+    if (!playing || level < 2) return
+    const timer = setInterval(() => setPos({ x: 8 + random() * 80, y: 12 + random() * 72 }), 1600 / levelPace(level))
+    return () => clearInterval(timer)
+  }, [playing, level, random])
 
   // Finishing is its own effect, so a run is reported exactly once when time reaches zero.
   useEffect(() => {

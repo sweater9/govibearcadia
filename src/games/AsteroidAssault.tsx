@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEvent } from 'react'
 import { Pause, Play, RotateCcw } from 'lucide-react'
 import { createRandom } from '../lib/rng'
+import { levelPace } from '../lib/levels'
 import type { GameProps } from '../types'
 import { LEVELS, NO_INPUT, RADIUS, SHIP_R, SIZE, newGame, start, step, type AState, type Input, type Level } from './asteroid/rules'
 import './asteroid/asteroid.css'
@@ -9,7 +10,8 @@ import './asteroid/asteroid.css'
 const FIXED_MS = 1000 / 120
 const MAX_FRAME_MS = 100
 
-export function AsteroidAssault({ onFinish, seed }: GameProps) {
+export function AsteroidAssault({ onFinish, seed, level: stage = 1 }: GameProps) {
+  const pace = levelPace(stage)
   const [level, setLevel] = useState<Level>('normal')
   const [run, setRun] = useState(0)
   const random = useMemo(() => createRandom(`${seed ?? 'asteroid'}:${run}`), [seed, run])
@@ -46,7 +48,7 @@ export function AsteroidAssault({ onFinish, seed }: GameProps) {
       last = t
       let s = current.current
       while (acc >= FIXED_MS && s.status === 'playing') {
-        s = step(s, FIXED_MS / 1000, input.current, random)
+        s = step(s, (FIXED_MS * pace) / 1000, input.current, random)
         playedMs.current += FIXED_MS
         acc -= FIXED_MS
       }
@@ -58,7 +60,7 @@ export function AsteroidAssault({ onFinish, seed }: GameProps) {
     }
     raf = requestAnimationFrame(frame)
     return () => cancelAnimationFrame(raf)
-  }, [running, random, report, setGame])
+  }, [running, random, report, setGame, pace])
 
   const begin = useCallback(() => {
     if (current.current.status === 'ready') setGame(start(current.current))

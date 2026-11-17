@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type TouchEvent } from 'react'
 import { Pause, Play, RotateCcw } from 'lucide-react'
 import { createRandom } from '../lib/rng'
+import { levelPace } from '../lib/levels'
 import type { GameProps } from '../types'
 import { begin, newGame, score, step, tickMs, turn, type Dir, type Point, type SnakeState } from './snake/rules'
 
@@ -22,7 +23,7 @@ const KEYS: Record<string, Dir> = {
 /** Minimum finger travel, in pixels, to count as a swipe. */
 const SWIPE_MIN = 24
 
-export function NeonSnake({ onFinish, seed }: GameProps) {
+export function NeonSnake({ onFinish, seed, level = 1 }: GameProps) {
   const random = useMemo(() => createRandom(seed), [seed])
   const [game, setGame] = useState<SnakeState>(() => newGame(random))
   const [paused, setPaused] = useState(false)
@@ -57,7 +58,7 @@ export function NeonSnake({ onFinish, seed }: GameProps) {
   // The timer is restarted only when the snake has moved (or status, speed or pause change). A turn
   // queued mid-tick changes `game` but must not restart the countdown, so the callback reads the
   // latest state, including the queue, from the ref instead.
-  const delay = tickMs(game)
+  const delay = Math.round(tickMs(game) / levelPace(level))
   useEffect(() => {
     if (game.status !== 'playing' || paused) return
     const timer = setTimeout(() => {

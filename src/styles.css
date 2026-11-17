@@ -907,3 +907,8 @@ main:focus{outline:none}
 .share-link{padding:6px 12px;border-radius:999px;border:1px solid var(--border);color:var(--text);text-decoration:none;font-size:.85rem;min-height:32px;display:inline-flex;align-items:center}
 .share-link:hover,.share-link:focus-visible{border-color:var(--primary);color:var(--primary)}
 .share-hint{flex-basis:100%;color:var(--text-muted);font-size:.8rem}
+/* Levels */
+.level-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin:0 auto 10px;max-width:640px;font-size:.92rem;color:var(--text-muted)}
+.level-bar select{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:4px 8px;min-height:32px}
+.level-result{margin:0;color:var(--text);display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+@media(max-height:800px){.level-bar{margin-bottom:4px;gap:4px 12px}.level-bar select{min-height:28px;padding:2px 6px}.play-page:has(.level-bar) .play-title .eyebrow{display:none}.play-page:has(.level-bar) .play-title{margin:8px 0}}

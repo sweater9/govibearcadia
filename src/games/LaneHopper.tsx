@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createRandom } from '../lib/rng'
+import { levelPace } from '../lib/levels'
 import type { GameProps } from '../types'
 import { COLS, IDLE_LIMIT, carsAt, hop, newGame, rowAt, score, start, step, type Dir, type State } from './hopper/rules'
 import './hopper/hopper.css'
@@ -8,7 +9,8 @@ const ROWS = 9
 const KEYS: Record<string, Dir> = { arrowup: 'up', w: 'up', arrowdown: 'down', s: 'down', arrowleft: 'left', a: 'left', arrowright: 'right', d: 'right' }
 const TINTS = ['#ff7a59', '#ffd166', '#9b8cff', '#5eead4', '#f472b6']
 
-export function LaneHopper({ onFinish, seed }: GameProps) {
+export function LaneHopper({ onFinish, seed, level = 1 }: GameProps) {
+  const pace = levelPace(level)
   const [base] = useState(() => seed ?? String(createRandom()()))
   const [run, setRun] = useState(0)
   const [game, setGameState] = useState<State>(() => newGame(base))
@@ -48,12 +50,12 @@ export function LaneHopper({ onFinish, seed }: GameProps) {
     const frame = (now: number) => {
       const dt = Math.min(50, now - last)
       last = now
-      if (current.current.status === 'playing') apply(step(current.current, dt))
+      if (current.current.status === 'playing') apply(step(current.current, dt * pace))
       raf = requestAnimationFrame(frame)
     }
     raf = requestAnimationFrame(frame)
     return () => cancelAnimationFrame(raf)
-  }, [apply])
+  }, [apply, pace])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

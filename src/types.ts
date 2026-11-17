@@ -35,6 +35,8 @@ export type GameProps = {
   onFinish: (result: GameResult) => void
   /** When set, all randomness is deterministic. Daily challenges will pass a date-derived seed. */
   seed?: string
+  /** Difficulty level for the score-chase games; 1 (the default) is the original game. */
+  level?: number
 }
 
 export type GameProgress = { gameId: GameId; highScore: number; plays: number; lastPlayed: string }
