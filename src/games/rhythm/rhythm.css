@@ -18,5 +18,5 @@
 .rm-hint{position:absolute;inset:6px;display:grid;gap:5px;align-content:center;justify-items:center;text-align:center;font-size:12px;background:#0a0f17ee;padding:6px;border-radius:10px;overflow:auto;z-index:2}
 .rm-hint label{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap}
 .rm-hint select{background:#111721;color:inherit;border:1px solid #384860;border-radius:8px;padding:3px 8px}
-.rm-hint input[type=range]{width:110px}
+.rm-hint input[type=range]{width:110px;min-height:24px}
 @media(max-height:760px){.rm .game-help{display:none}}

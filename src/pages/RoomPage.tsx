@@ -194,7 +194,7 @@ export function RoomPage() {
                 : "Friend's move"
 
   return (
-    <main className="play-page">
+    <main id="main" className="play-page">
       <div className="play-head">
         <Link to="/online" className="back">
           <ArrowLeft />

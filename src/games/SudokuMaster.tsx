@@ -141,7 +141,7 @@ export function SudokuMaster({ onFinish, seed }: GameProps) {
           <RotateCcw size={15} />
         </button>
       </div>
-      <div className="sdk-grid" role="grid" aria-label={`Sudoku, ${game.difficulty}`}>
+      <div className="sdk-grid" role="group" aria-label={`Sudoku, ${game.difficulty}`}>
         {game.cells.map((v, i) => {
           const given = isGiven(game, i)
           const notes = noteDigits(game.notes[i])
@@ -157,7 +157,6 @@ export function SudokuMaster({ onFinish, seed }: GameProps) {
                 if (el) cells.current.set(i, el)
                 else cells.current.delete(i)
               }}
-              role="gridcell"
               className={classes}
               data-i={i}
               data-v={v || undefined}

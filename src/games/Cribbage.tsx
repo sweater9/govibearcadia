@@ -128,7 +128,7 @@ export function Cribbage({ onFinish, seed }: GameProps) {
       </div>
       <div className="cb-tracks">{track(0, 'You')}{track(1, 'Computer')}</div>
       <div className="cb-felt">
-        <div className="cb-row" aria-label="Computer's cards">
+        <div className="cb-row" role="group" aria-label="Computer's cards">
           {game.phase === 'show' || over ? null : Array.from({ length: game.hands[1].length }, (_, i) => <Back key={i} />)}
         </div>
         {game.phase === 'peg' ? (
@@ -144,7 +144,7 @@ export function Cribbage({ onFinish, seed }: GameProps) {
           </div>
         ) : null}
         {game.phase === 'discard' || game.phase === 'peg' ? (
-          <div className="cb-row" aria-label="Your cards">
+          <div className="cb-row" role="group" aria-label="Your cards">
             {mine.map((c, i) => <Card key={c} id={c} hotkey={i + 1} pressed={choosing ? sel.includes(c) : undefined} disabled={over || (game.phase === 'peg' && !legal.has(c))} onClick={() => pick(c)} />)}
           </div>
         ) : null}

@@ -51,7 +51,7 @@ export function Passport() {
     setMessage(added ? `Imported ${added} new ${added === 1 ? 'run' : 'runs'}. Your existing progress was kept.` : 'Nothing new to import: everything in that file is already here.')
   }
 
-  if (!history) return <main className="passport"><p className="game-help">Loading your passport…</p></main>
+  if (!history) return <main id="main" className="passport"><p className="game-help">Loading your passport…</p></main>
 
   const day = today()
   const s = summarise(history, day)
@@ -62,7 +62,7 @@ export function Passport() {
   const doneToday = history.some((r) => r.won && r.daily === day)
 
   return (
-    <main className="passport">
+    <main id="main" className="passport">
       <p className="eyebrow">Arcade Passport</p>
       <div className="pp-head">
         <Avatar avatar={resolveAvatar(avatarId, lvl.level)} size={64} />

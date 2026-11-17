@@ -45,11 +45,11 @@ export function BattleshipBoard({ view, canFire, canPlace, onFire, onShuffle, on
           if (tab === 'fleet') {
             const ship = mine.has(i)
             const hit = incoming.has(i)
-            return <div key={i} className="bs-cell" data-ship={ship ? 'true' : undefined} data-state={hit ? (ship ? 'hit' : 'miss') : undefined} aria-label={`${label(i)}, ${ship ? 'ship' : 'water'}${hit ? (ship ? ', hit' : ', missed') : ''}`} />
+            return <div key={i} role="img" className="bs-cell" data-ship={ship ? 'true' : undefined} data-state={hit ? (ship ? 'hit' : 'miss') : undefined} aria-label={`${label(i)}, ${ship ? 'ship' : 'water'}${hit ? (ship ? ', hit' : ', missed') : ''}`} />
           }
           const result = shot.get(i)
-          if (result) return <div key={i} className="bs-cell" data-state={sunk.has(i) ? 'sunk' : result === 'miss' ? 'miss' : 'hit'} aria-label={`${label(i)}, ${sunk.has(i) ? 'sunk' : result === 'miss' ? 'miss' : 'hit'}`} />
-          if (revealed.has(i)) return <div key={i} className="bs-cell" data-ship="true" data-reveal="true" aria-label={`${label(i)}, enemy ship`} />
+          if (result) return <div key={i} role="img" className="bs-cell" data-state={sunk.has(i) ? 'sunk' : result === 'miss' ? 'miss' : 'hit'} aria-label={`${label(i)}, ${sunk.has(i) ? 'sunk' : result === 'miss' ? 'miss' : 'hit'}`} />
+          if (revealed.has(i)) return <div key={i} role="img" className="bs-cell" data-ship="true" data-reveal="true" aria-label={`${label(i)}, enemy ship`} />
           return <button key={i} type="button" className="bs-cell" data-cell={i} disabled={!canFire} onClick={() => onFire(i)} aria-label={`Fire at ${label(i)}`} />
         })}
       </div>

@@ -130,10 +130,10 @@ export function Durak({ onFinish, seed }: GameProps) {
         </span>
       </div>
       <div className="du-felt">
-        <div className="du-row du-comp" aria-label={`Computer holds ${game.hands[1].length} cards`}>
+        <div className="du-row du-comp" role="group" aria-label={`Computer holds ${game.hands[1].length} cards`}>
           {game.hands[1].map((_, i) => <div key={i} className="du-card" data-back="true" aria-hidden="true" />)}
         </div>
-        <div className="du-table" aria-label="Cards on the table">
+        <div className="du-table" role="group" aria-label="Cards on the table">
           {game.table.map((p) => (
             <div key={p.attack} className="du-pair">
               <Card id={p.attack} trump={suitOf(p.attack) === game.trump} />

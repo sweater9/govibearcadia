@@ -6,7 +6,7 @@ import { SITE_NAME } from '../site'
 export function About() {
   usePageMeta(`About and privacy | ${SITE_NAME}`, 'What GoVibeArcade stores on your device, what it sends to a server, and what it never collects.', '/about')
   return (
-    <main className="info-page">
+    <main id="main" className="info-page">
       <p className="eyebrow">About</p>
       <h1>About and privacy</h1>
       <p>{SITE_NAME} is a free, independent browser arcade. There are no ads, no accounts and no analytics or trackers.</p>

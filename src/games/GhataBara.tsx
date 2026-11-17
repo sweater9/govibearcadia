@@ -330,7 +330,7 @@ export function GhataBara({ onFinish, seed }: GameProps) {
       </div>
 
       <div className="gb-controls">
-          <div className="gb-queue" aria-label="Moves to place">
+          <div className="gb-queue" role="group" aria-label="Moves to place">
             {(game.phase === 'move' ? game.queue : game.rolls).map((v, i) => (
               <span key={i} className="gb-chunk">{v}</span>
             ))}

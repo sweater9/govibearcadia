@@ -121,7 +121,7 @@ export function Poker({ onFinish, seed }: GameProps) {
       </div>
       <p className={`pk-status${over ? (state!.winner === 0 ? ' win-message' : ' game-over') : won ? ' win-message' : ''}`} role="status" aria-live="polite">{status}</p>
       <div className="pk-me" data-turn={myTurn ? 'true' : undefined}>
-        <div className="pk-cards" aria-label="Your cards">{me?.hole.length ? me.hole.map((id, k) => <Face key={id} id={id} i={k} />) : <><span className="pk-slot" /><span className="pk-slot" /></>}</div>
+        <div className="pk-cards" role="group" aria-label="Your cards">{me?.hole.length ? me.hole.map((id, k) => <Face key={id} id={id} i={k} />) : <><span className="pk-slot" /><span className="pk-slot" /></>}</div>
         <div className="pk-mine"><b>{state && state.button === 0 ? <i className="pk-dealer" title="Dealer">D</i> : null}You</b><span>{state ? (me!.out ? 'Out' : `${me!.chips} chips`) : `${START_CHIPS} chips`}</span><small>{me?.folded && !me.out ? 'Folded' : me?.allIn ? 'All-in' : me?.bet ? `Bet ${me.bet}` : ''}</small></div>
       </div>
     </div>

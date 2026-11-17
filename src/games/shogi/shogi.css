@@ -11,7 +11,7 @@
 .sg-held:focus-visible{outline:3px solid #ffc247}
 .sg-held .sg-pc{width:24px;height:28px}
 .sg-hand[data-owner="2"] .sg-held .sg-pc{transform:rotate(180deg)}
-.sg-board{display:grid;grid-template-columns:repeat(9,1fr);aspect-ratio:1;container-type:inline-size;background:#c99b52;border:2px solid #5b3a14;border-radius:4px;box-shadow:0 8px 22px #0006}
+.sg-board{display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);aspect-ratio:1;container-type:inline-size;background:#c99b52;border:2px solid #5b3a14;border-radius:4px;box-shadow:0 8px 22px #0006}
 .sg-sq{position:relative;border:0;padding:0;background:none;box-shadow:inset 0 0 0 .5px #5b3a14;display:grid;place-items:center;cursor:pointer}
 .sg-sq:disabled{cursor:default}
 .sg-sq:focus-visible{outline:3px solid #1b57ff;outline-offset:-3px;z-index:2}

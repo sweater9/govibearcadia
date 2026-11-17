@@ -79,7 +79,7 @@ export function Nonogram({ onFinish, seed }: GameProps) {
             <div key={r} className="ng-clue ng-rowclue" data-done={rowDone(puzzle, grid, r) ? 'true' : undefined} aria-label={`Row ${r + 1} clue ${clue.join(' ')}`}>{clue.map((n, i) => <b key={i}>{n}</b>)}</div>
           ))}
         </div>
-        <div className="ng-grid" role="grid" aria-label="Picture grid">
+        <div className="ng-grid" role="group" aria-label="Picture grid">
           {grid.map((row, r) => row.map((v, c) => (
             <button
               key={`${r}-${c}`}

@@ -67,7 +67,7 @@ export function PulseTap({ onFinish, seed }: GameProps) {
             <div className="target preview">
               <span />
             </div>
-            <h3>{time === 0 ? 'Run complete' : 'Ready to pulse?'}</h3>
+            <h2>{time === 0 ? 'Run complete' : 'Ready to pulse?'}</h2>
             <p>{time === 0 ? `You scored ${score}.` : 'Hit as many signals as you can in 30 seconds.'}</p>
             <button className="primary-btn" onClick={start}>
               {time === 0 ? 'Play again' : 'Start run'}

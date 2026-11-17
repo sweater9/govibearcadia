@@ -59,7 +59,7 @@ export function Home() {
   const recent = progress[0] && games.find((g) => g.id === progress[0].gameId)
 
   return (
-    <main>
+    <main id="main">
       <section className="hero">
         <div className="hero-copy">
           <p className="trust">No tracking, no account, works offline once loaded, progress stays on your device.</p>

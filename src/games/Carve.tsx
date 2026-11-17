@@ -122,6 +122,7 @@ export function Carve({ onFinish, seed }: GameProps) {
           return (
             <div
               key={c}
+              role="img"
               data-cell={c}
               data-piece={o === undefined ? undefined : o}
               className={`cv-cell ${o !== undefined ? 'in' : ''} ${wrong.has(c) ? 'bad' : ''} ${preview.has(c) ? 'pre' : ''}`}

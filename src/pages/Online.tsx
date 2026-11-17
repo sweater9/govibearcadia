@@ -26,7 +26,7 @@ export function Online() {
   }
 
   return (
-    <main className="online">
+    <main id="main" className="online">
       <p className="eyebrow">Play with a friend</p>
       <h1>
         <Users size={30} /> Online rooms

@@ -165,7 +165,7 @@ export function Scopa({ onFinish, seed }: GameProps) {
           <Summary h={game.summary!} />
         ) : (
           <>
-            <div className="sc-row" aria-label="Computer's cards">{game.hands[1].map((c) => <Back key={c} />)}</div>
+            <div className="sc-row" role="group" aria-label="Computer's cards">{game.hands[1].map((c) => <Back key={c} />)}</div>
             <div className="sc-row sc-table" aria-label="Cards on the table">{game.table.map((c) => <Card key={c} id={c} hl={preview.includes(c)} />)}</div>
             <p className="sc-note" role="status">{game.note}</p>
             {sel !== null ? (
@@ -177,7 +177,7 @@ export function Scopa({ onFinish, seed }: GameProps) {
                 ))}
               </div>
             ) : null}
-            <div className="sc-row" aria-label="Your cards">
+            <div className="sc-row" role="group" aria-label="Your cards">
               {mine.map((c, i) => <Card key={c} id={c} hotkey={i + 1} pressed={sel === null ? undefined : sel === c} disabled={!myTurn} onClick={() => pick(c)} />)}
             </div>
           </>

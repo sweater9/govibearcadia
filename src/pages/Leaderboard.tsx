@@ -40,7 +40,7 @@ export function Leaderboard() {
   const myName = mine ? nickName(mine) : null
 
   return (
-    <main className="lb">
+    <main id="main" className="lb">
       <p className="eyebrow">Online wins</p>
       <h1>
         <Trophy size={30} /> Leaderboards

@@ -65,7 +65,7 @@ function PlainStop({ state, index, name }: { state: State; index: number; name: 
   return <section className="wt-card" aria-label="Selected stop" style={{ '--group': space.kind === 'city' ? GROUP_COLOURS[space.group] : '#b8780f' } as React.CSSProperties}>
     {space.kind === 'city' ? <LandmarkArt kind={space.landmark} city={space.name} /> : <div className="wt-art wt-art-tile" aria-hidden="true">{code(space)}</div>}
     <div>
-      <h3>{space.name}</h3>
+      <h2>{space.name}</h2>
       <p>Space {index + 1} of {BOARD.length}{space.kind === 'city' ? ` · ${space.country}` : ''}</p>
       {isClaimable(space) ? <p>{holding ? `Owned by ${name(holding.owner)}${holding.mortgaged ? ' (mortgaged)' : ''}` : `For sale ${money(space.price)}`} · visitor fee {money(feeAt(state, index))}{holding?.centre ? ' (visitor centre)' : ''}</p> : null}
       {space.kind === 'fee' ? <p>Flat fee {money(space.amount)}</p> : null}

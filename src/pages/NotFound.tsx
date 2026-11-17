@@ -13,7 +13,7 @@ export function NotFound() {
     return () => meta.remove()
   }, [])
   return (
-    <main className="info-page">
+    <main id="main" className="info-page">
       <p className="eyebrow">Error 404</p>
       <h1>That page is not in the arcade</h1>
       <p>The address may be mistyped, or the game may have moved. Your scores and progress are safe on this device.</p>

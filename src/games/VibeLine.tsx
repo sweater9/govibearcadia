@@ -139,6 +139,7 @@ export function VibeLine({ onFinish, seed }: GameProps) {
         {Array.from({ length: n * n }, (_, c) => (
           <div
             key={c}
+            role="img"
             data-cell={c}
             data-on={order.has(c) ? '' : undefined}
             data-head={c === head ? '' : undefined}
