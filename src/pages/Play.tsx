@@ -153,7 +153,7 @@ export function Play() {
       <section className="game-shell" ref={shellRef}>
         <GameBoundary key={meta.id}>
           <Suspense fallback={<p className="game-help">Loading {meta.title}…</p>}>
-            <Game key={`${seed ?? ''}:${level}:${run}`} onFinish={finish} seed={seed} level={leveled ? level : undefined} />
+            <Game key={`${seed ?? ''}:${level}:${run}`} onFinish={finish} seed={seed} level={leveled ? level : undefined} computer={computer ?? undefined} />
           </Suspense>
         </GameBoundary>
       </section>

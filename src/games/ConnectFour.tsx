@@ -2,12 +2,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { RotateCcw } from 'lucide-react'
 import { createRandom } from '../lib/rng'
 import type { GameProps } from '../types'
+import { byStrength } from '../lib/computerPlayers'
 import { COLS, ROWS, aiMove, dropRow, drop, isOver, newGame, scoreFor, type C4State } from './connect4/rules'
 
 /** Pause before the computer answers, so the player can follow the game. */
 const THINK_MS = 450
 
-export function ConnectFour({ onFinish, seed }: GameProps) {
+export function ConnectFour({ onFinish, seed, computer }: GameProps) {
   const random = useMemo(() => createRandom(seed), [seed])
   const [game, setGame] = useState<C4State>(() => newGame())
   const startedAt = useRef(0)
@@ -42,9 +43,9 @@ export function ConnectFour({ onFinish, seed }: GameProps) {
   // The computer's turn: one timer per position. `aiMove` draws from the seeded stream here, outside any updater.
   useEffect(() => {
     if (!thinking) return
-    const timer = setTimeout(() => commit(drop(game, aiMove(game, random))), THINK_MS)
+    const timer = setTimeout(() => commit(drop(game, aiMove(game, random, byStrength(computer, [1, 2, 3, 4, 5], 4)))), THINK_MS)
     return () => clearTimeout(timer)
-  }, [thinking, game, random, commit])
+  }, [thinking, game, random, commit, computer])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

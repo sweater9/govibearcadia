@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { RotateCcw } from 'lucide-react'
 import { createRandom } from '../lib/rng'
 import type { GameProps } from '../types'
+import { byStrength } from '../lib/computerPlayers'
 import { MorrisBoard } from './morris/Board'
 import { aiPly, apply, interact, isOver, menLeft, millPoints, newGame, phase, removable, scoreFor, slideTargets, type Level, type MState, type Ply } from './morris/rules'
 import './morris/morris.css'
@@ -11,8 +12,8 @@ const THINK_MS = 550
 type Mode = Level | 'two'
 const MODES: [Mode, string][] = [['easy', 'Easy'], ['normal', 'Normal'], ['hard', 'Hard'], ['two', 'Two players']]
 
-export function NineMensMorris({ onFinish, seed }: GameProps) {
-  const [mode, setMode] = useState<Mode>('normal')
+export function NineMensMorris({ onFinish, seed, computer }: GameProps) {
+  const [mode, setMode] = useState<Mode>(() => byStrength<Mode>(computer, ['easy', 'easy', 'normal', 'normal', 'hard'], 'normal'))
   const random = useMemo(() => createRandom(seed), [seed])
   const [game, setGame] = useState<MState>(() => newGame())
   const [picked, setPicked] = useState<number | null>(null)

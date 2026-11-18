@@ -2,13 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { RotateCcw } from 'lucide-react'
 import { createRandom } from '../lib/rng'
 import type { GameProps } from '../types'
+import { byStrength } from '../lib/computerPlayers'
 import { CheckersBoard } from './checkers/Board'
 import { aiStep, interact, isOver, legalSteps, newGame, scoreFor, step, type CState } from './checkers/rules'
 
 /** Pause before the computer answers, so the player can follow each hop. */
 const THINK_MS = 500
 
-export function Checkers({ onFinish, seed }: GameProps) {
+export function Checkers({ onFinish, seed, computer }: GameProps) {
   const random = useMemo(() => createRandom(seed), [seed])
   const [game, setGame] = useState<CState>(() => newGame())
   const [picked, setPicked] = useState<number | null>(null)
@@ -48,11 +49,11 @@ export function Checkers({ onFinish, seed }: GameProps) {
   useEffect(() => {
     if (!thinking) return
     const timer = setTimeout(() => {
-      const m = aiStep(game, random)
+      const m = aiStep(game, random, byStrength(computer, [1, 2, 3, 4, 5], 4))
       if (m) commit(step(game, m.from, m.to))
     }, THINK_MS)
     return () => clearTimeout(timer)
-  }, [thinking, game, random, commit])
+  }, [thinking, game, random, commit, computer])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

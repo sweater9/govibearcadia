@@ -37,6 +37,8 @@ export type GameProps = {
   seed?: string
   /** Difficulty level for the score-chase games; 1 (the default) is the original game. */
   level?: number
+  /** Quick-match computer opponent (a name from `computerPlayers.ts`); sets how strong the computer plays. */
+  computer?: string
 }
 
 export type GameProgress = { gameId: GameId; highScore: number; plays: number; lastPlayed: string }

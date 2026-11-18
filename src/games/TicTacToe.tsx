@@ -2,13 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { RotateCcw } from 'lucide-react'
 import { createRandom } from '../lib/rng'
 import type { GameProps } from '../types'
+import { byStrength } from '../lib/computerPlayers'
 import { TicTacToeBoard } from './tictactoe/Board'
 import { aiMove, isOver, newGame, play, scoreFor, type TState } from './tictactoe/rules'
 
 /** Pause before the computer answers, so the player can follow the game. */
 const THINK_MS = 400
 
-export function TicTacToe({ onFinish, seed }: GameProps) {
+export function TicTacToe({ onFinish, seed, computer }: GameProps) {
   const random = useMemo(() => createRandom(seed), [seed])
   const [game, setGame] = useState<TState>(() => newGame())
   const startedAt = useRef(0)
@@ -42,9 +43,9 @@ export function TicTacToe({ onFinish, seed }: GameProps) {
 
   useEffect(() => {
     if (!thinking) return
-    const timer = setTimeout(() => commit(play(game, aiMove(game, random))), THINK_MS)
+    const timer = setTimeout(() => commit(play(game, aiMove(game, random, byStrength(computer, [0.5, 0.35, 0.2, 0.1, 0], 0.2)))), THINK_MS)
     return () => clearTimeout(timer)
-  }, [thinking, game, random, commit])
+  }, [thinking, game, random, commit, computer])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

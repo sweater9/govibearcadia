@@ -15,3 +15,16 @@ describe('computer players', () => {
     expect(pickComputer(() => 1)).toBe('Ananya')
   })
 })
+
+import { STRENGTH, byStrength } from './computerPlayers'
+describe('strength', () => {
+  it('orders the five from gentlest to hardest', () => expect(['Ada', 'Mei', 'Zara', 'Sophia', 'Ananya'].map((n) => STRENGTH[n as keyof typeof STRENGTH])).toEqual([0, 1, 2, 3, 4]))
+  it('uses the game default without a named computer', () => {
+    expect(byStrength(null, [1, 2, 3, 4, 5], 4)).toBe(4)
+    expect(byStrength('nobody', [1, 2, 3, 4, 5], 4)).toBe(4)
+  })
+  it('maps each name to its table entry', () => {
+    expect(byStrength('Ada', [1, 2, 3, 4, 5], 4)).toBe(1)
+    expect(byStrength('Ananya', [1, 2, 3, 4, 5], 4)).toBe(5)
+  })
+})
