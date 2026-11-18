@@ -19,6 +19,7 @@ import { LevelBar } from '../components/LevelBar'
 import { isLeveled, levelCleared, readCleared, saveCleared } from '../lib/levels'
 import { getNick } from '../lib/online'
 import { usePageMeta } from '../lib/pageMeta'
+import { computerLabel, parseComputer } from '../lib/computerPlayers'
 import { dailyChallenge, shareDaily, today } from '../lib/passport'
 import type { GameResult } from '../types'
 
@@ -30,6 +31,7 @@ export function Play() {
   // Challengeable puzzles always get a seed, so any run can be sent to a friend afterwards to be dealt the same puzzle.
   const [fallbackSeed] = useState(() => randomSeed())
   const seed = params.get('seed') ?? (entry?.meta.challenge ? fallbackSeed : undefined)
+  const computer = parseComputer(params.get('vs'))
   const incoming = entry?.meta.challenge ? parseChallenge(params) : null
   // `?daily=<day>` counts only when it is today's challenge for this game, with the challenge's seed.
   const challenge = dailyChallenge(today(), games.filter((g) => g.daily).map((g) => g.id))
@@ -123,6 +125,7 @@ export function Play() {
       <div className="play-title">
         <p className="eyebrow">{daily ? `Daily challenge · ${meta.category}` : meta.category}</p>
         <h1>{meta.title}</h1>
+        {computer && !daily && !incoming ? <p role="status">You are playing {computerLabel(computer)}. No one else was waiting.</p> : null}
         {incoming ? (
           <p className="challenge-banner" role="note">
             {incoming.from ?? 'A friend'} {incoming.won ? 'won this with' : 'scored'} {incoming.beat.toLocaleString()} on this puzzle. Can you beat it?

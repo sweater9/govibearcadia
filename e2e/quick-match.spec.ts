@@ -60,11 +60,30 @@ test('after 20 seconds the player is offered the computer, an invite, or to keep
   await a.clock.runFor(20_000)
   const offer = a.getByRole('group', { name: 'Nobody yet' })
   await expect(offer).toBeVisible()
-  await expect(offer.getByRole('link', { name: 'Play the computer instead' })).toHaveAttribute('href', '/play/tic-tac-toe')
+  await expect(offer.getByText(/\((computer)\)/).first()).toBeVisible()
+  await expect(offer.getByRole('link', { name: /\(computer\) now/ })).toHaveAttribute('href', /^\/play\/tic-tac-toe\?vs=(Ada|Zara|Mei|Sophia|Ananya)$/)
   await expect(offer.getByRole('button', { name: 'Invite a friend' })).toBeVisible()
-  await offer.getByRole('button', { name: 'Keep waiting' }).click()
+  await offer.getByRole('button', { name: 'Keep waiting for a person' }).click()
   await expect(offer).toHaveCount(0)
+  await a.clock.runFor(10_000)
+  await expect(a).toHaveURL(/\/online/) // still waiting for a person
+})
+
+test('if nobody joins, a named computer player takes the seat, labelled as a computer', async ({ browser, baseURL, isMobile }) => {
+  const a = await player(browser, baseURL!, !!isMobile)
+  await a.clock.install()
+  await a.goto('/online')
+  await a.getByLabel('Game').selectOption('checkers')
+  await find(a).click()
   await expect(a.getByText(/Looking for an opponent/)).toBeVisible()
+  await a.clock.runFor(24_000)
+  await expect(a).toHaveURL(/\/play\/checkers\?vs=(Ada|Zara|Mei|Sophia|Ananya)$/)
+  await expect(a.getByText(/You are playing \w+ \(computer\)\. No one else was waiting\./)).toBeVisible()
+})
+
+test('a crafted ?vs= value shows no banner', async ({ page }) => {
+  await page.goto('/play/checkers?vs=%3Cb%3Eevil')
+  await expect(page.getByText(/You are playing/)).toHaveCount(0)
 })
 
 test('a player nobody pairs with is told so, and can try again', async ({ browser, baseURL, isMobile }) => {
@@ -74,7 +93,7 @@ test('a player nobody pairs with is told so, and can try again', async ({ browse
   await find(a).click()
   await expect(a.getByText('No one joined in time. Nothing was lost.')).toBeVisible({ timeout: 12_000 })
   await expect(a.getByRole('button', { name: 'Try again' })).toBeVisible()
-  await expect(a.getByRole('link', { name: 'Play the computer instead' })).toHaveAttribute('href', '/play/battleship')
+  await expect(a.getByRole('link', { name: /\(computer\) now/ })).toHaveAttribute('href', /^\/play\/battleship\?vs=/)
 })
 
 test('Invite a friend from the offer opens a private room', async ({ browser, baseURL, isMobile }) => {

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { OFFER_AFTER_MS, isMatchGame } from '../lib/matchmaking'
+import { COMPUTER_GRACE_MS, computerLabel, pickComputer, type ComputerPlayer } from '../lib/computerPlayers'
 import { fetchWaiting, matchSocketUrl, ONLINE_GAME_LIST, type OnlineGameId } from '../lib/online'
 
 type Phase = 'idle' | 'searching' | 'found' | 'timeout' | 'full' | 'lost'
@@ -17,6 +18,7 @@ export function QuickMatch({ game, onInvite, autoStart = false }: { game: Online
   const [elapsed, setElapsed] = useState(0)
   const [keepWaiting, setKeepWaiting] = useState(false)
   const [waitingNow, setWaitingNow] = useState<number | null>(null)
+  const [computer] = useState<ComputerPlayer>(() => pickComputer())
   const socket = useRef<WebSocket | null>(null)
   const title = ONLINE_GAME_LIST.find((g) => g.id === game)?.title ?? game
 
@@ -84,6 +86,12 @@ export function QuickMatch({ game, onInvite, autoStart = false }: { game: Online
     return () => clearInterval(t)
   }, [phase])
 
+  // Nobody came: after the grace period the named computer player takes the seat, clearly labelled.
+  useEffect(() => {
+    if (phase !== 'searching' || keepWaiting) return
+    if (elapsed * 1000 >= OFFER_AFTER_MS + COMPUTER_GRACE_MS) navigate(`/play/${game}?vs=${computer}`)
+  }, [phase, keepWaiting, elapsed, game, computer, navigate])
+
   // The idle screen shows how many are really waiting, refreshed every 10 seconds.
   useEffect(() => {
     if (phase !== 'idle') return
@@ -126,12 +134,14 @@ export function QuickMatch({ game, onInvite, autoStart = false }: { game: Online
           </p>
           {elapsed * 1000 >= OFFER_AFTER_MS && !keepWaiting ? (
             <div className="quick-offer" role="group" aria-label="Nobody yet">
-              <p>No one has joined yet. You can:</p>
+              <p>
+                No one else is here yet, so you will play {computerLabel(computer)} in a few seconds. You can:
+              </p>
               <button className="secondary-btn" onClick={() => setKeepWaiting(true)}>
-                Keep waiting
+                Keep waiting for a person
               </button>
-              <Link className="secondary-btn" to={`/play/${game}`}>
-                Play the computer instead
+              <Link className="secondary-btn" to={`/play/${game}?vs=${computer}`}>
+                Play {computerLabel(computer)} now
               </Link>
               <button className="secondary-btn" onClick={onInvite}>
                 Invite a friend
@@ -150,8 +160,8 @@ export function QuickMatch({ game, onInvite, autoStart = false }: { game: Online
           <button className="primary-btn" onClick={find}>
             Try again
           </button>
-          <Link className="secondary-btn" to={`/play/${game}`}>
-            Play the computer instead
+          <Link className="secondary-btn" to={`/play/${game}?vs=${computer}`}>
+            Play {computerLabel(computer)} now
           </Link>
           <button className="secondary-btn" onClick={onInvite}>
             Invite a friend
