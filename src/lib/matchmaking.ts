@@ -23,14 +23,19 @@ export type JoinResult =
   | { kind: 'matched'; code: string; partner: string | null }
   | { kind: 'queue-full' }
 
+/** The two-seat online games that have a quick-match queue (World Trip needs 2 to 6 seats and a Start button, so it is not here). */
+export const MATCH_GAMES = ['connect-four', 'tic-tac-toe', 'checkers', 'nine-mens-morris', 'battleship'] as const
+export type MatchGame = (typeof MATCH_GAMES)[number]
+export const isMatchGame = (value: string): value is MatchGame => (MATCH_GAMES as readonly string[]).includes(value)
+
 export const emptyState = (): MatchState => ({ waiting: [], matched: {}, recent: [] })
 
 const pairKey = (a: string, b: string) => (a < b ? `${a}|${b}` : `${b}|${a}`)
 
 /** Drops waiting entries, remembered matches and pair records that are past their time. */
-export function expire(state: MatchState, now: number): MatchState {
+export function expire(state: MatchState, now: number, waitMs = WAIT_MS): MatchState {
   return {
-    waiting: state.waiting.filter((w) => now - w.joinedAt < WAIT_MS),
+    waiting: state.waiting.filter((w) => now - w.joinedAt < waitMs),
     matched: Object.fromEntries(Object.entries(state.matched).filter(([, m]) => now - m.at < MATCH_KEEP_MS)),
     recent: state.recent.filter((r) => now - r.at < REPAIR_MS),
   }
@@ -43,8 +48,8 @@ export function expire(state: MatchState, now: number): MatchState {
  * 3. The first waiting player who is not this player and was not paired with them in the last 10 minutes is taken.
  * 4. Otherwise the player waits, unless the queue is full.
  */
-export function join(input: MatchState, player: string, now: number, makeCode: () => string): { state: MatchState; result: JoinResult } {
-  const state = expire(input, now)
+export function join(input: MatchState, player: string, now: number, makeCode: () => string, waitMs = WAIT_MS): { state: MatchState; result: JoinResult } {
+  const state = expire(input, now, waitMs)
 
   const again = state.matched[player]
   if (again) return { state, result: { kind: 'matched', code: again.code, partner: null } }
@@ -76,9 +81,9 @@ export function leave(state: MatchState, player: string): MatchState {
 }
 
 /** The earliest moment any entry will expire, for scheduling the next alarm; null when there is nothing to expire. */
-export function nextExpiry(state: MatchState): number | null {
+export function nextExpiry(state: MatchState, waitMs = WAIT_MS): number | null {
   const times = [
-    ...state.waiting.map((w) => w.joinedAt + WAIT_MS),
+    ...state.waiting.map((w) => w.joinedAt + waitMs),
     ...Object.values(state.matched).map((m) => m.at + MATCH_KEEP_MS),
     ...state.recent.map((r) => r.at + REPAIR_MS),
   ]

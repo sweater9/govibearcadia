@@ -1,13 +1,18 @@
 import { isRoomCode, makeRoomCode } from '../src/lib/roomcode'
 import { createLimiter } from '../src/lib/ratelimit'
 import { weekKey, isRankedGame } from '../src/lib/leaderboard'
+import { MATCH_GAMES, isMatchGame } from '../src/lib/matchmaking'
 import { sha256Hex } from './hash'
 export { Room } from './room'
 export { Leaderboard } from './leaderboard'
+export { Matchmaker } from './matchmaker'
 
 interface Env {
   ROOMS: DurableObjectNamespace
   LEADERBOARD: DurableObjectNamespace<import('./leaderboard').Leaderboard>
+  MATCHMAKER: DurableObjectNamespace<import('./matchmaker').Matchmaker>
+  /** "off" turns quick match off (see wrangler.jsonc). */
+  MATCHMAKING?: string
 }
 
 // Best effort: counters live in one Worker isolate's memory, so they slow abuse down rather than stop it outright.
@@ -19,6 +24,7 @@ const who = (request: Request) => {
   return ip === '127.0.0.1' || ip === '::1' ? null : ip // local development and tests share one address
 }
 
+const matchLimit = createLimiter(10, 60_000) // quick-match joins per visitor per minute
 const viewLimit = createLimiter(60, 60_000) // leaderboard reads per visitor per minute
 const forgetLimit = createLimiter(10, 60_000)
 const TOKEN = /^[A-Za-z0-9_-]{16,64}$/
@@ -60,6 +66,25 @@ export default {
     if (url.pathname === '/api/leaderboard/status') {
       const stub = env.LEADERBOARD.get(env.LEADERBOARD.idFromName('global'))
       return json({ service: 'leaderboard', ...(await stub.status()) })
+    }
+
+    if (parts[1] === 'match') {
+      if (env.MATCHMAKING === 'off') return json({ error: 'unavailable' }, 503)
+      // GET /api/match/status: how many are waiting for each game (cached for 10 seconds).
+      if (url.pathname === '/api/match/status' && request.method === 'GET') {
+        const ip = who(request)
+        if (ip && !viewLimit.hit(ip, Date.now())) return json({ error: 'slow-down' }, 429)
+        const counts = await Promise.all(MATCH_GAMES.map(async (g) => [g, (await env.MATCHMAKER.get(env.MATCHMAKER.idFromName(g)).status()).waiting] as const))
+        return new Response(JSON.stringify({ waiting: Object.fromEntries(counts) }), { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=10' } })
+      }
+      // /api/match/<game>/ws
+      if (parts.length === 4 && parts[3] === 'ws') {
+        if (!isMatchGame(parts[2])) return json({ error: 'bad-game' }, 400)
+        const ip = who(request)
+        if (ip && !matchLimit.hit(ip, Date.now())) return json({ error: 'slow-down' }, 429)
+        return env.MATCHMAKER.get(env.MATCHMAKER.idFromName(parts[2])).fetch(request)
+      }
+      return json({ error: 'not-found' }, 404)
     }
 
     if (url.pathname === '/api/rooms' && request.method === 'POST') {

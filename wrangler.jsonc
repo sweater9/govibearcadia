@@ -8,14 +8,18 @@
     "not_found_handling": "single-page-application",
     "run_worker_first": ["/api/*"]
   },
+  // Kill switch for quick match: set to "off" and redeploy, and /api/match/* answers 503. Nothing else changes.
+  "vars": { "MATCHMAKING": "on" },
   "durable_objects": {
     "bindings": [
       { "name": "ROOMS", "class_name": "Room" },
-      { "name": "LEADERBOARD", "class_name": "Leaderboard" }
+      { "name": "LEADERBOARD", "class_name": "Leaderboard" },
+      { "name": "MATCHMAKER", "class_name": "Matchmaker" }
     ]
   },
   "migrations": [
     { "tag": "v1", "new_sqlite_classes": ["Room"] },
-    { "tag": "v2", "new_sqlite_classes": ["Leaderboard"] }
+    { "tag": "v2", "new_sqlite_classes": ["Leaderboard"] },
+    { "tag": "v3", "new_sqlite_classes": ["Matchmaker"] }
   ]
 }

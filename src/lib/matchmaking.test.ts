@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MATCH_KEEP_MS, MAX_QUEUE, REPAIR_MS, WAIT_MS, emptyState, expire, join, leave, nextExpiry, type MatchState } from './matchmaking'
+import { MATCH_GAMES, MATCH_KEEP_MS, isMatchGame, MAX_QUEUE, REPAIR_MS, WAIT_MS, emptyState, expire, join, leave, nextExpiry, type MatchState } from './matchmaking'
 
 let n = 0
 const code = () => `CODE${++n}`
@@ -103,5 +103,19 @@ describe('quick match pairing', () => {
     leave(s, hash('a'))
     expire(s, WAIT_MS * 2)
     expect(JSON.stringify(s)).toBe(frozen)
+  })
+
+  it('the wait can be shortened (used by the end-to-end server only)', () => {
+    const s = join(emptyState(), hash('a'), 0, code, 4000).state
+    expect(expire(s, 3999, 4000).waiting).toHaveLength(1)
+    expect(expire(s, 4000, 4000).waiting).toHaveLength(0)
+    expect(nextExpiry(s, 4000)).toBe(4000)
+  })
+
+  it('only the five two-seat online games are queueable', () => {
+    expect([...MATCH_GAMES]).toEqual(['connect-four', 'tic-tac-toe', 'checkers', 'nine-mens-morris', 'battleship'])
+    expect(isMatchGame('checkers')).toBe(true)
+    expect(isMatchGame('world-trip')).toBe(false)
+    expect(isMatchGame('chess')).toBe(false)
   })
 })
