@@ -16,6 +16,7 @@ import type { TState } from '../games/tictactoe/rules'
 import { netWorth, type State as WorldTripState } from '../games/worldtrip/rules'
 import type { WorldTripMessage } from '../games/WorldTripRoom'
 import { recordPlay } from '../lib/db'
+import { ARRIVE_WAIT_MS } from '../lib/matchmaking'
 import { ONLINE_GAME_LIST, gameFromParam, getNick, roomSocketUrl, type OnlineGameId } from '../lib/online'
 import { isRoomCode } from '../lib/roomcode'
 
@@ -139,6 +140,15 @@ export function RoomPage() {
   const you = state?.you
   const opp = you === undefined ? undefined : ((1 - you) as 0 | 1)
   const oppHere = state && opp !== undefined ? state.connected[opp] : false
+  // A quick-match room whose opponent has not arrived after 15 seconds offers to look for someone else.
+  const quick = params.get('q') === '1'
+  const [noShow, setNoShow] = useState(false)
+  useEffect(() => {
+    setNoShow(false)
+    if (!quick || !state || oppHere) return
+    const t = setTimeout(() => setNoShow(true), ARRIVE_WAIT_MS)
+    return () => clearTimeout(t)
+  }, [quick, !!state, oppHere]) // eslint-disable-line react-hooks/exhaustive-deps
   const [away, setAway] = useState(false)
   useEffect(() => {
     setAway(false)
@@ -296,6 +306,11 @@ export function RoomPage() {
             <p className="game-help" role="status">
               {notice || (state ? `You are ${COLOURS[game][state.yourColour - 1]}.${oppHere ? '' : away ? ' Your friend has been gone a while. You can keep waiting, share the link again, or leave the room.' : ' Share the code or link so your friend can join.'}` : '')}
             </p>
+            {quick && noShow && !oppHere && !over ? (
+              <p>
+                Your opponent has not arrived yet. <Link className="secondary-btn" to={`/online?g=${game}&find=1`}>Find another opponent</Link>
+              </p>
+            ) : null}
             {over ? (
               <div className="game-over">
                 <h3>{headline}</h3>

@@ -9,6 +9,10 @@ export const WAIT_MS = 2 * 60_000
 export const MATCH_KEEP_MS = 60_000
 /** The same two players are not paired again within this time. */
 export const REPAIR_MS = 10 * 60_000
+/** After this long without an opponent the lobby offers other choices (keep waiting, play the computer, invite a friend). */
+export const OFFER_AFTER_MS = 20_000
+/** A matched room that still has no opponent after this long offers "Find another opponent". */
+export const ARRIVE_WAIT_MS = 15_000
 /** Most players that may wait for one game at once. */
 export const MAX_QUEUE = 200
 

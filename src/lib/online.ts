@@ -28,6 +28,21 @@ export function playerToken(): string {
 export const roomSocketUrl = (code: string, game: string, origin: string = location.origin): string =>
   `${origin.replace(/^http/, 'ws')}/api/rooms/${code}/ws?g=${encodeURIComponent(game)}&t=${playerToken()}`
 
+export const matchSocketUrl = (game: string, origin: string = location.origin): string =>
+  `${origin.replace(/^http/, 'ws')}/api/match/${encodeURIComponent(game)}/ws?t=${playerToken()}`
+
+/** How many players are waiting for each quick-match game, or null when it cannot be reached. */
+export async function fetchWaiting(): Promise<Record<string, number> | null> {
+  try {
+    const r = await fetch('/api/match/status')
+    if (!r.ok) return null
+    const body = (await r.json()) as { waiting?: Record<string, number> }
+    return body.waiting && typeof body.waiting === 'object' ? body.waiting : null
+  } catch {
+    return null
+  }
+}
+
 export async function createRoom(): Promise<string | null> {
   try {
     const r = await fetch('/api/rooms', { method: 'POST' })

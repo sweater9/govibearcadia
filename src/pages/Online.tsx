@@ -1,7 +1,9 @@
 import { Users } from 'lucide-react'
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { ONLINE_GAME_LIST, createRoom, type OnlineGameId } from '../lib/online'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { QuickMatch } from '../components/QuickMatch'
+import { ONLINE_GAME_LIST, createRoom, gameFromParam, type OnlineGameId } from '../lib/online'
+import { isMatchGame } from '../lib/matchmaking'
 import { isRoomCode, normaliseRoomCode } from '../lib/roomcode'
 
 export function Online() {
@@ -9,7 +11,9 @@ export function Online() {
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
-  const [game, setGame] = useState<OnlineGameId>('connect-four')
+  const [params] = useSearchParams()
+  const [game, setGame] = useState<OnlineGameId>(() => gameFromParam(params.get('g')))
+  const autoFind = params.get('find') === '1'
 
   const create = async () => {
     setBusy(true)
@@ -42,6 +46,11 @@ export function Online() {
           ))}
         </select>
       </label>
+      {isMatchGame(game) ? (
+        <QuickMatch key={`${game}`} game={game} onInvite={() => void create()} autoStart={autoFind} />
+      ) : (
+        <p className="text-white/55">Quick match is for the two-player games. {game === 'world-trip' ? 'World Trip takes two to six players, so start it with a private room.' : ''}</p>
+      )}
       <div className="online-actions">
         <button className="primary-btn" onClick={() => void create()} disabled={busy}>
           Create a room
