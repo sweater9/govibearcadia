@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { OFFER_AFTER_MS, isMatchGame } from '../lib/matchmaking'
 import { COMPUTER_GRACE_MS, computerLabel, pickComputer, type ComputerPlayer } from '../lib/computerPlayers'
-import { fetchWaiting, matchSocketUrl, ONLINE_GAME_LIST, type OnlineGameId } from '../lib/online'
+import { matchSocketUrl, ONLINE_GAME_LIST, type OnlineGameId } from '../lib/online'
 
 type Phase = 'idle' | 'searching' | 'found' | 'timeout' | 'full' | 'lost'
 
@@ -17,7 +17,6 @@ export function QuickMatch({ game, onInvite, autoStart = false }: { game: Online
   const [count, setCount] = useState(0)
   const [elapsed, setElapsed] = useState(0)
   const [keepWaiting, setKeepWaiting] = useState(false)
-  const [waitingNow, setWaitingNow] = useState<number | null>(null)
   const [computer] = useState<ComputerPlayer>(() => pickComputer())
   const socket = useRef<WebSocket | null>(null)
   const title = ONLINE_GAME_LIST.find((g) => g.id === game)?.title ?? game
@@ -92,19 +91,6 @@ export function QuickMatch({ game, onInvite, autoStart = false }: { game: Online
     if (elapsed * 1000 >= OFFER_AFTER_MS + COMPUTER_GRACE_MS) navigate(`/play/${game}?vs=${computer}`)
   }, [phase, keepWaiting, elapsed, game, computer, navigate])
 
-  // The idle screen shows how many are really waiting, refreshed every 10 seconds.
-  useEffect(() => {
-    if (phase !== 'idle') return
-    let live = true
-    const load = () => void fetchWaiting().then((w) => live && setWaitingNow(w ? (w[game] ?? 0) : null))
-    load()
-    const t = setInterval(load, 10_000)
-    return () => {
-      live = false
-      clearInterval(t)
-    }
-  }, [phase, game])
-
   const cancel = () => {
     stop()
     setPhase('idle')
@@ -118,9 +104,6 @@ export function QuickMatch({ game, onInvite, autoStart = false }: { game: Online
         <button className="primary-btn" onClick={find}>
           Find a match
         </button>
-        <p className="quick-count" role="status">
-          {waitingNow === null ? '' : waitingNow > 0 ? `${waitingNow} waiting for ${title} right now.` : `No one is waiting for ${title} right now.`}
-        </p>
       </section>
     )
 
