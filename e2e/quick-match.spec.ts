@@ -16,7 +16,6 @@ test('two players press Find a match, are paired into the same room, and play a 
   const b = await player(browser, baseURL!, !!isMobile)
   await a.goto('/online')
   await b.goto('/online')
-  await expect(a.getByText('No one is waiting for Connect Four right now.')).toBeVisible()
 
   await find(a).click()
   await expect(a.getByText(/Looking for an opponent in Connect Four/)).toBeVisible()
@@ -47,7 +46,6 @@ test('Cancel takes a waiting player out of the queue', async ({ browser, baseURL
   await expect(a.getByText(/Looking for an opponent in Checkers/)).toBeVisible()
   await a.getByRole('button', { name: 'Cancel' }).click()
   await expect(find(a)).toBeVisible()
-  await expect(a.getByText('No one is waiting for Checkers right now.')).toBeVisible()
 })
 
 test('after 20 seconds the player is offered the computer, an invite, or to keep waiting; it never claims the computer is a person', async ({ browser, baseURL, isMobile }) => {

@@ -17,7 +17,7 @@ export function QuickMatch({ game, onInvite, autoStart = false }: { game: Online
   const [count, setCount] = useState(0)
   const [elapsed, setElapsed] = useState(0)
   const [keepWaiting, setKeepWaiting] = useState(false)
-  const [waitingNow, setWaitingNow] = useState<number | null>(null)
+  const [, setWaitingNow] = useState<number | null>(null)
   const [computer] = useState<ComputerPlayer>(() => pickComputer())
   const socket = useRef<WebSocket | null>(null)
   const title = ONLINE_GAME_LIST.find((g) => g.id === game)?.title ?? game
@@ -92,7 +92,7 @@ export function QuickMatch({ game, onInvite, autoStart = false }: { game: Online
     if (elapsed * 1000 >= OFFER_AFTER_MS + COMPUTER_GRACE_MS) navigate(`/play/${game}?vs=${computer}`)
   }, [phase, keepWaiting, elapsed, game, computer, navigate])
 
-  // The idle screen shows how many are really waiting, refreshed every 10 seconds.
+  // Keeps the real waiting count fresh in the background (not shown on screen at the moment).
   useEffect(() => {
     if (phase !== 'idle') return
     let live = true
@@ -118,9 +118,6 @@ export function QuickMatch({ game, onInvite, autoStart = false }: { game: Online
         <button className="primary-btn" onClick={find}>
           Find a match
         </button>
-        <p className="quick-count" role="status">
-          {waitingNow === null ? '' : waitingNow > 0 ? `${waitingNow} waiting for ${title} right now.` : `No one is waiting for ${title} right now.`}
-        </p>
       </section>
     )
 
