@@ -592,6 +592,18 @@ export const registry: GameEntry[] = [
   },
   {
     meta: {
+      id: 'hangman',
+      title: 'Hangman',
+      description: 'Guess the word one letter at a time before the gallows is built. Ten categories, hints and a daily word.',
+      category: 'Word',
+      accent: 'from-amber-400 to-rose-500',
+      glyph: 'H',
+      estimated: '2–5 min',
+    },
+    Component: lazy(() => import('./Hangman').then((m) => ({ default: m.Hangman }))),
+  },
+  {
+    meta: {
       id: 'crazy-eights',
       title: 'Crazy Eights',
       description: 'Match the suit or rank, play an eight to change suit, and empty your hand first. Two to four players.',

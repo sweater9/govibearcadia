@@ -1,0 +1,61 @@
+import { expect, test } from '@playwright/test'
+import { expectRows, readTable } from './helpers'
+
+test('plays a word with the real keyboard, saves it once, and the next word starts fresh', async ({ page }) => {
+  await page.goto('/play/hangman?seed=e2e-hm')
+  await expect(page.locator('.hm-kb')).toBeVisible()
+  await expect(page.getByRole('button', { name: /^Letter / })).toHaveCount(26)
+  for (const l of 'etaoinshrdlucmfwypvbgkjqxz') await page.keyboard.press(l)
+  await expect(page.getByRole('button', { name: 'New word' })).toBeVisible()
+  await expectRows(page, 'history', 1)
+  const [row] = await readTable(page, 'history')
+  expect(row).toMatchObject({ gameId: 'hangman' })
+  await page.getByRole('button', { name: 'New word' }).click()
+  await expect(page.locator('.hm-word span:not([data-blank])')).toHaveCount(0)
+  await page.waitForTimeout(500)
+  await expectRows(page, 'history', 1)
+})
+
+test('tapping letters and the hint buttons work, and a wrong guess builds the gallows', async ({ page }) => {
+  await page.goto('/play/hangman?seed=e2e-hm-tap')
+  const before = await page.locator('.hm-gallows path, .hm-gallows circle').count()
+  expect(before).toBe(0)
+  // Tap letters until one is wrong (a q or z is very unlikely to be in the word).
+  for (const l of ['Q', 'Z', 'X', 'J']) await page.getByRole('button', { name: new RegExp(`^Letter ${l}\\b`) }).click()
+  await expect.poll(() => page.locator('.hm-gallows path, .hm-gallows circle').count()).toBeGreaterThan(0)
+  await page.getByRole('button', { name: /^Hint,/ }).click()
+  await expect(page.locator('.hm-clue')).toContainText('Clue:')
+  await expect(page.locator('.hm-kb button:disabled').first()).toBeVisible()
+})
+
+test('two players on one device: the word is hidden, the second player guesses it', async ({ page }) => {
+  await page.goto('/play/hangman?seed=e2e-hm-two')
+  await page.getByRole('button', { name: /New game/ }).click()
+  await page.getByLabel('Mode').selectOption('two')
+  await page.getByRole('button', { name: 'Start' }).click()
+  await expect(page.getByLabel('Secret word')).toHaveAttribute('type', 'password')
+  await page.getByLabel('Secret word').fill('kite')
+  await page.getByRole('button', { name: 'Hide and pass the device' }).click()
+  for (const l of 'kite') await page.keyboard.press(l)
+  await expect(page.getByText(/Player 2 got it!/)).toBeVisible()
+})
+
+test('the daily word is the same on a given day, and a finished daily is remembered after a reload', async ({ page }) => {
+  await page.goto('/play/hangman')
+  await page.getByRole('button', { name: /New game/ }).click()
+  await page.getByLabel('Mode').selectOption('daily')
+  await page.getByRole('button', { name: 'Start' }).click()
+  const length = await page.locator('.hm-word span').count()
+  await page.reload()
+  await page.getByRole('button', { name: /New game/ }).click()
+  await page.getByLabel('Mode').selectOption('daily')
+  await page.getByRole('button', { name: 'Start' }).click()
+  expect(await page.locator('.hm-word span').count()).toBe(length)
+  for (const l of 'etaoinshrdlucmfwypvbgkjqxz') await page.keyboard.press(l)
+  await expect(page.getByRole('button', { name: 'New word' })).toBeVisible()
+  await page.reload()
+  await page.getByRole('button', { name: /New game/ }).click()
+  await page.getByLabel('Mode').selectOption('daily')
+  await page.getByRole('button', { name: 'Start' }).click()
+  await expect(page.getByText(/already played today's word/)).toBeVisible()
+})
