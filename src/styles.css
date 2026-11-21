@@ -930,3 +930,5 @@ main:focus{outline:none}
 .quick-match .quick-count{margin:10px 0 0;font-size:.9rem}
 .quick-match button,.quick-match .secondary-btn{margin:4px 8px 4px 0;text-decoration:none;display:inline-flex}
 .quick-offer{margin:8px 0}
+/* Controller use: a clear focus ring for the whole page while a gamepad is driving it (a mouse, finger or key resets it). */
+html[data-input="pad"] :focus{outline:3px solid var(--primary);outline-offset:3px}
