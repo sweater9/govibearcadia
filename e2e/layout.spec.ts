@@ -55,6 +55,7 @@ const PLAY_AREA = {
   scopa: '.sc-felt',
   'crazy-eights': '.ce-felt',
   hangman: '.hm-kb',
+  'dots-and-boxes': '.db-board',
   'slap-pile': '.sp-felt',
   poker: '.pk-table',
 } as const

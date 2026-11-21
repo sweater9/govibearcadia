@@ -276,7 +276,20 @@ const hangman: Cover = (u, f) => <g>
   <text x="116" y="30" textAnchor="middle" fontSize="10" {...font} fill="#c9505f">X  Q  Z</text>
 </g>
 
+/** Dots and Boxes: a grid of dots with two players' lines and a few captured boxes. */
+const dotsAndBoxes: Cover = (u, f) => <g>
+  <rect width="160" height="90" fill="#14213a" />
+  <Shadow u={u} cx={80} cy={80} rx={46} ry={3} o={0.4} />
+  {[0, 1, 2].flatMap((r) => [0, 1, 2, 3].map((c) => <rect key={r + '-' + c} x={40 + c * 26 + 2} y={12 + r * 22 + 2} width="22" height="18" fill={(r + c) % 3 === 0 ? '#4cc9f0' : (r + c) % 3 === 1 ? f('gold') : 'transparent'} opacity="0.28" />))}
+  <g strokeWidth="3.4" strokeLinecap="round">
+    <path d="M40 12h52M40 34h26M66 56h52M40 12v44M92 12v22M118 34v22" stroke="#4cc9f0" />
+    <path d="M92 34h26M66 34v22M92 56v-22M118 12v22" stroke={f('gold')} />
+  </g>
+  {[0, 1, 2, 3].flatMap((c) => [0, 1, 2, 3].map((r) => <circle key={r + '-' + c} cx={40 + c * 26} cy={12 + r * 22} r="3" fill="#e8edf7" />))}
+</g>
+
 export const PUZZLE_COVERS: Record<string, Cover> = {
+  'dots-and-boxes': dotsAndBoxes,
   hangman,
   nonogram,
   'neon-merge': neonMerge, 'memory-grid': memoryGrid, minesweeper, 'color-sort': colorSort, 'daily-word': dailyWord,
