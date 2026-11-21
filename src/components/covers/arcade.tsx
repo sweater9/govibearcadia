@@ -219,6 +219,19 @@ const asteroidAssault: Cover = (u, f) => <g>
   <circle cx="99" cy="30" r="1.6" fill={f('gold')} />
 </g>
 
+/** Maze Runner: a maze with the runner, coins, a locked door and the green exit. */
+const mazeRunner: Cover = (u, f) => <g>
+  <rect width="160" height="90" fill="#0b1019" />
+  <rect x="20" y="10" width="120" height="70" fill="#162131" />
+  <path d="M20 10h120v70H20zM20 36h64M84 36v-26M84 36v26M112 80V28M112 28h28M46 62h38" fill="none" stroke="#6fd3ff" strokeWidth="2.6" strokeLinecap="round" />
+  <rect x="116" y="60" width="18" height="16" fill="#2fbf71" />
+  <rect x="86" y="42" width="12" height="12" fill="#a8642b" />
+  <circle cx="34" cy="23" r="6" fill="#4cc9f0" />
+  {[[56, 22], [70, 22], [98, 22], [60, 50]].map(([x, y]) => <circle key={x + '-' + y} cx={x} cy={y} r="3.2" fill={f('gold')} />)}
+  <rect x="64" y="64" width="9" height="9" fill="#c25cff" />
+  <Shadow u={u} cx={80} cy={84} rx={46} ry={3} o={0.4} />
+</g>
+
 /** Marble Maze: a maze with a marble, a hole and the green goal. */
 const marbleMaze: Cover = (u, f) => <g>
   <rect width="160" height="90" fill="#0e1420" />
@@ -276,4 +289,4 @@ export const ARCADE_COVERS: Record<string, Cover> = {
   'lane-hopper': laneHopper,
   'mole-mash': moleMash,
   'traffic-dodger': trafficDodger,
-  'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'gravity-flip': gravityFlip, 'asteroid-assault': asteroidAssault, pinball, 'rhythm-master': rhythmMaster, 'marble-maze': marbleMaze, 'pixel-run': pixelRun, 'tower-defense': towerDefense }
+  'pulse-tap': pulseTap, 'neon-snake': neonSnake, 'brick-breaker': brickBreaker, 'neon-pong': neonPong, 'space-defender': spaceDefender, 'gravity-flip': gravityFlip, 'asteroid-assault': asteroidAssault, pinball, 'rhythm-master': rhythmMaster, 'marble-maze': marbleMaze, 'maze-runner': mazeRunner, 'pixel-run': pixelRun, 'tower-defense': towerDefense }

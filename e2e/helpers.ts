@@ -48,6 +48,7 @@ export const GAMES = [
   { id: 'quoridor', title: 'Wall Race', category: 'Strategy', chunk: 'Quoridor' },
   { id: 'durak', title: 'Durak', category: 'Cards', chunk: 'Durak' },
   { id: 'scopa', title: 'Scopa', category: 'Cards', chunk: 'Scopa' },
+  { id: 'maze-runner', title: 'Maze Runner', category: 'Arcade', chunk: 'MazeRunner' },
   { id: 'dots-and-boxes', title: 'Dots and Boxes', category: 'Strategy', chunk: 'DotsAndBoxes' },
   { id: 'hangman', title: 'Hangman', category: 'Word', chunk: 'Hangman' },
   { id: 'crazy-eights', title: 'Crazy Eights', category: 'Cards', chunk: 'CrazyEights' },

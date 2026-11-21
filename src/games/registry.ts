@@ -604,6 +604,18 @@ export const registry: GameEntry[] = [
   },
   {
     meta: {
+      id: 'maze-runner',
+      title: 'Maze Runner',
+      description: 'Fifty campaign mazes that add keys, spikes, enemies, fog and a countdown, plus an endless mode that never repeats.',
+      category: 'Arcade',
+      accent: 'from-cyan-400 to-emerald-400',
+      glyph: '⌂',
+      estimated: '3–10 min',
+    },
+    Component: lazy(() => import('./MazeRunner').then((m) => ({ default: m.MazeRunner }))),
+  },
+  {
+    meta: {
       id: 'dots-and-boxes',
       title: 'Dots and Boxes',
       description: 'Join the dots, close boxes to score and move again. Boards from 3x3 to 8x8 against a computer with three levels.',
