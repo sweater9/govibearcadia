@@ -607,7 +607,7 @@ export const registry: GameEntry[] = [
       id: 'dots-and-boxes',
       title: 'Dots and Boxes',
       description: 'Join the dots, close boxes to score and move again. Boards from 3x3 to 8x8 against a computer with three levels.',
-      category: 'Board',
+      category: 'Strategy',
       accent: 'from-sky-400 to-amber-400',
       glyph: '▣',
       estimated: '5–15 min',
