@@ -54,6 +54,7 @@ const PLAY_AREA = {
   durak: '.du-felt',
   scopa: '.sc-felt',
   'crazy-eights': '.ce-felt',
+  hangman: '.hm-kb',
   'slap-pile': '.sp-felt',
   poker: '.pk-table',
 } as const

@@ -260,7 +260,24 @@ const nonogram: Cover = () => {
   </g>
 }
 
+/** Hangman: a gallows with a half-drawn figure and a word with two letters found. */
+const hangman: Cover = (u, f) => <g>
+  <rect width="160" height="90" fill="#17233a" />
+  <Shadow u={u} cx={50} cy={80} rx={34} ry={3} o={0.5} />
+  <g fill="none" stroke="#e8edf7" strokeWidth="3.2" strokeLinecap="round">
+    <path d="M24 78h46M38 78V12h34v10" />
+    <circle cx="72" cy="30" r="7" stroke={f('gold')} />
+    <path d="M72 37v16M72 42l-9 9M72 42l9 9M72 53l-7 12" />
+  </g>
+  {['A', '', '', 'E', ''].map((ch, i) => <g key={i}>
+    <rect x={88 + i * 13} y="56" width="10" height="2.6" rx="1" fill="#6fd3ff" />
+    {ch ? <text x={93 + i * 13} y="53" textAnchor="middle" fontSize="12" {...font} fill="#e8edf7">{ch}</text> : null}
+  </g>)}
+  <text x="116" y="30" textAnchor="middle" fontSize="10" {...font} fill="#c9505f">X  Q  Z</text>
+</g>
+
 export const PUZZLE_COVERS: Record<string, Cover> = {
+  hangman,
   nonogram,
   'neon-merge': neonMerge, 'memory-grid': memoryGrid, minesweeper, 'color-sort': colorSort, 'daily-word': dailyWord,
   'sudoku-master': sudoku, twofold, carve, vibeline,

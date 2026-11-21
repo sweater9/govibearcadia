@@ -1,0 +1,31 @@
+.hm{max-width:560px;margin:auto;display:grid;gap:8px}
+.hm-btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.hm-btns button{padding:8px 10px;font-size:13px;display:inline-flex;gap:5px;align-items:center}
+.hm-score{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:.85rem;font-variant-numeric:tabular-nums}
+.hm-stage{display:grid;grid-template-columns:minmax(90px,36%) 1fr;gap:12px;align-items:center}
+.hm-gallows{width:100%;max-height:clamp(96px,17vh,150px);color:#dbe3f0}
+.hm-right{display:grid;gap:6px;min-width:0}
+.hm-word{display:flex;gap:4px;flex-wrap:wrap}
+.hm-word span{min-width:clamp(22px,6.2vw,34px);height:clamp(30px,7vw,40px);display:grid;place-items:center;border-bottom:3px solid #dbe3f0;font-weight:800;font-size:clamp(18px,5vw,26px)}
+.hm-word span[data-blank]{border-bottom-color:#6fd3ff}
+.hm-word span[data-missed]{color:#ff8b94}
+.hm-wrong,.hm-clue,.hm-note,.hm-help{margin:0;font-size:.85rem}
+.hm-clue{color:#ffc247}
+.hm-note{min-height:1.2em;text-align:center}
+.hm-error{margin:0;color:#ff8b94;font-size:.85rem}
+.hm-kb{display:grid;gap:5px}
+.hm-row{display:flex;gap:4px;justify-content:center}
+.hm-row button{position:relative;flex:1 1 0;max-width:46px;min-width:0;height:clamp(38px,6.2vh,46px);padding:0;border-radius:8px;border:1px solid #384860;background:#1a2433;color:inherit;font-weight:800;font-size:1rem;cursor:pointer;touch-action:manipulation}
+.hm-row button[data-state="right"]{background:#1f6b4d;border-color:#3fae6a}
+.hm-row button[data-state="wrong"]{background:#3b2a30;border-color:#c9505f;text-decoration:line-through}
+.hm-row button:disabled{cursor:default;opacity:.8}
+.hm-row button small{position:absolute;top:1px;right:3px;font-size:.6rem}
+.hm-setup{display:grid;gap:10px;max-width:420px;margin:auto}
+.hm-setup label{display:grid;gap:4px;font-size:.9rem}
+.hm-setup select,.hm-setup input[type=text],.hm-setup input[type=password]{background:#111721;color:inherit;border:1px solid #384860;border-radius:8px;padding:8px;font:inherit}
+.hm-check{display:inline-flex!important;flex-direction:row!important;gap:6px;align-items:center}
+.hm-actions{display:flex;gap:8px;justify-content:center}
+@keyframes hm-in{from{transform:translateY(-6px);opacity:0}to{transform:none;opacity:1}}
+.hm-word span:not([data-blank]){animation:hm-in .22s ease-out}
+@media(prefers-reduced-motion:reduce){.hm-word span{animation:none!important}}
+@media(max-height:800px){.hm{gap:6px}.hm-gallows{max-height:clamp(84px,15vh,120px)}}

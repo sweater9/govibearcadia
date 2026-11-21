@@ -8,6 +8,8 @@ type Tone = [freq: number, ms: number, delay?: number]
 export const SOUNDS = {
   tap: [[520, 40]],
   move: [[330, 60]],
+  good: [[660, 70]],
+  bad: [[196, 150]],
   win: [[523, 110], [659, 110, 110], [784, 110, 220], [1047, 220, 330]],
   lose: [[330, 160], [262, 160, 150], [196, 280, 300]],
 } as const satisfies Record<string, readonly Tone[]>
