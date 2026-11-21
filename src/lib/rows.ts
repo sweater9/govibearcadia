@@ -9,7 +9,7 @@ export const SHELVES: readonly Shelf[] = [
   { id: 'friends', title: 'With friends', blurb: 'Online rooms or one shared screen', ids: ['connect-four', 'checkers', 'nine-mens-morris', 'battleship', 'dots-and-boxes', 'world-trip', 'ludo'] },
   { id: 'cards', title: 'Cards and table games', blurb: 'Play against the computer', ids: ['indian-rummy', 'cribbage', 'durak', 'scopa', 'crazy-eights', 'slap-pile', 'blackjack', 'poker', 'taiwanese-mahjong'] },
   { id: 'heritage', title: 'Timeless classics', blurb: 'Traditional games from around the world', ids: ['ghata-bara', 'aadu-puli-attam', 'pallanguzhi', 'carrom'] },
-  { id: 'arcade', title: 'Arcade rush', blurb: 'Fast reflexes, high scores', ids: ['neon-snake', 'brick-breaker', 'space-defender', 'gravity-flip'] },
+  { id: 'arcade', title: 'Arcade rush', blurb: 'Fast reflexes, high scores', ids: ['neon-snake', 'brick-breaker', 'space-defender', 'gravity-flip', 'maze-runner'] },
 ]
 
 /** A shelf's games, in shelf order, skipping any id the catalogue does not have. */

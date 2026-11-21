@@ -47,6 +47,11 @@ function Runner({ init, label, hint, dpad, seed, onEnd, onMenu, onRestart, overl
     rt.current.held = d
     rt.current.started = true
   }, [])
+  const tap = useCallback((d: Dir) => {
+    rt.current.pending = d
+    rt.current.pendingAt = performance.now()
+    rt.current.started = true
+  }, [])
   const release = useCallback((d?: Dir) => {
     if (!d || rt.current.held === d) rt.current.held = null
   }, [])
@@ -133,12 +138,12 @@ function Runner({ init, label, hint, dpad, seed, onEnd, onMenu, onRestart, overl
       }
     }
     raf = requestAnimationFrame(frame)
-    const ro = new ResizeObserver(() => sizeCanvas(canvasRef.current, boxRef.current))
-    if (boxRef.current) ro.observe(boxRef.current)
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(() => sizeCanvas(canvasRef.current, boxRef.current))
+    if (boxRef.current) ro?.observe(boxRef.current)
     sizeCanvas(canvasRef.current, boxRef.current)
     return () => {
       cancelAnimationFrame(raf)
-      ro.disconnect()
+      ro?.disconnect()
     }
   }, [random])
 
@@ -171,12 +176,12 @@ function Runner({ init, label, hint, dpad, seed, onEnd, onMenu, onRestart, overl
       <div className="mz-hud">
         <b>{label}</b>
         <span aria-label={`${hud.hearts} of ${hud.maxHearts} hearts`} className="mz-hearts">{heartsText}</span>
-        <span>Coins {hud.coins}/{hud.coinsTotal}</span>
+        {hud.coinsTotal ? <span>Coins {hud.coins}/{hud.coinsTotal}</span> : null}
         {hud.doors ? <span>Keys {hud.keys}</span> : null}
         {hud.time !== null ? <span className={hud.time <= 10 ? 'mz-low' : ''}>Time {fmt(hud.time * 1000)}</span> : <span>{fmt(hud.elapsed)}</span>}
         {active ? <span>{active}</span> : null}
         <span className="mz-btns">
-          <button type="button" onClick={togglePause} aria-label={paused ? 'Resume' : 'Pause'}>{paused ? <Play size={14} aria-hidden /> : <Pause size={14} aria-hidden />}</button>
+          <button type="button" onClick={togglePause} aria-label={paused ? 'Resume game' : 'Pause game'}>{paused ? <Play size={14} aria-hidden /> : <Pause size={14} aria-hidden />}</button>
           <button type="button" onClick={onMenu}><Settings size={14} aria-hidden /> Levels</button>
         </span>
       </div>
@@ -217,7 +222,7 @@ function Runner({ init, label, hint, dpad, seed, onEnd, onMenu, onRestart, overl
               onPointerUp={() => release(d)}
               onPointerLeave={() => release(d)}
               onPointerCancel={() => release(d)}
-              onClick={(e) => { if (e.detail === 0) press(d) }}
+              onClick={(e) => { if (e.detail === 0) tap(d) }}
             >{{ up: '▲', left: '◀', down: '▼', right: '▶' }[d]}</button>
           ))}
         </div>
