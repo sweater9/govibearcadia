@@ -592,6 +592,18 @@ export const registry: GameEntry[] = [
   },
   {
     meta: {
+      id: 'crazy-eights',
+      title: 'Crazy Eights',
+      description: 'Match the suit or rank, play an eight to change suit, and empty your hand first. Two to four players.',
+      category: 'Cards',
+      accent: 'from-emerald-400 to-sky-500',
+      glyph: '8',
+      estimated: '10–20 min',
+    },
+    Component: lazy(() => import('./CrazyEights').then((m) => ({ default: m.CrazyEights }))),
+  },
+  {
+    meta: {
       id: 'shogi',
       title: 'Shogi',
       description: 'Japanese chess: promote pieces and drop your captures back onto the board.',
