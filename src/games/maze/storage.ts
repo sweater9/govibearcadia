@@ -18,9 +18,9 @@ export const EMPTY: MazeSave = { unlocked: 1, levels: {}, coins: 0, endless: { t
 export const ACHIEVEMENTS: { id: string; title: string; how: string }[] = [
   { id: 'first-exit', title: 'First exit', how: 'Finish a campaign level.' },
   { id: 'untouched', title: 'Untouched', how: 'Finish level 4 or later without losing a heart.' },
-  { id: 'key-master', title: 'Key master', how: 'Finish a level that has two or more locked doors.' },
-  { id: 'fog-walker', title: 'Fog walker', how: 'Finish a level with fog.' },
-  { id: 'coin-hoarder', title: 'Coin hoarder', how: 'Collect 100 coins in total.' },
+  { id: 'chaser-catcher', title: 'Chaser catcher', how: 'Catch a scared chaser after a big pellet.' },
+  { id: 'hunter', title: 'Hunter', how: 'Catch three chasers in one level.' },
+  { id: 'coin-hoarder', title: 'Pellet hoarder', how: 'Eat 1000 pellets in total.' },
   { id: 'level-10', title: 'Ten down', how: 'Finish level 10.' },
   { id: 'level-25', title: 'Halfway', how: 'Finish level 25.' },
   { id: 'level-50', title: 'Maze master', how: 'Finish level 50.' },
@@ -49,7 +49,7 @@ export function readSave(): MazeSave {
       coins: num(v.coins),
       endless: { top },
       achievements: Array.isArray(v.achievements) ? v.achievements.filter((a): a is string => typeof a === 'string') : [],
-      settings: { difficulty: d === 'easy' || d === 'hard' ? d : 'normal', dpad: !!v.settings?.dpad },
+      settings: { difficulty: d === 'practice' || d === 'easy' || d === 'hard' ? d : 'normal', dpad: !!v.settings?.dpad },
     }
   } catch {
     return EMPTY
@@ -64,7 +64,7 @@ export function writeSave(s: MazeSave) {
   }
 }
 
-export type LevelResult = { n: number; stars: number; ms: number; score: number; coins: number; hits: number; doors: number; fog: boolean }
+export type LevelResult = { n: number; stars: number; ms: number; score: number; coins: number; hits: number; doors: number; fog: boolean; eaten?: number }
 
 /** Folds a finished campaign level into the save: best stars/time/score, unlocks the next level, achievements. */
 export function recordLevel(s: MazeSave, r: LevelResult): { save: MazeSave; earned: string[] } {
@@ -75,9 +75,9 @@ export function recordLevel(s: MazeSave, r: LevelResult): { save: MazeSave; earn
   const have = new Set(s.achievements)
   const now = new Set<string>(['first-exit'])
   if (r.n >= 4 && r.hits === 0) now.add('untouched')
-  if (r.doors >= 2) now.add('key-master')
-  if (r.fog) now.add('fog-walker')
-  if (next.coins >= 100) now.add('coin-hoarder')
+  if ((r.eaten ?? 0) >= 1) now.add('chaser-catcher')
+  if ((r.eaten ?? 0) >= 3) now.add('hunter')
+  if (next.coins >= 1000) now.add('coin-hoarder')
   for (const [n, id] of [[10, 'level-10'], [25, 'level-25'], [50, 'level-50']] as const) if (r.n >= n || levels[n]) now.add(id)
   if (Object.values(levels).filter((l) => l.stars === 3).length >= 10) now.add('star-collector')
   const earned = [...now].filter((id) => !have.has(id))

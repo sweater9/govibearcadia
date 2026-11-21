@@ -219,15 +219,14 @@ const asteroidAssault: Cover = (u, f) => <g>
   <circle cx="99" cy="30" r="1.6" fill={f('gold')} />
 </g>
 
-/** Maze Runner: a maze with the runner, coins, a locked door and the green exit. */
+/** Maze Runner: a maze with the runner, a trail of pellets, a big pellet and a chaser. */
 const mazeRunner: Cover = (u, f) => <g>
   <rect width="160" height="90" fill="#0b1019" />
   <rect x="20" y="10" width="120" height="70" fill="#162131" />
   <path d="M20 10h120v70H20zM20 36h64M84 36v-26M84 36v26M112 80V28M112 28h28M46 62h38" fill="none" stroke="#6fd3ff" strokeWidth="2.6" strokeLinecap="round" />
-  <rect x="116" y="60" width="18" height="16" fill="#2fbf71" />
-  <rect x="86" y="42" width="12" height="12" fill="#a8642b" />
+  <circle cx="125" cy="68" r="6" fill="#ff9ff3" />
   <circle cx="34" cy="23" r="6" fill="#4cc9f0" />
-  {[[56, 22], [70, 22], [98, 22], [60, 50]].map(([x, y]) => <circle key={x + '-' + y} cx={x} cy={y} r="3.2" fill={f('gold')} />)}
+  {[[48, 23], [58, 23], [68, 23], [98, 23], [58, 49], [70, 49], [98, 49], [98, 66], [58, 72]].map(([x, y]) => <circle key={x + '-' + y} cx={x} cy={y} r="2.4" fill={f('gold')} />)}
   <rect x="64" y="64" width="9" height="9" fill="#c25cff" />
   <Shadow u={u} cx={80} cy={84} rx={46} ry={3} o={0.4} />
 </g>

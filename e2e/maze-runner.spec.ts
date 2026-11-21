@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { campaignLevel } from '../src/games/maze/levels'
-import { DIRS, DIR_LIST, route } from '../src/games/maze/rules'
+import { DIRS, DIR_LIST, coverRoute } from '../src/games/maze/rules'
 import { expectRows, readTable } from './helpers'
 
 const KEY = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' } as const
@@ -9,7 +9,7 @@ const steps = async (page: Page) => Number(await page.locator('.mz-stage').getAt
 /** Presses one arrow key per cell along the real solution of the level and waits for each step to land. */
 async function solve(page: Page, n: number) {
   const l = campaignLevel(n)
-  const cells = route(l, l.start.y * l.w + l.start.x, l.exit.y * l.w + l.exit.x) as number[]
+  const cells = coverRoute(l)
   for (let i = 1; i < cells.length; i++) {
     const dx = (cells[i] % l.w) - (cells[i - 1] % l.w)
     const dy = Math.floor(cells[i] / l.w) - Math.floor(cells[i - 1] / l.w)
@@ -20,10 +20,12 @@ async function solve(page: Page, n: number) {
   }
 }
 
-test('finishes level 1 with the real keyboard, saves the result once and unlocks level 2', async ({ page }) => {
+test('clears level 1 (practice, no chasers) with the real keyboard, saves the result once and unlocks level 2', async ({ page }) => {
+  await page.addInitScript(() => { if (!localStorage.getItem('govibearcadia.maze')) localStorage.setItem('govibearcadia.maze', JSON.stringify({ unlocked: 1, levels: {}, coins: 0, endless: { top: [] }, achievements: [], settings: { difficulty: 'practice', dpad: false } })) })
   await page.goto('/play/maze-runner?seed=e2e-maze')
   await expect(page.locator('.mz-board')).toBeVisible()
   await solve(page, 1)
+  await expect(page.locator('.mz-stage')).toHaveAttribute('data-pellets', '0')
   await expect(page.getByRole('dialog', { name: 'Level cleared' })).toBeVisible()
   await expectRows(page, 'history', 1)
   const [row] = await readTable(page, 'history')

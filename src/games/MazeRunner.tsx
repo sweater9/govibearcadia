@@ -13,8 +13,8 @@ type Overlay = { title: string; lines: string[]; stars?: number; next?: boolean 
 
 const KEY_DIRS: Record<string, Dir> = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', w: 'up', s: 'down', a: 'left', d: 'right', W: 'up', S: 'down', A: 'left', D: 'right' }
 const POWER_GLYPH: Record<PowerKind, string> = { speed: '»', shield: 'O', reveal: '?', time: '+', freeze: '*' }
-const SOUND_FOR: Partial<Record<MEvent, SoundName>> = { coin: 'coin', key: 'key', door: 'door', hit: 'hit', power: 'power', win: 'win', lose: 'lose', locked: 'bad' }
-const MESSAGE: Partial<Record<MEvent, string>> = { coin: 'Coin', key: 'Key collected', door: 'Door unlocked', locked: 'Locked. Find a key.', hit: 'Ouch! Lost a heart', power: 'Power-up collected' }
+const SOUND_FOR: Partial<Record<MEvent, SoundName>> = { eat: 'coin', coin: 'coin', key: 'key', door: 'door', hit: 'hit', power: 'power', win: 'win', lose: 'lose', locked: 'bad' }
+const MESSAGE: Partial<Record<MEvent, string>> = { coin: 'Coin', key: 'Key collected', door: 'Door unlocked', locked: 'Locked. Find a key.', hit: 'Caught! Lost a heart', eat: 'Caught a chaser!', power: 'Big pellet: the chasers are scared!' }
 const fmt = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor(ms / 1000) % 60).padStart(2, '0')}`
 
 const newRunSeed = (seed?: string) => {
@@ -170,12 +170,14 @@ function Runner({ init, label, hint, dpad, seed, onEnd, onMenu, onRestart, overl
   }
 
   const heartsText = '♥'.repeat(Math.max(0, hud.hearts)) + '♡'.repeat(Math.max(0, hud.maxHearts - hud.hearts))
-  const active = [hud.speed && 'Speed', hud.shield && 'Shield', hud.freeze && 'Freeze'].filter(Boolean).join(', ')
+  const active = [hud.scared && 'Chasers scared', hud.speed && 'Speed', hud.shield && 'Shield', hud.freeze && 'Freeze'].filter(Boolean).join(', ')
   return (
     <div className="mz-run">
       <div className="mz-hud">
         <b>{label}</b>
         <span aria-label={`${hud.hearts} of ${hud.maxHearts} hearts`} className="mz-hearts">{heartsText}</span>
+        {hud.chase ? <span>Pellets left {hud.pel}</span> : null}
+        {hud.chase ? <span>Score {hud.points}</span> : null}
         {hud.coinsTotal ? <span>Coins {hud.coins}/{hud.coinsTotal}</span> : null}
         {hud.doors ? <span>Keys {hud.keys}</span> : null}
         {hud.time !== null ? <span className={hud.time <= 10 ? 'mz-low' : ''}>Time {fmt(hud.time * 1000)}</span> : <span>{fmt(hud.elapsed)}</span>}
@@ -185,10 +187,10 @@ function Runner({ init, label, hint, dpad, seed, onEnd, onMenu, onRestart, overl
           <button type="button" onClick={onMenu}><Settings size={14} aria-hidden /> Levels</button>
         </span>
       </div>
-      <div className="mz-stage" data-x={hud.x} data-y={hud.y} data-steps={hud.steps} data-status={hud.status} data-hearts={hud.hearts} data-coins={hud.coins} data-keys={hud.keys}>
+      <div className="mz-stage" data-x={hud.x} data-y={hud.y} data-steps={hud.steps} data-status={hud.status} data-hearts={hud.hearts} data-coins={hud.coins} data-pellets={hud.pel} data-keys={hud.keys}>
         <div className="mz-board" ref={boxRef} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}>
-          <canvas ref={canvasRef} className="mz-canvas" role="img" aria-label={`Maze, ${l.w} by ${l.h}. You are at column ${hud.x + 1}, row ${hud.y + 1}. The exit is at column ${l.exit.x + 1}, row ${l.exit.y + 1}${l.fog ? ', but fog hides most of the maze' : ''}.`} />
-          {!hud.started && hud.status === 'playing' && !overlay ? <div className="mz-ready" role="status">{hint}<br />Press an arrow key or WASD, swipe, or use the pad to start.</div> : null}
+          <canvas ref={canvasRef} className="mz-canvas" role="img" aria-label={`Maze, ${l.w} by ${l.h}. You are at column ${hud.x + 1}, row ${hud.y + 1}. ${l.pellets.length ? 'Eat every pellet to clear the maze.' : `The exit is at column ${l.exit.x + 1}, row ${l.exit.y + 1}${l.fog ? ', but fog hides most of the maze' : ''}.`}`} />
+          {!hud.started && hud.status === 'playing' && !overlay ? <div className="mz-ready" role="status">{hint}<br />Eat every pellet. Press an arrow key or WASD, swipe, or use the pad to start.</div> : null}
           {paused ? (
             <div className="mz-overlay" role="dialog" aria-label="Paused">
               <h3>Paused</h3>
@@ -233,7 +235,7 @@ function Runner({ init, label, hint, dpad, seed, onEnd, onMenu, onRestart, overl
 
 function snapshot(s: MState, paused: boolean, started: boolean) {
   return {
-    hearts: s.hearts, maxHearts: s.maxHearts, coins: s.coinsGot, coinsTotal: s.coinsGot + s.coinsLeft.length, keys: s.keys, doors: s.level.doors.length > 0,
+    hearts: s.hearts, maxHearts: s.maxHearts, coins: s.coinsGot, coinsTotal: s.coinsGot + s.coinsLeft.length, pel: s.pelletsLeft.length + s.bigLeft.length, chase: s.level.pellets.length > 0, points: s.points, scared: s.effects.scared > 0, keys: s.keys, doors: s.level.doors.length > 0,
     time: s.timeLeft === null ? null : Math.ceil(s.timeLeft / 1000), elapsed: Math.floor(s.elapsed / 1000) * 1000,
     speed: s.effects.speed > 0, shield: s.effects.shield > 0, freeze: s.effects.freeze > 0, x: s.p.x, y: s.p.y, steps: s.steps, status: s.status, paused, started,
   }
@@ -265,7 +267,20 @@ function draw(c: HTMLCanvasElement | null, s: MState, anim: null | { from: { x: 
   }
   const cx = (x: number) => (x + 0.5) * cell
   // exit
-  if (seen(s.level.exit.x, s.level.exit.y)) {
+  const chase = s.level.pellets.length > 0
+  for (const p of s.pelletsLeft) {
+    ctx.fillStyle = '#ffe9b0'
+    ctx.beginPath()
+    ctx.arc(cx(p.x), cx(p.y), cell * 0.09, 0, 7)
+    ctx.fill()
+  }
+  for (const p of s.bigLeft) {
+    ctx.fillStyle = '#ff9ff3'
+    ctx.beginPath()
+    ctx.arc(cx(p.x), cx(p.y), cell * 0.26 * (1 + 0.12 * Math.sin(now / 160)), 0, 7)
+    ctx.fill()
+  }
+  if (!chase && seen(s.level.exit.x, s.level.exit.y)) {
     const e = s.level.exit
     ctx.fillStyle = '#2fbf71'
     ctx.fillRect(e.x * cell + cell * 0.12, e.y * cell + cell * 0.12, cell * 0.76, cell * 0.76)
@@ -344,7 +359,7 @@ function draw(c: HTMLCanvasElement | null, s: MState, anim: null | { from: { x: 
   ctx.stroke()
   // enemies
   for (const e of s.enemies) if (seen(e.x, e.y)) {
-    ctx.fillStyle = s.effects.freeze > 0 ? '#9fd8f2' : '#c25cff'
+    ctx.fillStyle = s.effects.scared > 0 ? (s.effects.scared < 2000 && Math.floor(now / 150) % 2 === 0 ? '#ffffff' : '#3a5bff') : s.effects.freeze > 0 ? '#9fd8f2' : '#c25cff'
     ctx.fillRect(e.x * cell + cell * 0.18, e.y * cell + cell * 0.18, cell * 0.64, cell * 0.64)
     ctx.fillStyle = '#0b1019'
     ctx.fillRect(cx(e.x) - cell * 0.2, cx(e.y) - cell * 0.12, cell * 0.12, cell * 0.14)
@@ -424,19 +439,19 @@ export function MazeRunner({ onFinish, seed }: GameProps) {
         const won = s.status === 'won'
         let lines: string[]
         if (won) {
-          const { save: next, earned } = recordLevel(cur, { n: mode.n, stars: st, ms: s.elapsed, score: sc, coins: s.coinsGot, hits: s.hitsTaken, doors: s.level.doors.length, fog: s.level.fog > 0 })
+          const { save: next, earned } = recordLevel(cur, { n: mode.n, stars: st, ms: s.elapsed, score: sc, coins: s.coinsGot + s.pelletsGot, hits: s.hitsTaken, doors: s.level.doors.length, fog: s.level.fog > 0, eaten: s.eaten })
           commit(next)
-          lines = [`Time ${fmt(s.elapsed)} (par ${fmt(parMs(s.level))}). Coins ${s.coinsGot}/${s.level.coins.length}. Score ${sc}.`, ...earned.map((id) => `Achievement: ${ACHIEVEMENTS.find((a) => a.id === id)?.title}`)]
+          lines = [`Time ${fmt(s.elapsed)} (par ${fmt(parMs(s.level))}). Chasers caught ${s.eaten}. Score ${sc}.`, ...earned.map((id) => `Achievement: ${ACHIEVEMENTS.find((a) => a.id === id)?.title}`)]
           setOverlay({ title: mode.n === CAMPAIGN_LEVELS ? 'Maze master!' : 'Level cleared', stars: st, lines, next: mode.n < CAMPAIGN_LEVELS })
         } else {
-          setOverlay({ title: s.reason === 'time' ? 'Time ran out' : 'Out of hearts', lines: [`Coins ${s.coinsGot}/${s.level.coins.length}.`] })
+          setOverlay({ title: s.reason === 'time' ? 'Time ran out' : 'Out of hearts', lines: [`Pellets eaten ${s.pelletsGot}. Score ${sc}.`] })
         }
-        onFinish({ score: sc, durationMs: Math.round(s.elapsed), won, stats: { level: mode.n, stars: st, coins: s.coinsGot, hearts: s.hearts, steps: s.steps, hits: s.hitsTaken, difficulty: ['easy', 'normal', 'hard'].indexOf(difficulty) + 1 } })
+        onFinish({ score: sc, durationMs: Math.round(s.elapsed), won, stats: { level: mode.n, stars: st, pellets: s.pelletsGot, caught: s.eaten, hearts: s.hearts, steps: s.steps, hits: s.hitsTaken, difficulty: ['practice', 'easy', 'normal', 'hard'].indexOf(difficulty) } })
         return
       }
       const distance = mode.distance + s.steps
       const timeMs = mode.timeMs + s.elapsed
-      const coins = mode.coins + s.coinsGot
+      const coins = mode.coins + s.pelletsGot
       if (s.status === 'won') {
         const hearts = Math.min(5, s.hearts + ((mode.i + 1) % 3 === 0 ? 1 : 0))
         setMode({ ...mode, i: mode.i + 1, hearts, distance, timeMs, coins })
@@ -446,9 +461,9 @@ export function MazeRunner({ onFinish, seed }: GameProps) {
       const run = { mazes: mode.i, distance, timeMs: Math.round(timeMs), day: new Date().toISOString().slice(0, 10) }
       const { save: next, earned, best } = recordEndless(cur, run)
       commit(next)
-      const sc = mode.i * 100 + coins * 10
+      const sc = mode.i * 100 + coins
       setOverlay({ title: s.reason === 'time' ? 'Time ran out' : 'Out of hearts', lines: [`${mode.i} maze${mode.i === 1 ? '' : 's'} cleared, ${distance} steps, ${fmt(timeMs)}.`, ...(best ? ['New personal best!'] : []), ...earned.map((id) => `Achievement: ${ACHIEVEMENTS.find((a) => a.id === id)?.title}`)] })
-      onFinish({ score: sc, durationMs: Math.round(timeMs), stats: { mazes: mode.i, distance, coins, difficulty: ['easy', 'normal', 'hard'].indexOf(difficulty) + 1 } })
+      onFinish({ score: sc, durationMs: Math.round(timeMs), stats: { mazes: mode.i, distance, coins, difficulty: ['practice', 'easy', 'normal', 'hard'].indexOf(difficulty) } })
     },
     [mode, commit, onFinish, difficulty],
   )
@@ -471,8 +486,17 @@ export function MazeRunner({ onFinish, seed }: GameProps) {
             )
           })}
         </div>
+        <h3>How to play</h3>
+        <ul className="mz-help">
+          <li>You are the <b>blue dot</b>. Move with the arrow keys or WASD, swipe, or use the pad.</li>
+          <li>Eat every <b>small pellet</b> in the maze to clear it. Each is 10 points.</li>
+          <li><b>Purple squares</b> are chasers. If one catches you, you lose a heart and restart from the start square.</li>
+          <li>A <b>big pink pellet</b> turns the chasers blue for a few seconds. Touch a blue chaser to eat it (200 points, more for each one in a row). It goes back to its home.</li>
+          <li>Stars: clear the maze; clear it without being caught; clear it fast.</li>
+          <li>Too hard? Pick <b>Practice</b> in Settings for no chasers.</li>
+        </ul>
         <h3>Endless maze</h3>
-        <p>A new maze every time, bigger and meaner as you go. Hearts carry over; a heart comes back every third maze. {best ? `Your best: ${best.mazes} mazes.` : ''}</p>
+        <p>A new maze every time with more and faster chasers as you go. Hearts carry over; a heart comes back every third maze. {best ? `Your best: ${best.mazes} mazes.` : ''}</p>
         <div className="mz-actions"><button type="button" onClick={startEndless}>Start Endless</button></div>
         {save.endless.top.length ? (
           <ol className="mz-top10" aria-label="Personal bests">

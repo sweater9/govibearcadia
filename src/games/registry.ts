@@ -606,7 +606,7 @@ export const registry: GameEntry[] = [
     meta: {
       id: 'maze-runner',
       title: 'Maze Runner',
-      description: 'Fifty campaign mazes that add keys, spikes, enemies, fog and a countdown, plus an endless mode that never repeats.',
+      description: 'Eat every pellet, dodge the chasers, and turn the tables with big pellets. Fifty campaign mazes plus an endless mode.',
       category: 'Arcade',
       accent: 'from-cyan-400 to-emerald-400',
       glyph: '⌂',

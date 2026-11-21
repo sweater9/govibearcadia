@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { createRandom } from '../../lib/rng'
 import { CAMPAIGN_LEVELS, DIFFICULTIES, campaignConfig, campaignLevel, endlessLevel, introduces, startLevel } from './levels'
-import { DIRS, DIR_LIST, distances, generate, isSolvable, move, newState, openNeighbours, parMs, route, score, stars, tick, trapActive, type Config, type Dir, type Level, type MState } from './rules'
+import { DIRS, DIR_LIST, coverRoute, distances, generate, isSolvable, move, newState, openNeighbours, parMs, route, score, stars, tick, trapActive, type Config, type Dir, type Level, type MState } from './rules'
 
-const BASE: Config = { w: 9, h: 9, braid: 0, coins: 0, traps: 0, togglingTraps: false, doors: 0, enemies: 0, enemyMs: 600, powers: 0, timed: 0, fog: 0 }
+const BASE: Config = { w: 9, h: 9, braid: 0, coins: 0, traps: 0, togglingTraps: false, doors: 0, enemies: 0, enemyMs: 600, powers: 0, timed: 0, fog: 0, pellets: false, bigPellets: 0 }
 const idx = (l: Level, p: { x: number; y: number }) => p.y * l.w + p.x
 const dirBetween = (l: Level, a: number, b: number): Dir => DIR_LIST.find((d) => a % l.w + DIRS[d].dx === b % l.w && Math.floor(a / l.w) + DIRS[d].dy === Math.floor(b / l.w)) as Dir
 
@@ -57,25 +57,25 @@ describe('all 50 campaign levels', () => {
     expect(() => campaignLevel(0)).toThrow()
     expect(() => campaignLevel(51)).toThrow()
   })
-  it('level 1 is a small plain maze and level 50 is the biggest with every mechanic', () => {
+  it('level 1 is a small maze with one slow chaser and level 50 is the biggest with five', () => {
     const a = campaignLevel(1)
-    expect([a.w, a.coins.length, a.traps.length, a.doors.length, a.enemies.length, a.timeLimitMs, a.fog]).toEqual([7, 0, 0, 0, 0, 0, 0])
+    expect([a.w, a.enemies.length, a.bigPellets.length, a.timeLimitMs, a.fog]).toEqual([7, 1, 2, 0, 0])
+    expect(a.pellets.length).toBeGreaterThan(30)
+    expect(a.enemyMs).toBeGreaterThanOrEqual(900)
     const z = campaignLevel(50)
     expect(z.w).toBe(21)
-    expect(z.traps.length).toBeGreaterThan(0)
-    expect(z.doors.length).toBeGreaterThan(0)
-    expect(z.enemies.length).toBeGreaterThan(0)
-    expect(z.powers.length).toBeGreaterThan(0)
+    expect(z.enemies.length).toBe(5)
+    expect(z.bigPellets.length).toBe(4)
   })
-  it('gets harder: size, hazards and par never go down across tiers', () => {
-    const tier = (n: number) => campaignConfig(n)
+  it('gets harder: size and chasers never go down and chasers never slow down', () => {
     for (let n = 2; n <= 50; n++) {
-      expect(tier(n).w).toBeGreaterThanOrEqual(tier(n - 1).w)
-      expect(tier(n).coins + tier(n).traps + tier(n).doors + tier(n).enemies).toBeGreaterThanOrEqual(tier(n - 1).coins + tier(n - 1).traps + tier(n - 1).doors + tier(n - 1).enemies)
+      expect(campaignConfig(n).w).toBeGreaterThanOrEqual(campaignConfig(n - 1).w)
+      expect(campaignConfig(n).enemies).toBeGreaterThanOrEqual(campaignConfig(n - 1).enemies)
+      expect(campaignConfig(n).enemyMs).toBeLessThanOrEqual(campaignConfig(n - 1).enemyMs)
     }
   })
-  it('introduces new things gradually', () => {
-    expect([1, 2, 4, 6, 9, 10, 11, 16, 20].every((n) => introduces(n) !== null)).toBe(true)
+  it('explains what is new', () => {
+    expect([1, 2, 10].every((n) => introduces(n) !== null)).toBe(true)
     expect(introduces(3)).toBeNull()
   })
   it('endless mazes are solvable for many indexes and seeds, and grow', () => {
@@ -154,7 +154,7 @@ describe('moving', () => {
     const l = generate({ ...BASE, traps: 3 }, createRandom('trap'))
     const t = l.traps[0]
     const next = openNeighbours(l, idx(l, t))[0]
-    const s = move({ ...newState(l), p: at(l, next), effects: { speed: 0, shield: 5000, freeze: 0, hurt: 0 } }, dirBetween(l, next, idx(l, t)))
+    const s = move({ ...newState(l), p: at(l, next), effects: { speed: 0, shield: 5000, freeze: 0, hurt: 0, scared: 0 } }, dirBetween(l, next, idx(l, t)))
     expect(s.hearts).toBe(3)
   })
   it('power-ups: speed, shield, freeze, extra time and reveal', () => {
@@ -194,7 +194,7 @@ describe('time and enemies', () => {
     let s = newState(l)
     s = tick(s, 700, createRandom('e'))
     expect(s.enemies[0].x !== e.x || s.enemies[0].y !== e.y).toBe(true)
-    const frozen = tick({ ...newState(l), effects: { speed: 0, shield: 0, freeze: 3000, hurt: 0 } }, 700, createRandom('e'))
+    const frozen = tick({ ...newState(l), effects: { speed: 0, shield: 0, freeze: 3000, hurt: 0, scared: 0 } }, 700, createRandom('e'))
     expect(frozen.enemies[0].x).toBe(e.x)
     expect(frozen.enemies[0].y).toBe(e.y)
     // Chase: put the player two cells from an enemy and let it close in.
@@ -236,8 +236,8 @@ describe('fog, scoring and difficulty', () => {
     expect(stars(won({ coinsGot: 2, elapsed: 1 }))).toBe(3)
     expect(score(won({ coinsGot: 2, elapsed: 1 }))).toBeGreaterThan(score(won({ coinsGot: 0, elapsed: parMs(l) + 1 })))
   })
-  it('difficulty changes hearts, time and enemy speed but not the maze', () => {
-    const l = campaignLevel(14)
+  it('difficulty changes hearts, time and chaser speed but not the maze; practice removes chasers', () => {
+    const l = { ...campaignLevel(14), timeLimitMs: 60000 }
     const e = startLevel(l, 'easy')
     const h = startLevel(l, 'hard')
     expect(e.hearts).toBe(DIFFICULTIES.easy.hearts)
@@ -245,6 +245,91 @@ describe('fog, scoring and difficulty', () => {
     expect((e.timeLeft ?? 0) > (h.timeLeft ?? 0)).toBe(true)
     expect(e.level.walls).toEqual(h.level.walls)
     expect(e.level.enemyMs).toBeGreaterThan(h.level.enemyMs)
+    expect(startLevel(l, 'practice').enemies).toEqual([])
+    expect(startLevel(l, 'normal').enemies.length).toBeGreaterThan(0)
+  })
+})
+
+describe('chase mode (pellets)', () => {
+  const lv = (over: Partial<Config> = {}) => generate({ ...BASE, w: 7, h: 7, pellets: true, bigPellets: 2, ...over }, createRandom('pel'))
+  const dirTo = (l: Level, a: number, b: number) => dirBetween(l, a, b)
+
+  it('puts a pellet in every open cell except the start, and never doubles up', () => {
+    const l = lv({ enemies: 1 })
+    const cells = [...l.pellets, ...l.bigPellets, l.start].map((p) => idx(l, p))
+    expect(new Set(cells).size).toBe(cells.length)
+    expect(cells.length).toBe(l.w * l.h)
+    expect(l.bigPellets).toHaveLength(2)
+  })
+  it('eating pellets scores and eating them all wins (no exit needed)', () => {
+    const l = lv()
+    let s = newState(l)
+    const cover = coverRoute(l)
+    for (let i = 1; i < cover.length; i++) {
+      expect(s.status).toBe('playing')
+      s = move(s, dirTo(l, cover[i - 1], cover[i]))
+    }
+    expect(s.status).toBe('won')
+    expect(s.pelletsLeft).toEqual([])
+    expect(s.bigLeft).toEqual([])
+    expect(s.points).toBe(l.pellets.length * 10 + l.bigPellets.length * 50)
+    expect(score(s)).toBeGreaterThan(s.points)
+  })
+  it('a big pellet scares chasers; touching a scared chaser eats it and sends it home', () => {
+    const l = lv({ enemies: 1 })
+    const e = l.enemies[0]
+    const next = openNeighbours(l, idx(l, e))[0]
+    const base = newState(l)
+    const s0: MState = { ...base, p: at(l, next), effects: { ...base.effects, scared: 5000 }, enemies: [{ ...base.enemies[0], x: e.x, y: e.y }] }
+    const s = move(s0, dirTo(l, next, idx(l, e)))
+    expect(s.eaten).toBe(1)
+    expect(s.points).toBeGreaterThanOrEqual(200)
+    expect(s.hearts).toBe(3)
+    expect(s.events).toContain('eat')
+    expect(s.enemies[0]).toMatchObject({ x: e.x, y: e.y })
+    expect(s.enemies[0].acc).toBeLessThan(0)
+  })
+  it('eating several in a row is worth more each time', () => {
+    const l = lv({ enemies: 2 })
+    const base = newState(l)
+    const p = l.enemies[0]
+    const s0: MState = { ...base, p: { ...l.start }, effects: { ...base.effects, scared: 5000 }, enemies: base.enemies.map((e) => ({ ...e, x: p.x, y: p.y })) }
+    const s = tick({ ...s0, p: { ...p } }, 16, createRandom('x'))
+    expect(s.eaten).toBe(2)
+    expect(s.points).toBe(200 + 400)
+  })
+  it('being caught costs a heart and restarts from the start square with chasers at home', () => {
+    const l = lv({ enemies: 1 })
+    const e = l.enemies[0]
+    const base = newState(l)
+    const s = tick({ ...base, p: { ...e }, enemies: [{ ...base.enemies[0], x: e.x, y: e.y }] }, 16, createRandom('x'))
+    expect(s.hearts).toBe(2)
+    expect(s.p).toEqual(l.start)
+    expect(s.enemies[0]).toMatchObject({ x: e.x, y: e.y })
+    expect(s.effects.hurt).toBeGreaterThan(0)
+  })
+  it('a scared chaser runs away from the player', () => {
+    const l = lv({ enemies: 1 })
+    const base = newState(l)
+    const e = base.enemies[0]
+    const s0: MState = { ...base, effects: { ...base.effects, scared: 5000 } }
+    const before = distances(l, idx(l, l.start))[idx(l, e)]
+    const s = tick(s0, 2000, createRandom('f'))
+    expect(distances(l, idx(l, l.start))[idx(s.level, s.enemies[0])]).toBeGreaterThanOrEqual(before)
+  })
+  it('stars: clear, clear without being caught, clear under par', () => {
+    const l = lv()
+    const won = (o: Partial<MState>): MState => ({ ...newState(l), status: 'won', ...o })
+    expect(stars(won({ hitsTaken: 1, elapsed: parMs(l) + 1 }))).toBe(1)
+    expect(stars(won({ hitsTaken: 0, elapsed: parMs(l) + 1 }))).toBe(2)
+    expect(stars(won({ hitsTaken: 1, elapsed: 1 }))).toBe(2)
+    expect(stars(won({ hitsTaken: 0, elapsed: 1 }))).toBe(3)
+  })
+  it('every campaign and endless maze has all its pellets reachable', () => {
+    for (const l of [1, 12, 30, 50].map(campaignLevel)) {
+      const d = distances(l, idx(l, l.start))
+      for (const p of [...l.pellets, ...l.bigPellets]) expect(d[idx(l, p)]).toBeGreaterThanOrEqual(0)
+    }
   })
 })
 

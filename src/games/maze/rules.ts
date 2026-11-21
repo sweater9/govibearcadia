@@ -40,6 +40,9 @@ export type Config = {
   timed: number
   /** 0 for a fully visible maze, otherwise the radius you can see. */
   fog: number
+  /** Pac-Man style: a pellet in every open cell, eat them all to win; no exit. */
+  pellets: boolean
+  bigPellets: number
 }
 
 export type Level = {
@@ -59,6 +62,8 @@ export type Level = {
   par: number
   timeLimitMs: number
   fog: number
+  pellets: Pt[]
+  bigPellets: Pt[]
 }
 
 export const STEP_MS = 130
@@ -218,6 +223,18 @@ export function generate(cfg: Config, random: Random): Level {
   // Enemies start well away from where you do.
   const enemies = free().filter((i) => dist[i] >= 6 && !doorCells.has(i)).slice(0, cfg.enemies).map((c) => at(shell, c))
 
+  let pellets: Pt[] = []
+  let bigPellets: Pt[] = []
+  if (cfg.pellets) {
+    const spread: number[] = []
+    for (const c of free().filter((i) => dist[i] >= 3 && !doorCells.has(i))) {
+      if (spread.length >= cfg.bigPellets) break
+      if (spread.every((o) => Math.hypot(at(shell, o).x - at(shell, c).x, at(shell, o).y - at(shell, c).y) >= Math.max(3, w / 3))) spread.push(c)
+    }
+    for (const c of spread) used.add(c)
+    bigPellets = spread.map((c) => at(shell, c))
+    pellets = Array.from({ length: w * h }, (_, i) => i).filter((i) => (!used.has(i) || i === exitCell) && !doorCells.has(i)).map((i) => at(shell, i))
+  }
   const par = main.length - 1
   return {
     w,
@@ -235,6 +252,8 @@ export function generate(cfg: Config, random: Random): Level {
     par,
     timeLimitMs: cfg.timed > 0 ? Math.round(5000 + par * STEP_MS * cfg.timed) : 0,
     fog: cfg.fog,
+    pellets,
+    bigPellets,
   }
 }
 
@@ -255,10 +274,10 @@ export function isSolvable(l: Level): boolean {
 
 // ---------------------------------------------------------------- the simulation
 
-export type Effects = { speed: number; shield: number; freeze: number; hurt: number }
-export type Enemy = Pt & { last: number; acc: number }
+export type Effects = { speed: number; shield: number; freeze: number; hurt: number; scared: number }
+export type Enemy = Pt & { last: number; acc: number; home: Pt }
 export type Status = 'playing' | 'won' | 'lost'
-export type MEvent = 'coin' | 'key' | 'door' | 'locked' | 'hit' | 'power' | 'win' | 'lose' | 'step'
+export type MEvent = 'pellet' | 'eat' | 'coin' | 'key' | 'door' | 'locked' | 'hit' | 'power' | 'win' | 'lose' | 'step'
 
 export type MState = {
   level: Level
@@ -268,6 +287,12 @@ export type MState = {
   keys: number
   coinsLeft: Pt[]
   coinsGot: number
+  pelletsLeft: Pt[]
+  bigLeft: Pt[]
+  pelletsGot: number
+  eaten: number
+  combo: number
+  points: number
   keysLeft: Pt[]
   doorsLeft: Pt[]
   powersLeft: Power[]
@@ -286,7 +311,10 @@ export type MState = {
 }
 
 export const HURT_PROTECT_MS = 1200
-export const POWER_MS = { speed: 6000, shield: 6000, freeze: 5000 }
+export const POWER_MS = { speed: 6000, shield: 6000, freeze: 5000, scared: 7000 }
+export const PELLET_POINTS = 10
+export const BIG_POINTS = 50
+export const EAT_POINTS = 200
 export const TIME_BONUS_MS = 10000
 export const REVEAL_RADIUS = 6
 
@@ -299,11 +327,17 @@ export function newState(level: Level, hearts = 3, timeScale = 1): MState {
     keys: 0,
     coinsLeft: level.coins.slice(),
     coinsGot: 0,
+    pelletsLeft: level.pellets.slice(),
+    bigLeft: level.bigPellets.slice(),
+    pelletsGot: 0,
+    eaten: 0,
+    combo: 0,
+    points: 0,
     keysLeft: level.keys.slice(),
     doorsLeft: level.doors.slice(),
     powersLeft: level.powers.slice(),
-    enemies: level.enemies.map((e) => ({ ...e, last: -1, acc: 0 })),
-    effects: { speed: 0, shield: 0, freeze: 0, hurt: 0 },
+    enemies: level.enemies.map((e) => ({ ...e, last: -1, acc: 0, home: { ...e } })),
+    effects: { speed: 0, shield: 0, freeze: 0, hurt: 0, scared: 0 },
     timeLeft: level.timeLimitMs ? Math.round(level.timeLimitMs * timeScale) : null,
     elapsed: 0,
     steps: 0,
@@ -328,6 +362,30 @@ export const stepMs = (s: MState) => (s.effects.speed > 0 ? FAST_STEP_MS : STEP_
 export const trapActive = (t: Trap, elapsed: number) => t.period === 0 || (Math.floor((elapsed + t.phase) / t.period) % 2 === 0)
 const isDoor = (s: MState, p: Pt) => s.doorsLeft.some((d) => same(d, p))
 
+export const isPellet = (s: MState) => s.level.pellets.length > 0
+
+/** Sends you back to the start and the enemies back home, as after being caught. */
+function reset(s: MState): MState {
+  return { ...s, p: { ...s.level.start }, enemies: s.enemies.map((e) => ({ ...e, ...e.home, last: -1, acc: 0 })) }
+}
+
+/** What happens when you and an enemy share a cell: eat it while they are scared, otherwise lose a heart and start again. */
+function collide(s: MState): MState {
+  if (s.status !== 'playing') return s
+  let n = s
+  const hit = n.enemies.filter((e) => same(e, n.p))
+  if (!hit.length) return n
+  if (n.effects.scared > 0) {
+    for (const e of hit) {
+      n = { ...n, points: n.points + EAT_POINTS * 2 ** Math.min(n.combo, 3), combo: n.combo + 1, eaten: n.eaten + 1, events: [...n.events, 'eat'], enemies: n.enemies.map((o) => (o === e ? { ...o, ...o.home, last: -1, acc: -1500 } : o)) }
+    }
+    return n
+  }
+  const before = n.hearts
+  n = hurt(n)
+  return n.hearts < before && n.status === 'playing' ? reset(n) : n
+}
+
 function hurt(s: MState): MState {
   if (s.status !== 'playing' || s.effects.shield > 0 || s.effects.hurt > 0) return s
   const hearts = s.hearts - 1
@@ -351,6 +409,8 @@ export function move(s: MState, dir: Dir): MState {
   }
   if (n.coinsLeft.some((c) => same(c, to))) n = { ...n, coinsLeft: n.coinsLeft.filter((c) => !same(c, to)), coinsGot: n.coinsGot + 1, events: [...n.events, 'coin'] }
   if (n.keysLeft.some((k) => same(k, to))) n = { ...n, keysLeft: n.keysLeft.filter((k) => !same(k, to)), keys: n.keys + 1, events: [...n.events, 'key'] }
+  if (n.pelletsLeft.some((c) => same(c, to))) n = { ...n, pelletsLeft: n.pelletsLeft.filter((c) => !same(c, to)), pelletsGot: n.pelletsGot + 1, points: n.points + PELLET_POINTS, events: [...n.events, 'pellet'] }
+  if (n.bigLeft.some((c) => same(c, to))) n = { ...n, bigLeft: n.bigLeft.filter((c) => !same(c, to)), pelletsGot: n.pelletsGot + 1, points: n.points + BIG_POINTS, combo: 0, effects: { ...n.effects, scared: POWER_MS.scared }, events: [...n.events, 'power'] }
   const pw = n.powersLeft.find((q) => same(q, to))
   if (pw) {
     n = { ...n, powersLeft: n.powersLeft.filter((q) => q !== pw), events: [...n.events, 'power'] }
@@ -362,12 +422,13 @@ export function move(s: MState, dir: Dir): MState {
   }
   if (l.fog) n = reveal(n, l.fog, to)
   if (l.traps.some((t) => same(t, to) && trapActive(t, n.elapsed))) n = hurt(n)
-  if (n.enemies.some((e) => same(e, to))) n = hurt(n)
-  if (n.status === 'playing' && same(to, l.exit)) n = { ...n, status: 'won', events: [...n.events, 'win'] }
+  n = collide(n)
+  if (n.status === 'playing' && isPellet(n) && n.pelletsLeft.length === 0 && n.bigLeft.length === 0) n = { ...n, status: 'won', events: [...n.events, 'win'] }
+  if (n.status === 'playing' && !isPellet(n) && same(to, l.exit)) n = { ...n, status: 'won', events: [...n.events, 'win'] }
   return n
 }
 
-function enemyStep(s: MState, e: Enemy, random: Random): Enemy {
+function enemyStep(s: MState, e: Enemy, idx: number, random: Random): Enemy {
   const l = s.level
   const here = e.y * l.w + e.x
   const doorCells = new Set(s.doorsLeft.map((d) => d.y * l.w + d.x))
@@ -375,7 +436,13 @@ function enemyStep(s: MState, e: Enemy, random: Random): Enemy {
   if (!options.length) return e
   const pd = distances(l, s.p.y * l.w + s.p.x, doorCells)
   let next: number
-  if (pd[here] > 0 && pd[here] <= 6) {
+  const pellet = isPellet(s)
+  const range = pellet ? (idx % 2 === 0 ? 14 : 8) : 6
+  if (s.effects.scared > 0) {
+    // Frightened: run from the player.
+    const far = Math.max(...options.map((c) => pd[c]))
+    next = options.filter((c) => pd[c] === far)[Math.floor(random() * options.filter((c) => pd[c] === far).length)]
+  } else if (pd[here] > 0 && pd[here] <= range && (!pellet || idx % 3 !== 2 || random() < 0.6)) {
     // Chase: the neighbour closest to the player.
     const best = Math.min(...options.map((c) => (pd[c] < 0 ? 999 : pd[c])))
     next = options.filter((c) => (pd[c] < 0 ? 999 : pd[c]) === best)[0]
@@ -384,45 +451,70 @@ function enemyStep(s: MState, e: Enemy, random: Random): Enemy {
     const pool = fwd.length ? fwd : options
     next = pool[Math.floor(random() * pool.length)]
   }
-  return { x: next % l.w, y: Math.floor(next / l.w), last: here, acc: e.acc }
+  return { x: next % l.w, y: Math.floor(next / l.w), last: here, acc: e.acc, home: e.home }
 }
 
 /** Advances time: the clock, power-ups wearing off, enemies walking, spikes cycling. */
 export function tick(s: MState, dt: number, random: Random): MState {
   if (s.status !== 'playing' || dt <= 0) return s
   const dec = (v: number) => Math.max(0, v - dt)
-  let n: MState = { ...s, events: [], elapsed: s.elapsed + dt, effects: { speed: dec(s.effects.speed), shield: dec(s.effects.shield), freeze: dec(s.effects.freeze), hurt: dec(s.effects.hurt) } }
+  let n: MState = { ...s, events: [], elapsed: s.elapsed + dt, effects: { speed: dec(s.effects.speed), shield: dec(s.effects.shield), freeze: dec(s.effects.freeze), hurt: dec(s.effects.hurt), scared: dec(s.effects.scared) } }
   if (s.timeLeft !== null) {
     const left = s.timeLeft - dt
     if (left <= 0) return { ...n, timeLeft: 0, status: 'lost', reason: 'time', events: ['lose'] }
     n = { ...n, timeLeft: left }
   }
   if (s.effects.freeze <= 0 && n.enemies.length) {
-    const enemies = n.enemies.map((e) => {
+    const every = n.effects.scared > 0 ? n.level.enemyMs * 1.6 : n.level.enemyMs
+    const enemies = n.enemies.map((e, i) => {
       let cur: Enemy = { ...e, acc: e.acc + dt }
       let guard = 0
-      while (cur.acc >= n.level.enemyMs && guard++ < 4) {
-        cur = { ...enemyStep(n, cur, random), acc: cur.acc - n.level.enemyMs }
+      while (cur.acc >= every && guard++ < 4) {
+        cur = { ...enemyStep(n, cur, i, random), acc: cur.acc - every }
       }
       return cur
     })
     n = { ...n, enemies }
   }
-  if (n.enemies.some((e) => same(e, n.p))) n = hurt(n)
+  n = collide(n)
   if (n.level.traps.some((t) => same(t, n.p) && trapActive(t, n.elapsed))) n = hurt(n)
   return n
 }
 
-/** Star rating for a finished level: finish, all coins, and under the par time. */
+/** Par time. Exit levels: the shortest route plus coin detours. Pellet levels: a clean sweep of the maze, with room for backtracking. */
 export function parMs(l: Level): number {
+  if (l.pellets.length) return 4000 + (l.pellets.length + l.bigPellets.length) * STEP_MS * 2.2
   return 1500 + l.par * STEP_MS * 2.4 + l.coins.length * 700
 }
+/** Stars: finish; finish without being caught (or, with coins, collect them all); finish under the par time. */
 export function stars(s: MState): 0 | 1 | 2 | 3 {
   if (s.status !== 'won') return 0
-  return (1 + (s.level.coins.length === 0 || s.coinsGot === s.level.coins.length ? 1 : 0) + (s.elapsed <= parMs(s.level) ? 1 : 0)) as 1 | 2 | 3
+  const second = isPellet(s) ? s.hitsTaken === 0 : s.level.coins.length === 0 || s.coinsGot === s.level.coins.length
+  return (1 + (second ? 1 : 0) + (s.elapsed <= parMs(s.level) ? 1 : 0)) as 1 | 2 | 3
 }
 export function score(s: MState): number {
+  if (isPellet(s)) return s.points + (s.status === 'won' ? 500 + s.hearts * 100 + stars(s) * 100 + Math.max(0, Math.round((parMs(s.level) - s.elapsed) / 100)) : 0)
   if (s.status !== 'won') return s.coinsGot * 10
   const bonus = Math.max(0, Math.round((parMs(s.level) - s.elapsed) / 100))
   return 100 + s.coinsGot * 10 + stars(s) * 50 + s.hearts * 20 + bonus
+}
+
+/** A walk that visits every cell from the start (depth-first, backtracking), cut off after the last new cell. Used by tests and by the par estimate. */
+export function coverRoute(l: { w: number; h: number; walls: number[]; start: Pt }): number[] {
+  const seen = new Set<number>()
+  const out: number[] = []
+  let lastNew = 0
+  const visit = (c: number) => {
+    seen.add(c)
+    out.push(c)
+    lastNew = out.length
+    for (const n of openNeighbours(l, c)) {
+      if (!seen.has(n)) {
+        visit(n)
+        out.push(c)
+      }
+    }
+  }
+  visit(l.start.y * l.w + l.start.x)
+  return out.slice(0, lastNew)
 }
