@@ -3,10 +3,11 @@ import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MazeRunner } from './MazeRunner'
 import { campaignLevel } from './maze/levels'
-import { DIRS, DIR_LIST, route, type Dir } from './maze/rules'
+import { DIRS, DIR_LIST, coverRoute, type Dir } from './maze/rules'
 
 beforeEach(() => {
   localStorage.clear()
+  localStorage.setItem('govibearcadia.maze', JSON.stringify({ unlocked: 1, levels: {}, coins: 0, endless: { top: [] }, achievements: [], settings: { difficulty: 'practice', dpad: false } }))
   vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date', 'requestAnimationFrame', 'cancelAnimationFrame', 'performance'] })
   HTMLCanvasElement.prototype.getContext = (() => null) as never
 })
@@ -28,7 +29,7 @@ const ARROW: Record<Dir, string> = { up: 'ArrowUp', down: 'ArrowDown', left: 'Ar
 
 function solveLevel(n: number) {
   const l = campaignLevel(n)
-  const cells = route(l, l.start.y * l.w + l.start.x, l.exit.y * l.w + l.exit.x) as number[]
+  const cells = coverRoute(l)
   for (let i = 1; i < cells.length; i++) {
     const dx = (cells[i] % l.w) - (cells[i - 1] % l.w)
     const dy = Math.floor(cells[i] / l.w) - Math.floor(cells[i - 1] / l.w)
@@ -43,6 +44,7 @@ describe('Maze Runner component', () => {
     setup()
     expect(screen.getByText('Level 1')).toBeTruthy()
     expect(screen.getByText(/Press an arrow key/)).toBeTruthy()
+    expect(screen.getByText(/Pellets left/)).toBeTruthy()
     wait(3000)
     expect(stage().dataset.steps).toBe('0')
   })
@@ -57,7 +59,7 @@ describe('Maze Runner component', () => {
     expect(stage().dataset.steps).toBe('1')
   })
 
-  it('finishing level 1 reports once, shows stars, saves progress and unlocks level 2', () => {
+  it('eating every pellet on level 1 reports once, shows stars, saves progress and unlocks level 2', () => {
     const { onFinish } = setup()
     solveLevel(1)
     wait(500)

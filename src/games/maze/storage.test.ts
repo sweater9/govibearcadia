@@ -32,8 +32,8 @@ describe('maze progress', () => {
     const a = recordLevel(EMPTY, r())
     expect(a.earned).toEqual(['first-exit'])
     expect(recordLevel(a.save, r()).earned).toEqual([])
-    const b = recordLevel(EMPTY, r({ n: 10, hits: 0, doors: 2, fog: true, coins: 100 }))
-    expect(b.earned).toEqual(expect.arrayContaining(['untouched', 'key-master', 'fog-walker', 'coin-hoarder', 'level-10']))
+    const b = recordLevel(EMPTY, r({ n: 10, hits: 0, eaten: 3, coins: 1000 }))
+    expect(b.earned).toEqual(expect.arrayContaining(['untouched', 'chaser-catcher', 'hunter', 'coin-hoarder', 'level-10']))
     expect(recordLevel(EMPTY, r({ n: 3, hits: 0 })).earned).not.toContain('untouched')
   })
   it('endless keeps the best ten and awards run achievements', () => {

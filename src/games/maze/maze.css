@@ -29,3 +29,4 @@
 .mz-ach li[data-earned=false]{opacity:.65}
 @media(prefers-reduced-motion:reduce){.mz-board{scroll-behavior:auto}}
 @media(max-height:800px){.mz-board{width:min(100%,calc(100svh - 280px),520px)}}
+.mz-help{margin:0;padding-left:18px;font-size:.85rem;display:grid;gap:3px}
