@@ -164,4 +164,14 @@ const slapPile: Cover = (u, f) => <g>
   <path d="M112 62c-4-10-4-20 0-26l6 2-2 8 8-2 2 6-6 4 4 8z" fill={f('gold')} stroke="#7a4d00" strokeWidth=".8" />
 </g>
 
-export const CARD_COVERS: Record<string, Cover> = { 'indian-rummy': rummy, blackjack, poker, klondike, 'call-break': callBreak, cribbage, durak, scopa, 'slap-pile': slapPile }
+/** Crazy Eights: a wild eight fanned in front of a hand. */
+const crazyEights: Cover = (u, f) => <g>
+  <rect width="160" height="90" fill={f('felt')} />
+  <Card u={u} x={20} y={34} w={30} h={44} rot={-16} rank="4" suit="D" />
+  <Card u={u} x={44} y={28} w={30} h={44} rot={-8} rank="K" suit="S" />
+  <Card u={u} x={70} y={24} w={30} h={44} rot={0} rank="8" suit="H" />
+  <Card u={u} x={96} y={28} w={30} h={44} rot={8} rank="8" suit="C" />
+  <Card u={u} x={120} y={34} w={30} h={44} rot={16} rank="2" suit="H" />
+</g>
+
+export const CARD_COVERS: Record<string, Cover> = { 'crazy-eights': crazyEights, 'indian-rummy': rummy, blackjack, poker, klondike, 'call-break': callBreak, cribbage, durak, scopa, 'slap-pile': slapPile }

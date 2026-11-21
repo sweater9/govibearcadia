@@ -53,6 +53,7 @@ const PLAY_AREA = {
   cribbage: '.cb-felt',
   durak: '.du-felt',
   scopa: '.sc-felt',
+  'crazy-eights': '.ce-felt',
   'slap-pile': '.sp-felt',
   poker: '.pk-table',
 } as const
