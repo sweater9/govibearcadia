@@ -115,7 +115,9 @@ test('animation shows seeds moving a step at a time, then settles on the right b
 
 test('a whole two-player match: rounds, refills and piggy pits, to a winner, saved once', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'one full match is enough; the phone project covers touch and layout')
-  test.setTimeout(300_000)
+  // A full match is hundreds of real clicks: about 3.5 minutes on an idle machine and over 5 under the load of a full run.
+  // The limit is generous because this test is slow, not flaky: the rules and the page agree on every board it checks.
+  test.setTimeout(900_000)
   await open(page, 'local')
   const random = createRandom('e2e-pg-full')
   let s = newGame()
