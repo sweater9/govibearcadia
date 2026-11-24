@@ -930,3 +930,9 @@ main:focus{outline:none}
 .quick-match .quick-count{margin:10px 0 0;font-size:.9rem}
 .quick-match button,.quick-match .secondary-btn{margin:4px 8px 4px 0;text-decoration:none;display:inline-flex}
 .quick-offer{margin:8px 0}
+
+.how-btn{position:relative;color:#6fd3ff}.how-dot{position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:#ff6b8b;box-shadow:0 0 0 2px #18202d}
+.how-backdrop{position:fixed;inset:0;z-index:60;background:#0a0f16cc;display:grid;place-items:center;padding:16px}
+.how-dialog{position:relative;width:min(480px,100%);max-height:calc(100svh - 32px);overflow:auto;background:#18202d;border:1px solid #dbe3f022;border-radius:18px;padding:24px;display:grid;gap:12px;box-shadow:0 30px 80px #000a}
+.how-dialog h2{margin:0 40px 0 0;font-size:22px}.how-dialog p{margin:0;line-height:1.55}
+.how-close{position:absolute;top:12px;right:12px}

@@ -15,6 +15,7 @@ import { ShareButton } from '../components/ShareButton'
 import { challengePath, parseChallenge, randomSeed, shareChallenge, shareScore, verdict, verdictText } from '../lib/challenge'
 import { gameDescription, gameTitle } from '../lib/gamePages'
 import { GameAbout } from '../components/GameAbout'
+import { HowToPlay } from '../components/HowToPlay'
 import { LevelBar } from '../components/LevelBar'
 import { isLeveled, levelCleared, readCleared, saveCleared } from '../lib/levels'
 import { getNick } from '../lib/online'
@@ -106,6 +107,7 @@ export function Play() {
           Back to arcade
         </Link>
         <div className="play-head-tools">
+        <HowToPlay meta={meta} />
         <SoundToggle />
         <button className="icon-btn lock-btn" aria-label="Fit to screen and lock" onClick={() => setLocked(true)}>
           <Lock />
