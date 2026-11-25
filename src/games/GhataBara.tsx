@@ -6,12 +6,13 @@ import type { GameProps } from '../types'
 import { chooseAction } from './ghata/bot'
 import {
   FACES, LAYOUTS, actionDestination, apply, board, dice as rollDice, homeCount, innerKey, isSafe, keyOf, legalActions, newGame, yardCount,
-  type Action, type GameEvent, type Seat, type Size, type State,
+  type Action, type Seat, type Size, type State,
 } from './ghata/rules'
 import { TokenIcon } from '../components/TokenIcon'
 import { clearSaved, loadSaved, loadTokenPref, save, saveTokenPref } from './ghata/save'
 import { TOKENS, assignTokens, validTokens } from './ghata/tokens'
 import { HUMAN_SEATS, SEAT_INFO } from './ghata/seats'
+import { describe, plural } from './ghata/describe'
 
 /** Pause before the computer acts, and how long the dice tumble, so every step can be followed. */
 const BOT_MS = 380
@@ -29,29 +30,6 @@ for (const size of [5, 7] as const) {
 const startSeats = (size: Size): Record<string, Seat> => Object.fromEntries(LAYOUTS[size].start.map((i, seat) => [`o${i}`, seat as Seat]))
 
 const ringOf = (key: string, size: Size) => (key === 'c' ? 'home' : key[0] === 'o' ? 'outer' : size === 7 && Number(key.slice(1)) < 16 ? 'middle' : 'inner')
-
-const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`
-
-function describe(events: GameEvent[]): string {
-  const name = (s: Seat) => SEAT_INFO[s].name
-  const parts = events.map((e) => {
-    switch (e.type) {
-      case 'roll': return `${name(e.seat)} rolled ${e.total === 6 ? 'Chowka (6)' : e.total === 12 ? 'Baara (12)' : e.total}`
-      case 'bonus-roll': return 'roll again'
-      case 'bust': return `three in a row: ${name(e.seat)} busts and the sequence is lost`
-      case 'release': return `${name(e.seat)} released a pawn`
-      case 'capture': return `${name(e.seat)} captured ${plural(e.pawns, 'pawn')}`
-      case 'pin': return `${name(e.seat)} pinned a pawn`
-      case 'rescue': return 'the pinned pawn is free'
-      case 'juga': return `${name(e.seat)} formed a Juga`
-      case 'home': return `${plural(e.pawns, 'pawn')} home for ${name(e.seat)}`
-      case 'forfeit': return `no legal use for ${e.chunks.join(', ')}`
-      case 'capture-bonus': return `${name(e.seat)} earned a capture bonus roll`
-      case 'win': return `${name(e.seat)} wins`
-    }
-  })
-  return parts.length ? `${parts.join('; ')}.` : ''
-}
 
 const sumOf = (s: State, chunks: number[]) => chunks.reduce((t, i) => t + s.queue[i], 0)
 

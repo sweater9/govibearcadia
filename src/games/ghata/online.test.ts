@@ -101,4 +101,15 @@ describe('Ghata Bara online room', () => {
     expect(parseRoom({ ...newRoom(), wins: [0] })).toBeNull()
     expect(parseRoom(null)).toBeNull()
   })
+
+  it('reports what happened since the last person moved, so a roll that goes nowhere is still visible', () => {
+    const room = started()
+    const mover = room.humanAt[room.state!.turn]!
+    const r = applyMove(room, mover, { action: 'roll' }, rnd())
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(r.room.last?.some((e) => e.type === 'roll')).toBe(true)
+    expect(viewFor(r.room, mover).last).toEqual(r.room.last)
+    expect(parseRoom({ ...r.room, last: 'x' })).toBeNull()
+  })
 })

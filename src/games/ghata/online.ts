@@ -8,12 +8,13 @@
 import type { Random } from '../../lib/rng'
 import { chooseAction } from './bot'
 import { HUMAN_SEATS } from './seats'
-import { PAWNS_PER_SEAT, apply, dice, newGame, type Action, type Seat, type Size, type State } from './rules'
+import { PAWNS_PER_SEAT, apply, dice, newGame, type Action, type GameEvent, type Seat, type Size, type State } from './rules'
 
 export const SEATS = 4
 export const MIN_PLAYERS = 2
 /** `humanAt[boardSeat]` is the room seat playing it, or null for the computer. `state` is null in the lobby. */
-export type Room = { state: State | null; humanAt: (number | null)[]; round: number; wins: number[]; rematch: boolean[] }
+/** `last` is everything that happened since the previous person moved (their action and the computer's replies), so nobody misses a roll. */
+export type Room = { state: State | null; humanAt: (number | null)[]; round: number; wins: number[]; rematch: boolean[]; last?: GameEvent[] }
 export type Context = { seated: boolean[]; connected: boolean[] }
 export type Failure = 'game-over' | 'not-your-turn' | 'illegal-move' | 'game-not-over' | 'not-started' | 'not-host' | 'need-two'
 export type Outcome = { ok: true; room: Room } | { ok: false; error: Failure }
@@ -34,21 +35,23 @@ export function seatPlayers(here: number[]): (number | null)[] {
 }
 
 /** Plays every computer seat until it is a person's turn or the game ends. Bounded so a bug cannot spin forever. */
-export function autoplay(state: State, humanAt: (number | null)[], random: Random = secureRandom): State {
+export function autoplay(state: State, humanAt: (number | null)[], random: Random = secureRandom, log?: GameEvent[]): State {
   let s = state
   for (let i = 0; i < 5000 && s.phase !== 'over' && humanAt[s.turn] === null; i++) {
     const r = apply(s, chooseAction(s, random))
     if (!r.ok) break
     s = r.state
+    log?.push(...s.events)
   }
   return s
 }
 
 const connectedHere = (ctx: Context): number[] => ctx.connected.flatMap((c, i) => (c ? [i] : []))
 
-function deal(size: Size, here: number[], random: Random): { state: State; humanAt: (number | null)[] } {
+function deal(size: Size, here: number[], random: Random): { state: State; humanAt: (number | null)[]; last: GameEvent[] } {
   const humanAt = seatPlayers(here)
-  return { humanAt, state: autoplay(newGame(size), humanAt, random) }
+  const last: GameEvent[] = []
+  return { humanAt, state: autoplay(newGame(size), humanAt, random, last), last }
 }
 
 const isSize = (v: unknown): v is Size => v === 5 || v === 7
@@ -103,7 +106,8 @@ export function applyMove(room: Room, seat: number, message: Record<string, unkn
   if (!action) return { ok: false, error: 'illegal-move' }
   const r = apply(s, action)
   if (!r.ok) return { ok: false, error: 'illegal-move' }
-  return { ok: true, room: finish(room, autoplay(r.state, room.humanAt, random)) }
+  const last: GameEvent[] = [...r.state.events]
+  return { ok: true, room: { ...finish(room, autoplay(r.state, room.humanAt, random, last)), last: last.slice(-30) } }
 }
 
 /** Hands a person who has gone to the computer, but only when their turn is what everyone is waiting for. */
@@ -116,7 +120,8 @@ export function replaceAbsent(room: Room, seat: number, message: Record<string, 
   if (room.humanAt[s.turn] === null) return { ok: false, error: 'illegal-move' }
   const humanAt = room.humanAt.map((h) => (h === target ? null : h))
   if (!humanAt.some((h) => h !== null)) return { ok: false, error: 'illegal-move' }
-  return { ok: true, room: finish({ ...room, humanAt }, autoplay(s, humanAt, random)) }
+  const last: GameEvent[] = []
+  return { ok: true, room: { ...finish({ ...room, humanAt }, autoplay(s, humanAt, random, last)), last: last.slice(-30) } }
 }
 
 /** When every player who is here has asked, a new game starts from the lobby's seats. */
@@ -154,6 +159,7 @@ export function viewFor(room: Room, seat: number, ctx?: Context) {
     wins: room.wins,
     rematch: room.rematch,
     humanAt: room.humanAt,
+    last: room.last ?? [],
     board: s,
   }
 }
@@ -165,6 +171,7 @@ export function parseRoom(value: unknown): Room | null {
   if (!Number.isSafeInteger(r.round) || !Array.isArray(r.wins) || r.wins.length !== SEATS || !Array.isArray(r.rematch) || r.rematch.length !== SEATS) return null
   if (!Array.isArray(r.humanAt) || r.humanAt.length !== SEATS || !r.humanAt.every((h) => h === null || (Number.isInteger(h) && (h as number) >= 0 && (h as number) < SEATS))) return null
   const s = r.state
+  if (r.last !== undefined && !Array.isArray(r.last)) return null
   if (s === null) return r as Room
   if (!s || typeof s !== 'object' || !isSize(s.size) || !Array.isArray(s.pawns) || s.pawns.length !== SEATS * PAWNS_PER_SEAT || !Array.isArray(s.jugas)) return null
   if (!['roll', 'move', 'over'].includes(s.phase) || !Number.isInteger(s.turn) || s.turn < 0 || s.turn > 3 || !Array.isArray(s.queue) || !Array.isArray(s.rolls)) return null
