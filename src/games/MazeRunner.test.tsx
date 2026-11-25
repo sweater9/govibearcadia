@@ -19,7 +19,7 @@ function setup(props: Record<string, unknown> = {}) {
   const onFinish = vi.fn()
   render(
     <StrictMode>
-      <MazeRunner onFinish={onFinish} seed="mz" {...props} />
+      <MazeRunner onFinish={onFinish} {...props} />
     </StrictMode>,
   )
   return { onFinish }
@@ -110,5 +110,13 @@ describe('Maze Runner component', () => {
     fireEvent.click(screen.getByRole('button', { name: `Move ${open}` }))
     wait(200)
     expect(stage().dataset.steps).toBe('1')
+  })
+
+  it('given a seed (the daily challenge) it opens the same fixed maze and leaves the campaign alone', () => {
+    setup({ seed: '2026-11-25' })
+    expect(screen.getByText('Daily maze')).toBeTruthy()
+    const saved = JSON.parse(localStorage.getItem('govibearcadia.maze') as string)
+    expect(saved.unlocked).toBe(1)
+    expect(saved.levels).toEqual({})
   })
 })

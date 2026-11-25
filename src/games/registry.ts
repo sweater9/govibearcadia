@@ -612,6 +612,7 @@ export const registry: GameEntry[] = [
       accent: 'from-cyan-400 to-emerald-400',
       glyph: '⌂',
       estimated: '3–10 min',
+      daily: true,
     },
     Component: lazy(() => import('./MazeRunner').then((m) => ({ default: m.MazeRunner }))),
   },

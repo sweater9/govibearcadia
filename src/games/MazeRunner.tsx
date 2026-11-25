@@ -8,7 +8,7 @@ import { DIRS, move, parMs, score, stars, stepMs, tick, trapActive, type Dir, ty
 import { ACHIEVEMENTS, readSave, recordEndless, recordLevel, writeSave, type MazeSave } from './maze/storage'
 import './maze/maze.css'
 
-type Mode = { kind: 'campaign'; n: number } | { kind: 'endless'; i: number; hearts: number; distance: number; timeMs: number; coins: number; seed: string }
+type Mode = { kind: 'campaign'; n: number } | { kind: 'daily'; seed: string } | { kind: 'endless'; i: number; hearts: number; distance: number; timeMs: number; coins: number; seed: string }
 type Overlay = { title: string; lines: string[]; stars?: number; next?: boolean } | null
 
 const KEY_DIRS: Record<string, Dir> = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', w: 'up', s: 'down', a: 'left', d: 'right', W: 'up', S: 'down', A: 'left', D: 'right' }
@@ -401,7 +401,7 @@ function draw(c: HTMLCanvasElement | null, s: MState, anim: null | { from: { x: 
 export function MazeRunner({ onFinish, seed }: GameProps) {
   const [save, setSave] = useState<MazeSave>(readSave)
   const [screen, setScreen] = useState<'play' | 'menu'>('play')
-  const [mode, setMode] = useState<Mode>(() => ({ kind: 'campaign', n: Math.min(CAMPAIGN_LEVELS, readSave().unlocked) }))
+  const [mode, setMode] = useState<Mode>(() => (seed ? { kind: 'daily', seed } : { kind: 'campaign', n: Math.min(CAMPAIGN_LEVELS, readSave().unlocked) }))
   const [attempt, setAttempt] = useState(0)
   const [overlay, setOverlay] = useState<Overlay>(null)
   const [banner, setBanner] = useState('')
@@ -411,6 +411,8 @@ export function MazeRunner({ onFinish, seed }: GameProps) {
 
   const init = useMemo<MState>(() => {
     if (mode.kind === 'campaign') return startLevel(campaignLevel(mode.n), difficulty)
+    // The daily maze is the same for everyone and ignores the difficulty setting, so scores are comparable.
+    if (mode.kind === 'daily') return startLevel(endlessLevel(mode.seed, 2), 'normal')
     return startLevel(endlessLevel(mode.seed, mode.i), difficulty, mode.hearts)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, attempt, difficulty])
@@ -447,6 +449,13 @@ export function MazeRunner({ onFinish, seed }: GameProps) {
           setOverlay({ title: s.reason === 'time' ? 'Time ran out' : 'Out of hearts', lines: [`Pellets eaten ${s.pelletsGot}. Score ${sc}.`] })
         }
         onFinish({ score: sc, durationMs: Math.round(s.elapsed), won, stats: { level: mode.n, stars: st, pellets: s.pelletsGot, caught: s.eaten, hearts: s.hearts, steps: s.steps, hits: s.hitsTaken, difficulty: ['practice', 'easy', 'normal', 'hard'].indexOf(difficulty) } })
+        return
+      }
+      if (mode.kind === 'daily') {
+        const won = s.status === 'won'
+        const sc = score(s)
+        setOverlay({ title: won ? 'Daily maze cleared' : s.reason === 'time' ? 'Time ran out' : 'Out of hearts', stars: won ? stars(s) : undefined, lines: [`Time ${fmt(s.elapsed)}. Chasers caught ${s.eaten}. Score ${sc}.`] })
+        onFinish({ score: sc, durationMs: Math.round(s.elapsed), won, stats: { pellets: s.pelletsGot, caught: s.eaten, hearts: s.hearts, steps: s.steps, hits: s.hitsTaken, daily: 1 } })
         return
       }
       const distance = mode.distance + s.steps
@@ -515,23 +524,23 @@ export function MazeRunner({ onFinish, seed }: GameProps) {
     )
   }
 
-  const label = mode.kind === 'campaign' ? `Level ${mode.n}` : `Maze ${mode.i + 1}`
-  const hint = mode.kind === 'campaign' ? introduces(mode.n) ?? `Level ${mode.n}` : banner || 'Endless maze'
+  const label = mode.kind === 'campaign' ? `Level ${mode.n}` : mode.kind === 'daily' ? 'Daily maze' : `Maze ${mode.i + 1}`
+  const hint = mode.kind === 'campaign' ? introduces(mode.n) ?? `Level ${mode.n}` : mode.kind === 'daily' ? 'Same maze for everyone today' : banner || 'Endless maze'
   return (
     <Runner
-      key={`${mode.kind}-${mode.kind === 'campaign' ? mode.n : mode.i}-${attempt}`}
+      key={`${mode.kind}-${mode.kind === 'campaign' ? mode.n : mode.kind === 'daily' ? 0 : mode.i}-${attempt}`}
       init={init}
       label={label}
       hint={hint}
       dpad={save.settings.dpad}
-      seed={`${seed ?? 'maze'}:${mode.kind}:${mode.kind === 'campaign' ? mode.n : mode.i}:${attempt}`}
+      seed={`${seed ?? 'maze'}:${mode.kind}:${mode.kind === 'campaign' ? mode.n : mode.kind === 'daily' ? 0 : mode.i}:${attempt}`}
       onEnd={onEnd}
       onMenu={() => setScreen('menu')}
-      onRestart={() => (mode.kind === 'campaign' ? play(mode) : startEndless())}
+      onRestart={() => (mode.kind === 'campaign' || mode.kind === 'daily' ? play(mode) : startEndless())}
       overlay={overlay}
       onOverlay={(a) => {
         if (a === 'next' && mode.kind === 'campaign') play({ kind: 'campaign', n: mode.n + 1 })
-        else if (mode.kind === 'campaign') play(mode)
+        else if (mode.kind === 'campaign' || mode.kind === 'daily') play(mode)
         else startEndless()
       }}
     />
