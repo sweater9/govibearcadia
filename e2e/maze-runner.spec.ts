@@ -22,7 +22,7 @@ async function solve(page: Page, n: number) {
 
 test('clears level 1 (practice, no chasers) with the real keyboard, saves the result once and unlocks level 2', async ({ page }) => {
   await page.addInitScript(() => { if (!localStorage.getItem('govibearcadia.maze')) localStorage.setItem('govibearcadia.maze', JSON.stringify({ unlocked: 1, levels: {}, coins: 0, endless: { top: [] }, achievements: [], settings: { difficulty: 'practice', dpad: false } })) })
-  await page.goto('/play/maze-runner?seed=e2e-maze')
+  await page.goto('/play/maze-runner')
   await expect(page.locator('.mz-board')).toBeVisible()
   await solve(page, 1)
   await expect(page.locator('.mz-stage')).toHaveAttribute('data-pellets', '0')
