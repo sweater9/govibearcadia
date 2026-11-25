@@ -51,7 +51,10 @@ export function Play() {
   const [run, setRun] = useState(0)
   const [cleared, setCleared] = useState(0)
 
-  useEffect(() => setLastRun(null), [seed, gameId, level, run])
+  useEffect(() => {
+    setLastRun(null)
+    setDailyWin(null)
+  }, [seed, gameId, level, run])
   useEffect(() => {
     if (!gameId || !isLeveled(gameId)) return
     const best = readCleared()[gameId] ?? 0
@@ -84,7 +87,7 @@ export function Play() {
   const finish = useCallback(
     (result: GameResult) => {
       if (gameId) void recordPlay(gameId, result, daily)
-      if (daily && result.won) setDailyWin(result)
+      if (daily) setDailyWin(result)
       const passed = leveled && gameId ? levelCleared(gameId, level, result) : undefined
       if (passed && gameId) {
         saveCleared(gameId, level)

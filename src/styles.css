@@ -936,3 +936,7 @@ main:focus{outline:none}
 .how-dialog{position:relative;width:min(480px,100%);max-height:calc(100svh - 32px);overflow:auto;background:#18202d;border:1px solid #dbe3f022;border-radius:18px;padding:24px;display:grid;gap:12px;box-shadow:0 30px 80px #000a}
 .how-dialog h2{margin:0 40px 0 0;font-size:22px}.how-dialog p{margin:0;line-height:1.55}
 .how-close{position:absolute;top:12px;right:12px}
+
+/* Fit to screen: only the game shows. The "About" text below the game used to bleed over the bottom of the locked screen. */
+html.screen-locked .play-page.locked .game-about,html.screen-locked .play-page.locked .play-more{display:none!important}
+html.screen-locked .play-page.locked .gb-board{width:min(100%,calc(100svh - 330px),520px)}

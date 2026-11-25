@@ -5,7 +5,7 @@ import { newGame } from '../src/games/twofold/rules'
 import { expectRows, overflowsHorizontally, readTable } from './helpers'
 
 // Games eligible for the daily challenge (the `daily: true` entries in the registry). The home card is checked against this.
-const DAILY_IDS = ['memory-grid', 'minesweeper', 'color-sort', 'daily-word', 'sudoku-master', 'vibeline', 'twofold', 'carve']
+const DAILY_IDS = ['memory-grid', 'minesweeper', 'color-sort', 'daily-word', 'sudoku-master', 'vibeline', 'twofold', 'carve', 'tower-defense', 'rhythm-master', 'marble-maze', 'pixel-run', 'dots-and-boxes', 'ghata-bara']
 
 /** The first day from 1 Nov 2026 whose daily challenge is Twofold, which this spec can solve. */
 const day = (() => {

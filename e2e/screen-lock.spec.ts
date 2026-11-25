@@ -22,3 +22,13 @@ test('on a desktop the lock button is not offered', async ({ page, isMobile }) =
   await page.goto('/play/connect-four')
   await expect(page.getByRole('button', { name: 'Fit to screen and lock' })).toBeHidden()
 })
+
+test('locked, Ghata Bara shows only the game: no About text under it, and the Roll button is on screen', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'the lock button is for phones')
+  await page.goto('/play/ghata-bara')
+  await page.getByRole('button', { name: 'Fit to screen and lock' }).click()
+  await expect(page.getByRole('button', { name: 'Unlock screen' })).toBeVisible()
+  await expect(page.locator('.game-about')).toBeHidden()
+  const roll = await page.getByRole('button', { name: 'Roll', exact: true }).boundingBox()
+  expect(roll!.y + roll!.height).toBeLessThanOrEqual(page.viewportSize()!.height)
+})
