@@ -50,6 +50,9 @@ test('two people play Ghata Bara online with the computer filling the other seat
     if (!did) await a.waitForTimeout(150)
   }
   expect(acted).toBeGreaterThanOrEqual(10)
+  // Every roll is reported on both screens, even one that cannot move anything.
+  await expect(a.getByRole('status').filter({ hasText: /rolled/ }).first()).toBeVisible()
+  await expect(b.getByRole('status').filter({ hasText: /rolled/ }).first()).toBeVisible()
   // Both screens agree on whose turn it is.
   const turn = (p: Page) => p.locator('.gb-seats li[data-turn] strong').first().innerText()
   await expect.poll(async () => (await turn(a)) === (await turn(b))).toBe(true)

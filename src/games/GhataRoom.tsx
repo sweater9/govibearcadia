@@ -2,8 +2,9 @@ import { useMemo, useState } from 'react'
 import { TokenIcon } from '../components/TokenIcon'
 import {
   LAYOUTS, actionDestination, board, homeCount, innerKey, isSafe, keyOf, legalActions, yardCount,
-  type Action, type Seat, type Size, type State,
+  type Action, type GameEvent, type Seat, type Size, type State,
 } from './ghata/rules'
+import { describe } from './ghata/describe'
 import { SEAT_INFO } from './ghata/seats'
 import { MIN_PLAYERS } from './ghata/online'
 import { TOKENS } from './ghata/tokens'
@@ -21,6 +22,7 @@ export type GhataMessage = {
   rematch: boolean[]
   connected: boolean[]
   humanAt: (number | null)[]
+  last: GameEvent[]
   lobby: boolean
   host: number
   seated: number
@@ -218,6 +220,12 @@ export default function GhataRoom({ state, reconnecting, notice, send }: Props) 
               ))}
               <button className="primary-btn gb-roll" disabled={!(myTurn && game.phase === 'roll')} onClick={() => send({ type: 'move', action: 'roll' })}>Roll</button>
             </div>
+            <p className="gb-status" role="status" data-seat={game.turn}>
+              <strong>{over ? '' : game.phase === 'move' ? `${name(game.turn)}: moving with ${game.queue.join(' · ')}.` : game.rolls.length ? `${name(game.turn)}: rolled ${game.rolls.join(', ')}, roll again.` : ''}</strong> {describe(state.last ?? [])}
+            </p>
+            {myTurn && game.phase === 'roll' && yardCount(game, game.turn) === 6 && homeCount(game, game.turn) === 0 && !game.rolls.length ? (
+              <p className="gb-hint">All your pawns are in the yard. Roll a Chowka (6) or a Baara (12) to release one onto the board.</p>
+            ) : null}
             <ul className="gb-seats" aria-label="Seats">
               {([0, 1, 2, 3] as Seat[]).map((s) => {
                 const away = state.humanAt[s] !== null && state.humanAt[s] !== state.you && !state.connected[state.humanAt[s]!]
