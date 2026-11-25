@@ -10,10 +10,15 @@ The 5x5 game for four seats, as specified: 25 squares (16 outer counterclockwise
 
 Seats are Violet (player 1, bottom), Cyan (right), Amber (top), Rose (left); play goes counterclockwise from the bottom. One to four people can play; the computer plays the other seats. A game in progress is saved in this browser only.
 
+## Online
+
+A private room takes two to four people. Everyone joins a lobby from the invite link; the host picks 5x5 or 7x7 and starts. People take seats the same way as on one device (two sit opposite each other) and the computer, tagged "Computer", plays every other colour. The server is the only authority: it rolls the dice with a secure random source (clients cannot send dice), checks it is your turn, applies the same `ghata/rules.ts`, and plays the computer seats itself. If a player disconnects and their turn is holding the game up, anyone else can hand that colour to the computer. A rematch starts when everyone present asks. Online games are not saved to the leaderboard and do not use quick match. Rules live in `src/games/ghata/online.ts`.
+
 ## Not built
 
 - The 10x10 variant (the plan says to start with 5x5; its rules are still unconfirmed).
-- Online play, spectators, tournaments.
+- Tournaments, a leaderboard and quick match for Ghata Bara (it is not a ranked game).
+- Chat, and watching a room you were not in when the game started (anyone who arrives after the start is turned away).
 - Choosing which seats are people (two players sit opposite each other; three sit bottom, right and top).
 
 A game is long: computer-only games take about 900 to 1,600 actions. That is the traditional pace of the game; a "short game" option could be added if wanted.

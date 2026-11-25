@@ -9,6 +9,7 @@ import * as ck from './checkers/rules'
 import * as ttt from './tictactoe/rules'
 import * as nm from './morris/rules'
 import * as wt from './worldtrip/online'
+import * as gh from './ghata/online'
 
 export type Message = Record<string, unknown>
 export type Result = { ok: true; room: unknown } | { ok: false; error: string }
@@ -98,5 +99,17 @@ const worldTrip: OnlineGame = {
   act: (room, seat, m, ctx) => (m.type === 'start' ? wt.startTrip(room as wt.Room, seat, ctx) : wt.removeAbsent(room as wt.Room, seat, m, ctx)),
 }
 
-export const ONLINE_GAMES: Record<string, OnlineGame> = { 'connect-four': connectFour, 'tic-tac-toe': tictactoe, checkers, 'nine-mens-morris': morris, battleship, 'world-trip': worldTrip }
+const ghataBara: OnlineGame = {
+  seats: gh.SEATS,
+  newRoom: () => gh.newRoom(),
+  open: (room) => gh.isOpen(room as gh.Room),
+  move: (room, seat, m) => gh.applyMove(room as gh.Room, seat, m),
+  rematch: (room, seat, ctx) => gh.requestRematch(room as gh.Room, seat, ctx),
+  view: (room, seat, ctx) => gh.viewFor(room as gh.Room, seat, ctx),
+  parse: gh.parseRoom,
+  extra: ['start', 'replace'],
+  act: (room, seat, m, ctx) => (m.type === 'start' ? gh.startGame(room as gh.Room, seat, m, ctx) : gh.replaceAbsent(room as gh.Room, seat, m, ctx)),
+}
+
+export const ONLINE_GAMES: Record<string, OnlineGame> = { 'connect-four': connectFour, 'tic-tac-toe': tictactoe, checkers, 'nine-mens-morris': morris, battleship, 'world-trip': worldTrip, 'ghata-bara': ghataBara }
 export const ONLINE_GAME_IDS = Object.keys(ONLINE_GAMES)

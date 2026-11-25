@@ -62,6 +62,7 @@ export const ONLINE_GAME_LIST = [
   { id: 'nine-mens-morris', title: "Nine Men's Morris" },
   { id: 'battleship', title: 'Battleship' },
   { id: 'world-trip', title: 'World Trip' },
+  { id: 'ghata-bara', title: 'Ghata Bara' },
 ] as const
 export type OnlineGameId = (typeof ONLINE_GAME_LIST)[number]['id']
 

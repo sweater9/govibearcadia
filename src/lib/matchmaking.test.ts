@@ -116,6 +116,7 @@ describe('quick match pairing', () => {
     expect([...MATCH_GAMES]).toEqual(['connect-four', 'tic-tac-toe', 'checkers', 'nine-mens-morris', 'battleship'])
     expect(isMatchGame('checkers')).toBe(true)
     expect(isMatchGame('world-trip')).toBe(false)
+    expect(isMatchGame('ghata-bara')).toBe(false)
     expect(isMatchGame('chess')).toBe(false)
   })
 })

@@ -49,7 +49,7 @@ export function Online() {
       {isMatchGame(game) ? (
         <QuickMatch key={`${game}`} game={game} onInvite={() => void create()} autoStart={autoFind} />
       ) : (
-        <p className="text-white/55">Quick match is for the two-player games. {game === 'world-trip' ? 'World Trip takes two to six players, so start it with a private room.' : ''}</p>
+        <p className="text-white/55">Quick match is for the two-player games. {game === 'world-trip' ? 'World Trip takes two to six players, so start it with a private room.' : game === 'ghata-bara' ? 'Ghata Bara takes two to four players, so start it with a private room.' : ''}</p>
       )}
       <div className="online-actions">
         <button className="primary-btn" onClick={() => void create()} disabled={busy}>

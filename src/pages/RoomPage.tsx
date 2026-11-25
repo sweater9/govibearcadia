@@ -15,12 +15,14 @@ import { TicTacToeBoard } from '../games/tictactoe/Board'
 import type { TState } from '../games/tictactoe/rules'
 import { netWorth, type State as WorldTripState } from '../games/worldtrip/rules'
 import type { WorldTripMessage } from '../games/WorldTripRoom'
+import type { GhataMessage } from '../games/GhataRoom'
 import { recordPlay } from '../lib/db'
 import { ARRIVE_WAIT_MS } from '../lib/matchmaking'
 import { ONLINE_GAME_LIST, gameFromParam, getNick, roomSocketUrl, type OnlineGameId } from '../lib/online'
 import { isRoomCode } from '../lib/roomcode'
 
 const WorldTripRoom = lazy(() => import('../games/WorldTripRoom'))
+const GhataRoom = lazy(() => import('../games/GhataRoom'))
 
 type Connected = boolean[]
 /** Connect Four sends its board flat (cells, line, moves); the other games nest it under `board`. */
@@ -38,6 +40,7 @@ function scoreOf(game: OnlineGameId, v: StateMessage): number {
   const won = v.winner === v.you
   if (game === 'tic-tac-toe') return won ? 500 + 100 * (5 - Math.ceil(moves / 2)) : v.draw ? 200 : 0
   if (game === 'battleship') return won ? Math.max(300, 1000 - 6 * moves) : 0
+  if (game === 'ghata-bara') return won ? 600 : 0
   if (game === 'world-trip') return Math.max(0, netWorth(v.board as WorldTripState, v.you).worth)
   if (game === 'nine-mens-morris') return won ? Math.max(400, 1000 - 4 * moves) : v.draw ? 300 : 0
   if (game === 'checkers') return won ? Math.max(400, 1000 - 4 * moves) : v.draw ? 300 : 0
@@ -49,7 +52,7 @@ const emptyBattleship = {
   board: { phase: 'placing', fleet: [], incoming: [], shots: [], sunk: [], ready: { you: false, opp: false }, left: { you: 5, opp: 5 }, moves: 0, reveal: null },
 }
 
-const COLOURS: Record<OnlineGameId, [string, string]> = { 'connect-four': ['red', 'yellow'], 'tic-tac-toe': ['X', 'O'], checkers: ['red', 'white'], 'nine-mens-morris': ['red', 'blue'], battleship: ['first to shoot', 'second to shoot'], 'world-trip': ['Player 1', 'Player 2'] }
+const COLOURS: Record<OnlineGameId, [string, string]> = { 'connect-four': ['red', 'yellow'], 'tic-tac-toe': ['X', 'O'], checkers: ['red', 'white'], 'nine-mens-morris': ['red', 'blue'], battleship: ['first to shoot', 'second to shoot'], 'world-trip': ['Player 1', 'Player 2'], 'ghata-bara': ['Player 1', 'Player 2'] }
 
 function alreadyRecorded(key: string): boolean {
   try {
@@ -123,6 +126,7 @@ export function RoomPage() {
   useEffect(() => {
     if (!state || state.turn !== null) return
     if (state.winner === null && !state.draw) return
+    if ((state as { playing?: boolean }).playing === false) return // a spectator has no result to record
     if (alreadyRecorded(`${code}:${state.round}`)) return
     void recordPlay(game, {
       score: scoreOf(game, state),
@@ -226,7 +230,9 @@ export function RoomPage() {
             </Link>
           </div>
         ) : (
-          game === 'world-trip' ? (
+          game === 'ghata-bara' ? (
+            <Suspense fallback={<p>Loading the room…</p>}><GhataRoom state={state as unknown as GhataMessage | null} reconnecting={status === 'reconnecting'} notice={notice} send={send} /></Suspense>
+          ) : game === 'world-trip' ? (
             <Suspense fallback={<p>Loading the room…</p>}><WorldTripRoom state={state as unknown as WorldTripMessage | null} reconnecting={status === 'reconnecting'} notice={notice} send={send} /></Suspense>
           ) : <div className={game === 'connect-four' ? 'c4' : game === 'tic-tac-toe' ? 'ttt' : game === 'battleship' ? 'bs' : game === 'nine-mens-morris' ? 'nm' : 'ck'}>
             <div className="game-toolbar c4-bar">
