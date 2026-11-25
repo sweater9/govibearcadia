@@ -5,14 +5,14 @@ import { expect, test, type Page } from '@playwright/test'
 
 async function step(p: Page): Promise<boolean> {
   const roll = p.getByRole('button', { name: 'Roll', exact: true })
-  if (await roll.isEnabled().catch(() => false)) { await roll.click(); return true }
+  if (await roll.isEnabled({ timeout: 300 }).catch(() => false)) return roll.click({ timeout: 2000 }).then(() => true, () => false)
   const release = p.getByRole('button', { name: /^Release a pawn/ }).first()
-  if (await release.isVisible().catch(() => false)) { await release.click(); return true }
+  if (await release.isVisible().catch(() => false)) { return release.click({ timeout: 2000 }).then(() => true, () => false) }
   const movable = p.locator('.gb-sq[data-movable]:not([disabled])').first()
   if (await movable.count()) {
-    await movable.click()
+    await movable.click({ timeout: 2000 }).catch(() => undefined)
     const target = p.locator('.gb-sq[data-target]').first()
-    if (await target.count()) { await target.click(); return true }
+    if (await target.count()) return target.click({ timeout: 2000 }).then(() => true, () => false)
   }
   return false
 }
